@@ -1,0 +1,9 @@
+*node_modules*
+dump
+build
+.circleci
+.github
+.nxs
+docs
+packages/cypress
+packages/documentation

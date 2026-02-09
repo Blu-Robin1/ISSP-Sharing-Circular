@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["@react-router/node", "vite/client"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
+    "noImplicitAny": false,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types",
+      "@testing-library/jest-dom",
+      "../src/themes/types",
+      "./node_modules"
+    ],
+    "declaration": true,
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": false,
+    "downlevelIteration": true,
+    "paths": { "*": ["./*"] }
+  },
+  "include": ["src/**/*", "types", "vite-env.d.ts"],
+  "exclude": [
+    "node_modules",
+    "build",
+    "jest",
+    "src/setupTests.ts",
+    "packages/components",
+    "packages/themes"
+  ]
+}
