@@ -106,7 +106,7 @@ const Header = observer(() => {
         <Flex
           data-cy="header"
           sx={{
-            backgroundColor: '#F5F1E8',
+            backgroundColor: 'white',
             px: [4, 4, 0],
             zIndex: (theme as any).zIndex.header,
             position: 'relative',

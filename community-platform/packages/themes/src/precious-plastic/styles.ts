@@ -1,4 +1,4 @@
-import logo from '../../assets/images/scis-logo.webp';
+import logo from '../../assets/images/precious-plastic-logo-official.svg';
 import { baseTheme } from '../common';
 import { getButtons } from '../common/button';
 
@@ -9,8 +9,8 @@ export type { ButtonVariants } from '../common/button';
 // use enum to specify list of possible colors for typing
 export const colors = {
   ...baseTheme.colors,
-  primary: '#4F7C77',
-  accent: { base: '#4F7C77', hover: '#3e625f'},
+  primary: '#fee77b',
+  accent: { base: '#fee77b', hover: '#ffde45' },
 };
 
 export const alerts = {

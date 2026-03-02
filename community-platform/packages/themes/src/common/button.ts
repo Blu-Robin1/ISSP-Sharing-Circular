@@ -1,7 +1,7 @@
 import type { ThemeWithName } from '../types';
 
 const BASE_BUTTON = {
-  fontFamily: 'inherit',
+  fontFamily: '"Varela Round", Arial, sans-serif',
   fontSize: 3,
   display: 'inline-flex',
   cursor: 'pointer',
@@ -10,7 +10,7 @@ const BASE_BUTTON = {
   transition: '.2s ease-in-out',
   borderRadius: 1,
   width: 'auto',
-  border: 'none',
+  border: '2px solid',
   height: '2.75rem',
 };
 
@@ -41,7 +41,7 @@ export const getButtons = (colors: ThemeWithName['colors']) => ({
   },
   secondary: {
     ...BASE_BUTTON,
-    border: 'none' + colors.black,
+    border: '2px solid ' + colors.black,
     color: colors.black,
     backgroundColor: colors.softblue,
     '&:hover': {
@@ -57,7 +57,7 @@ export const getButtons = (colors: ThemeWithName['colors']) => ({
   },
   destructive: {
     ...BASE_BUTTON,
-    border: 'none' + colors.black,
+    border: '2px solid ' + colors.black,
     backgroundColor: colors.red2,
     color: colors.black,
     '&:hover': {
@@ -66,7 +66,7 @@ export const getButtons = (colors: ThemeWithName['colors']) => ({
   },
   success: {
     ...BASE_BUTTON,
-    border: 'none' + colors.black,
+    border: '2px solid ' + colors.black,
     backgroundColor: colors.betaGreen,
     color: colors.black,
     '&:hover': {
@@ -75,7 +75,7 @@ export const getButtons = (colors: ThemeWithName['colors']) => ({
   },
   info: {
     ...BASE_BUTTON,
-    border: 'none' + colors.black,
+    border: '2px solid ' + colors.black,
     backgroundColor: colors.blue,
     color: colors.black,
     '&:hover': {
@@ -84,7 +84,7 @@ export const getButtons = (colors: ThemeWithName['colors']) => ({
   },
   outline: {
     ...BASE_BUTTON,
-    border: 'none' + colors.black,
+    border: '2px solid ' + colors.black,
     color: colors.black,
     backgroundColor: 'transparent',
     '&:hover': {
