@@ -10,12 +10,17 @@ import { MapContext } from './MapContext';
 import { mapPinService } from './map.service';
 import { filterPins, sortPinsByBadgeThenLastActive } from './utils/pinUtils';
 
+// SCIS mock service
+import { scisService } from './scis.service';
+// NEW: local client store (support actions + computed stage)
+import { computeEffectiveStage, scisStore } from './scis.store';
+
 import './styles.css';
 
 const MapsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [isPlacingInitiative, setIsPlacingInitiative] = useState(false);
   const [boundaries, setBoundaries] = useState<LatLngBounds | null>(null);
   const [allPins, setAllPins] = useState<MapPin[] | null>(null);
   const [allProfileTypes, setAllProfileTypes] = useState<ProfileType[]>([]);
@@ -26,16 +31,21 @@ const MapsPage = () => {
   const [activeProfileSettingFilters, setActiveSettings] = useState<string[]>([]);
   const [activeProfileTypeFilters, setActiveTypes] = useState<string[]>([]);
   const [activeTagFilters, setActiveTags] = useState<number[]>([]);
-  const [pinLocation, setPinLocation] = useState<ILatLng>({
-    lat: 30.0,
-    lng: 19.0,
-  });
+
+  // SCIS filter state
+  const [activeInitiativeStages, setActiveInitiativeStages] = useState<number[]>([]);
+  const [onlyInitiatives, setOnlyInitiatives] = useState(false);
+
+  const [pinLocation, setPinLocation] = useState<ILatLng>({ lat: 30.0, lng: 19.0 });
   const [selectedPin, selectPin] = useState<MapPin | null | undefined>(undefined);
   const [loadingMessage, setLoadingMessage] = useState<string>('Loading...');
   const [isMobile, setIsMobile] = useState(false);
   const [zoom, setZoom] = useState<number>(2);
   const [mapRef, setMapRef] = useState<MapType | null>(null);
   const [clusterGroupRef, setClusterGroupRef] = useState<any>(null);
+
+  // Used to force rebuild of initiative pins when local store changes
+  const [scisVersion, setScisVersion] = useState(0);
 
   const updateMapView = (location: ILatLng, zoomLevel: number) => {
     if (mapRef?.leafletElement) {
@@ -88,6 +98,10 @@ const MapsPage = () => {
       types: activeProfileTypeFilters,
       tags: activeTagFilters,
       boundaries: boundaries ?? undefined,
+
+      // SCIS additions
+      initiativeStages: activeInitiativeStages,
+      onlyInitiatives,
     });
   }, [
     allPins,
@@ -96,16 +110,36 @@ const MapsPage = () => {
     activeProfileTypeFilters,
     activeTagFilters,
     boundaries,
+    activeInitiativeStages,
+    onlyInitiatives,
   ]);
 
+  // Keep selectedPin in sync with allPins when store updates (e.g. after adding support)
+  useEffect(() => {
+    if (selectedPin && allPins && allPins.length > 0) {
+      const selectedId = (selectedPin as any)?.id ?? (selectedPin as any)?._id;
+      const updatedPin = allPins.find((p: any) => (p.id ?? p._id) === selectedId);
+      if (updatedPin && updatedPin !== selectedPin) {
+        selectPin(updatedPin);
+      }
+    }
+  }, [allPins, selectedPin]);
+
+  // Keep drawer/popup from sticking around if the pin gets filtered away.
   useEffect(() => {
     if (selectedPin && allPins && allPins.length > 0 && boundaries) {
-      const isPinStillVisible = filteredPins.some((pin) => pin.id === selectedPin.id);
+      const selectedId = (selectedPin as any)?.id ?? (selectedPin as any)?._id;
+      const isPinStillVisible = filteredPins.some((pin: any) => (pin.id ?? pin._id) === selectedId);
       if (!isPinStillVisible) {
         selectPin(null);
       }
     }
   }, [filteredPins, selectedPin, allPins, boundaries]);
+
+  // Subscribe to SCIS store changes (SSR-safe: subscribe no-ops server-side)
+  useEffect(() => {
+    return scisStore.subscribe(() => setScisVersion((v) => v + 1));
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -115,10 +149,104 @@ const MapsPage = () => {
           mapPinService.getMapFilters(),
           mapPinService.getCurrentUserMapPin(),
         ]);
+
         let pinsToSet: MapPin[] = [];
         if (pins) {
           pinsToSet = pins;
         }
+
+        // SCIS: fetch initiatives (placeholder service for now)
+        const initiatives = await scisService.getInitiatives();
+
+        const initiativePins = initiatives.map((i: any) => {
+          const rawId = String(i.id);
+          const local = scisStore.getLocalState(rawId);
+
+          const baseStage = Number(i.stage ?? 1);
+          const serverCounts = {
+            supporters: Number(i.supporter_count ?? 0),
+            members: Number(i.member_count ?? 0),
+            champions: Number(i.champion_count ?? 0),
+          };
+          const effectiveStage = computeEffectiveStage(baseStage, local, serverCounts);
+
+          const mergedSupporters = scisStore.getSupporterCountStrict(rawId, Number(i.supporter_count ?? 0));
+
+          return {
+            id: `initiative-${rawId}`,
+            _id: `initiative-${rawId}`,
+            _created: new Date().toISOString(),
+            _updated: new Date().toISOString(),
+
+            type: 'initiative',
+            stage: baseStage,
+            effectiveStage,
+
+            // clustering/panning
+            lat: Number(i.lat),
+            lng: Number(i.lng),
+
+            title: i.title,
+            description: i.description,
+            supporterCount: mergedSupporters,
+            imageUrl: i.image_url ?? '',
+
+            // store raw initiative id so drawer actions can reference it
+            initiativeId: rawId,
+
+            profile: {
+              name: i.title,
+              username: `initiative-${rawId}`,
+              avatar: i.image_url ?? '',
+              type: 'member',
+            },
+          };
+        }) as any[];
+
+        pinsToSet = [...pinsToSet, ...(initiativePins as any)];
+
+        // SCIS: merge local initiatives (client-first submissions)
+        const localInitiatives = scisStore.listLocalInitiatives();
+        const localPins = localInitiatives
+          .filter((li) => li.moderation !== 'rejected')
+          .map((li) => {
+            const local = scisStore.getLocalState(li.id);
+            const baseStage = 1;
+            const effectiveStage = computeEffectiveStage(baseStage, local, undefined);
+            const mergedSupporters = scisStore.getSupporterCountStrict(li.id, 0);
+
+            return {
+              id: `initiative-${li.id}`,
+              _id: `initiative-${li.id}`,
+              _created: li.createdAt,
+              _updated: li.createdAt,
+
+              type: 'initiative',
+              stage: baseStage,
+              effectiveStage,
+
+              lat: li.lat,
+              lng: li.lng,
+
+              title: li.title,
+              description: li.description,
+              projectType: li.projectType,
+              supporterCount: mergedSupporters,
+              imageUrl: '',
+
+              initiativeId: li.id,
+              isLocalSubmission: true,
+              moderation: li.moderation,
+
+              profile: {
+                name: li.title,
+                username: `initiative-${li.id}`,
+                avatar: '',
+                type: 'member',
+              },
+            };
+          });
+        pinsToSet = [...pinsToSet, ...(localPins as any)];
 
         // might be missing because it's not approved
         const existingPinIndex = pinsToSet.findIndex((x) => x.id === userPin?.id);
@@ -134,25 +262,27 @@ const MapsPage = () => {
         setAllPins(sortPinsByBadgeThenLastActive(pinsToSet, 'pro'));
 
         if (filters?.filters) {
-          const sortedTypes = (filters.filters.types || [])
-            .slice()
-            .sort((a, b) => a.order - b.order);
+          const sortedTypes = (filters.filters.types || []).slice().sort((a, b) => a.order - b.order);
+
           setAllProfileTypes(sortedTypes);
           setAllBadges(filters.filters.badges || []);
           setAllTags(filters.filters.tags || []);
           setAllProfileSettings(filters.filters.settings || []);
         }
+
         if (filters?.defaultFilters?.types) {
           setActiveTypes(filters.defaultFilters.types);
         }
 
         setLoadingMessage('');
       } catch (error) {
-        setLoadingMessage(error);
+        setLoadingMessage(error as any);
       }
     };
+
     init();
-  }, []);
+    // Re-run when local SCIS store changes so pins update supporterCount + effectiveStage
+  }, [scisVersion]);
 
   const toggleActiveBadgeFilter = (value: string) => {
     if (activeBadgeFilters.includes(value)) {
@@ -161,6 +291,7 @@ const MapsPage = () => {
       setActiveBadges((values) => [...values, value]);
     }
   };
+
   const toggleActiveProfileSettingFilter = (value: string) => {
     if (activeProfileSettingFilters.includes(value)) {
       setActiveSettings(activeProfileSettingFilters.filter((x) => x !== value));
@@ -168,6 +299,7 @@ const MapsPage = () => {
       setActiveSettings((values) => [...values, value]);
     }
   };
+
   const toggleActiveProfileTypeFilter = (value: string) => {
     if (activeProfileTypeFilters.includes(value)) {
       setActiveTypes(activeProfileTypeFilters.filter((x) => x !== value));
@@ -175,6 +307,7 @@ const MapsPage = () => {
       setActiveTypes((values) => [...values, value]);
     }
   };
+
   const toggleActiveTagFilter = (value: number) => {
     if (activeTagFilters.includes(value)) {
       setActiveTags(activeTagFilters.filter((x) => x !== value));
@@ -183,9 +316,18 @@ const MapsPage = () => {
     }
   };
 
+  // Safe hash navigation for both users and initiatives
   useEffect(() => {
     if (selectedPin) {
-      navigate(`/map#${selectedPin.profile!.username}`, { replace: true });
+      const hash =
+        selectedPin.profile?.username ||
+        (selectedPin as any).slug ||
+        (selectedPin as any).id ||
+        (selectedPin as any)._id;
+
+      if (hash) {
+        navigate(`/map#${hash}`, { replace: true });
+      }
     } else if (selectedPin === null) {
       navigate('/map', { replace: true });
     }
@@ -196,9 +338,19 @@ const MapsPage = () => {
     const username = pinId.length > 0 ? pinId : undefined;
 
     if (allPins && username) {
-      const foundPin = allPins.find((pin) => pin.profile!.username === username);
+      const foundPin = allPins.find((pin: any) => {
+        return (
+          pin.profile?.username === username ||
+          pin.slug === username ||
+          pin.id === username ||
+          pin._id === username
+        );
+      });
+
       if (foundPin) {
-        const isPinVisible = filteredPins.some((pin) => pin.id === foundPin.id);
+        const foundId = (foundPin as any)?.id ?? (foundPin as any)?._id;
+        const isPinVisible = filteredPins.some((pin: any) => (pin.id ?? pin._id) === foundId);
+
         if (isPinVisible && selectedPin?.profile?.username !== username) {
           selectPinAndHandleCluster(foundPin);
         }
@@ -231,6 +383,17 @@ const MapsPage = () => {
         toggleActiveProfileSettingFilter,
         toggleActiveProfileTypeFilter,
         toggleActiveTagFilter,
+
+        // SCIS filters
+        activeInitiativeStages,
+        setActiveInitiativeStages,
+        onlyInitiatives,
+        setOnlyInitiatives,
+
+        // SCIS submission mode
+        isPlacingInitiative,
+        setIsPlacingInitiative,
+
         isMobile,
         setIsMobile,
         boundaries,
@@ -245,14 +408,8 @@ const MapsPage = () => {
       }}
     >
       <Box id="mapPage" sx={{ height: 'calc(100vh - 80px)', width: '100%' }}>
-        <Flex
-          sx={{
-            flexDirection: 'row',
-            height: '100%',
-          }}
-        >
+        <Flex sx={{ flexDirection: 'row', height: '100%' }}>
           <MapList />
-
           <MapView />
         </Flex>
       </Box>
