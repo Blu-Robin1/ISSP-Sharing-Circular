@@ -40,6 +40,12 @@ const maps: IPageNavigation = {
   title: 'Map',
 };
 
+const initiatives: IPageNavigation = {
+  module: MODULE.MAP,
+  path: '/initiatives',
+  title: 'Initiatives',
+};
+
 const news: IPageNavigation = {
   module: MODULE.NEWS,
   path: '/news',
@@ -54,6 +60,7 @@ export const COMMUNITY_PAGES: IPageNavigation[] = [
   news,
   library,
   maps,
+  initiatives,
   academy,
   ResearchModule,
   QuestionModule,

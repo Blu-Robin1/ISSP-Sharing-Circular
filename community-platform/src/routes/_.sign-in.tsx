@@ -1,7 +1,7 @@
 import { Button, FieldInput, HeroBanner, TextNotification } from 'oa-components';
 import { Field, Form } from 'react-final-form';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
-import { Link, redirect, useActionData } from 'react-router';
+import { Link, redirect, useActionData, useSubmit } from 'react-router';
 import { PasswordField } from 'src/common/Form/PasswordField';
 import Main from 'src/pages/common/Layout/Main';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -39,19 +39,39 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       const url = new URL(request.url);
       const protocol = url.host.startsWith('localhost') ? 'http:' : 'https:';
       const emailRedirectUrl = `${protocol}//${url.host}/email-confirmation`;
-      await client.auth.resend({
+      const resendResult = await client.auth.resend({
         type: 'signup',
         email,
         options: {
           emailRedirectTo: emailRedirectUrl,
         },
       });
-
+      if (resendResult.error?.message?.toLowerCase().includes('rate limit')) {
+        return Response.json(
+          {
+            error:
+              'Email rate limit exceeded. Please try again in an hour or check your inbox for an existing confirmation link.',
+          },
+          { headers, status: 429 },
+        );
+      }
       return Response.json(
         {
           error: 'We need to confirm your email before logging in. Please check your inbox :)',
         },
         { headers },
+      );
+    }
+    if (
+      error.message?.toLowerCase().includes('rate limit') ||
+      (error as { status?: number }).status === 429
+    ) {
+      return Response.json(
+        {
+          error:
+            'Email rate limit exceeded. Please try again in an hour.',
+        },
+        { headers, status: 429 },
       );
     }
 
@@ -67,7 +87,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const fallbackPath = data.user?.user_metadata.username
     ? `/u/${data.user?.user_metadata.username}`
     : '/';
-  const path = getReturnUrl(request, fallbackPath);
+  const requestedPath = getReturnUrl(request, fallbackPath);
+
+  const { data: profileData } = await client
+    .from('profiles')
+    .select('roles')
+    .eq('auth_id', data.user!.id)
+    .limit(1);
+
+  const roles = profileData?.at(0)?.roles ?? [];
+  const isAdmin = roles.includes('admin');
+  const path = isAdmin ? '/admin/initiatives' : requestedPath;
 
   try {
     // This will fail if there is already a profile for the current auth_id, or the auth_id is invalid (can be invalid the the credentials are wrong)
@@ -86,12 +116,20 @@ export const meta = mergeMeta<typeof loader>(() => {
 });
 
 export default function Index() {
+  const submit = useSubmit();
   const actionResponse: any = useActionData<typeof action>();
+
+  const handleSubmit = (values: Record<string, unknown>) => {
+    const formData = new FormData();
+    formData.append('email', String(values.email ?? ''));
+    formData.append('password', String(values.password ?? ''));
+    submit(formData, { method: 'post' });
+  };
 
   return (
     <Main style={{ flex: 1 }}>
       <Form
-        onSubmit={() => {}}
+        onSubmit={handleSubmit}
         render={({ submitting, invalid }) => {
           return (
             <form data-cy="login-form" method="post">

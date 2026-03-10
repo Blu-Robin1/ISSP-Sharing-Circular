@@ -13,7 +13,7 @@ const get = async (): Promise<Profile | undefined> => {
   try {
     const url = new URL('/api/profile', window.location.origin);
 
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: 'include' });
 
     return (await response.json()) as Profile;
   } catch (error) {

@@ -6,13 +6,24 @@ type CreateProfileArgs = {
 };
 
 const createUserProfile = async (args: CreateProfileArgs, client: SupabaseClient) => {
-  // Should add more typing here about the required fields needed to create a profile
+  const { data: typeData, error: typeError } = await client
+    .from('profile_types')
+    .select('id')
+    .eq('name', 'member')
+    .limit(1);
 
-  const { data, error } = await client.from('profile_types').select('*').eq('name', 'member');
+  if (typeError) {
+    console.error('[createUserProfile] profile_types error:', typeError);
+    return { data: null, error: typeError };
+  }
 
-  if (error) {
-    console.error(error);
-    throw 'Default member type not found';
+  const memberTypeId = typeData?.[0]?.id;
+  if (memberTypeId == null) {
+    console.error('[createUserProfile] No profile_type with name "member" found');
+    return {
+      data: null,
+      error: { message: 'Default member type not found', code: 'MEMBER_TYPE_MISSING', details: '' },
+    };
   }
 
   return await client.from('profiles').insert({
@@ -20,7 +31,7 @@ const createUserProfile = async (args: CreateProfileArgs, client: SupabaseClient
     username: args.username,
     display_name: args.username,
     tenant_id: process.env.TENANT_ID,
-    profile_type: data[0].id,
+    profile_type: memberTypeId,
   });
 };
 

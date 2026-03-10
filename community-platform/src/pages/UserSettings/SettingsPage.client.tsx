@@ -1,7 +1,7 @@
 import { Tabs } from '@mui/base/Tabs';
 import { observer } from 'mobx-react';
 import type { availableGlyphs } from 'oa-components';
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { isPreciousPlastic } from 'src/config/config';
 import { isModuleSupported, MODULE } from 'src/modules';
@@ -21,7 +21,11 @@ import '../../styles/leaflet.css';
 
 export const SettingsPage = observer(() => {
   const env = useContext(EnvironmentContext);
-  const { isComplete, missingFields, profile } = useProfileStore();
+  const { isComplete, missingFields, profile, refresh } = useProfileStore();
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
   const navigate = useNavigate();
   const { pathname } = useLocation();
 

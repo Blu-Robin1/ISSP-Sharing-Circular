@@ -1,6 +1,9 @@
 import { observer } from 'mobx-react';
-import { ExternalLink } from 'oa-components';
+import { Button, ExternalLink } from 'oa-components';
+import { UserRole } from 'oa-shared';
+import { Link } from 'react-router';
 import { DISCORD_INVITE_URL } from 'src/constants';
+import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { fields, headings } from 'src/pages/UserSettings/labels';
 import { Flex, Heading, Text } from 'theme-ui';
 
@@ -10,6 +13,8 @@ import { ChangePasswordForm } from './content/sections/ChangePassword.form';
 
 export const SettingsPageAccount = observer(() => {
   const { description, title } = fields.deleteAccount;
+  const { isUserAuthorized } = useProfileStore();
+  const isAdmin = isUserAuthorized?.(UserRole.ADMIN);
 
   return (
     <Flex
@@ -27,6 +32,12 @@ export const SettingsPageAccount = observer(() => {
       <PatreonIntegration />
       <ChangePasswordForm />
       <ChangeEmailForm />
+
+      {isAdmin && (
+        <Link to="/admin/initiatives">
+          <Button variant="secondary">Admin panel</Button>
+        </Link>
+      )}
 
       <Text variant="body">
         {title}{' '}

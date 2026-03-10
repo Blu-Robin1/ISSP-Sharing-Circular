@@ -1,15 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { Box, Button, Flex, Heading, Text, Badge, Select, Input, Textarea, Label } from 'theme-ui';
-import { scisService } from '../scis.service';
-import {
-  computeEffectiveStage,
-  scisStore,
-  type ScisLocalInitiative,
-  type ScisModerationStatus,
-  type ScisStage,
-  type ScisProjectType,
-} from '../scis.store';
+import { scisService, type NormalizedInitiative } from '../scis.service';
+import { computeEffectiveStage, type ScisModerationStatus, type ScisStage, type ScisProjectType } from '../scis.store';
 
 const STAGE_OPTIONS: ScisStage[] = [1, 2, 3, 4];
 const PROJECT_TYPE_OPTIONS: { value: ScisProjectType; label: string }[] = [
@@ -28,53 +21,90 @@ const selectSx = {
   py: 1,
 } as const;
 
-const LocalInitiativeCard = (props: {
-  li: ScisLocalInitiative;
-  onModeration: (id: string, s: ScisModerationStatus) => void;
-  onStageOverride: (id: string, s: ScisStage | '') => void;
-  onDelete: (id: string) => void;
-  onUpdate: (id: string, u: { title?: string; description?: string; projectType?: ScisProjectType }) => void;
-  supporterCountStrict: (id: string) => number;
-  membershipCount: (id: string) => number;
-  championCount: (id: string) => number;
-  volunteerCount: (id: string) => number;
-  donateCount: (id: string) => number;
-}) => {
-  const {
-    li,
-    onModeration,
-    onStageOverride,
-    onDelete,
-    onUpdate,
-    supporterCountStrict,
-    membershipCount,
-    championCount,
-    volunteerCount,
-    donateCount,
-  } = props;
+type Supporter = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  postal_code: string | null;
+  created_at: string;
+};
 
-  const local = scisStore.getLocalState(li.id);
-  const effStage = computeEffectiveStage(1, local, undefined);
+type Contribution = {
+  id: string;
+  type: string;
+  payload: Record<string, unknown> | null;
+  created_at: string;
+};
+
+const InitiativeCard = (props: {
+  initiative: NormalizedInitiative;
+  onModeration: (id: string, s: ScisModerationStatus) => Promise<void>;
+  onStageOverride: (id: string, s: ScisStage | '') => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+  onUpdate: (id: string, u: { title?: string; description?: string; projectType?: ScisProjectType }) => Promise<void>;
+  onRefresh: () => void;
+}) => {
+  const { initiative: i, onModeration, onStageOverride, onDelete, onUpdate, onRefresh } = props;
+
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [supporters, setSupporters] = useState<Supporter[]>([]);
+  const [contributions, setContributions] = useState<Contribution[]>([]);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   const [editing, setEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(li.title);
-  const [editDesc, setEditDesc] = useState(li.description ?? '');
-  const [editProjectType, setEditProjectType] = useState<ScisProjectType>(li.projectType ?? 'other');
+  const [editTitle, setEditTitle] = useState(i.title);
+  const [editDesc, setEditDesc] = useState(i.description ?? '');
+  const [editProjectType, setEditProjectType] = useState<ScisProjectType>(
+    (i.project_type as ScisProjectType) ?? 'other',
+  );
+  const [busy, setBusy] = useState(false);
 
-  const milestones = scisStore.getStageReadinessState(li.id);
+  const loadDetails = useCallback(async () => {
+    setDetailsLoading(true);
+    const data = await scisService.getInitiativeDetails(i.id);
+    if (data) {
+      setSupporters(data.supporters);
+      setContributions(data.contributions);
+    }
+    setDetailsLoading(false);
+  }, [i.id]);
+
+  useEffect(() => {
+    if (detailsExpanded && supporters.length === 0 && contributions.length === 0) {
+      loadDetails();
+    }
+  }, [detailsExpanded, loadDetails, supporters.length, contributions.length]);
+
+  const baseStage = Number(i.stage ?? 1);
+  const serverCounts = {
+    supporters: i.supporter_count,
+    members: i.member_count,
+    champions: i.champion_count,
+  };
+  const local = {
+    stageOverride: (i.stage_override != null ? i.stage_override : undefined) as ScisStage | undefined,
+    stage3Milestones: i.stage3_milestones ?? undefined,
+  };
+  const effStage = computeEffectiveStage(baseStage, local, serverCounts);
+
+  const status = i.status ?? 'pending';
+  const milestones = (i.stage3_milestones ?? {}) as Record<string, unknown>;
+  const statusLabel =
+    status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Pending approval';
 
   return (
     <Box
       sx={{
-        p: 3,
+        p: 4,
         border: '1px solid',
-        borderColor: 'muted',
-        borderRadius: 2,
-        bg: li.moderation === 'rejected' ? 'muted' : 'background',
+        borderColor: status === 'pending' ? 'orange' : status === 'rejected' ? 'red' : 'muted',
+        borderRadius: 3,
+        bg: status === 'rejected' ? 'muted' : status === 'pending' ? 'softYellow' : 'background',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}
     >
       <Flex sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           {editing ? (
             <>
               <Label>Title</Label>
@@ -99,23 +129,23 @@ const LocalInitiativeCard = (props: {
               <Flex sx={{ gap: 2 }}>
                 <Button
                   sx={{ fontSize: 0 }}
-                  onClick={() => {
-                    onUpdate(li.id, { title: editTitle, description: editDesc, projectType: editProjectType });
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    await onUpdate(i.id, {
+                      title: editTitle,
+                      description: editDesc,
+                      projectType: editProjectType,
+                    });
                     setEditing(false);
+                    onRefresh();
+                    setBusy(false);
                   }}
                 >
                   Save
                 </Button>
-                <Button
-                  variant="outline"
-                  sx={{ fontSize: 0 }}
-                  onClick={() => {
-                    setEditTitle(li.title);
-                    setEditDesc(li.description ?? '');
-                    setEditProjectType(li.projectType ?? 'other');
-                    setEditing(false);
-                  }}
-                >
+
+                <Button variant="outline" sx={{ fontSize: 0 }} onClick={() => setEditing(false)}>
                   Cancel
                 </Button>
               </Flex>
@@ -123,13 +153,14 @@ const LocalInitiativeCard = (props: {
           ) : (
             <>
               <Heading as="h3" sx={{ fontSize: 2, mb: 1 }}>
-                {li.title}
+                {i.title}
               </Heading>
-              <Text sx={{ fontSize: 1, color: 'grey', mb: 1 }}>{li.description || '—'}</Text>
+
+              <Text sx={{ fontSize: 1, color: 'grey', mb: 1 }}>{i.description || '—'}</Text>
+
               <Text sx={{ fontSize: 0, color: 'grey' }}>
-                {li.lat.toFixed(4)}, {li.lng.toFixed(4)} · {supporterCountStrict(li.id)} supporters (strict) ·{' '}
-                {membershipCount(li.id)} members · {championCount(li.id)} champions · {volunteerCount(li.id)} volunteers ·{' '}
-                {donateCount(li.id)} donations
+                {i.lat.toFixed(4)}, {i.lng.toFixed(4)} · {i.supporter_count} supporters · {i.member_count} members ·{' '}
+                {i.champion_count} champions · {i.volunteer_count} volunteers · {i.donate_count} donations
               </Text>
 
               {effStage >= 3 && milestones && (
@@ -143,240 +174,252 @@ const LocalInitiativeCard = (props: {
                   {milestones.fundraisingLaunched ? 'fundraising✓' : ''}
                 </Text>
               )}
-
-              <Button variant="outline" sx={{ mt: 2, fontSize: 0 }} onClick={() => setEditing(true)}>
-                Edit
-              </Button>
             </>
           )}
         </Box>
 
         {!editing && (
-          <Badge
-            variant={li.moderation === 'approved' ? 'primary' : li.moderation === 'rejected' ? 'secondary' : 'outline'}
+          <Flex
             sx={{
-              alignSelf: 'flex-start',
-              px: 2,
-              py: 1,
-              borderRadius: 9999,
-              fontSize: 0,
-              whiteSpace: 'nowrap',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: 2,
+              minWidth: 'fit-content',
             }}
           >
-            {li.moderation}
-          </Badge>
+            <Badge
+              variant={status === 'approved' ? 'primary' : status === 'rejected' ? 'secondary' : 'outline'}
+              sx={{
+                alignSelf: 'flex-end',
+                px: 2,
+                py: 1,
+                borderRadius: 9999,
+                fontSize: 0,
+                whiteSpace: 'nowrap',
+                bg: status === 'pending' ? 'orange' : undefined,
+                color: status === 'pending' ? 'white' : undefined,
+              }}
+            >
+              {statusLabel}
+            </Badge>
+
+            <Button variant="outline" sx={{ fontSize: 0 }} onClick={() => setEditing(true)}>
+              Edit
+            </Button>
+          </Flex>
         )}
       </Flex>
 
       {!editing && (
-        <Flex sx={{ gap: 2, rowGap: 2, mt: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Text sx={{ fontSize: 1 }}>Moderate:</Text>
+        <Box
+          sx={{
+            mt: 3,
+            pt: 3,
+            borderTop: '1px solid',
+            borderColor: 'muted',
+          }}
+        >
+          <Text sx={{ fontSize: 1, fontWeight: 600, mb: 2, display: 'block' }}>Moderation</Text>
 
-          <Button
-            variant={li.moderation === 'approved' ? 'primary' : 'outline'}
-            sx={{ fontSize: 0 }}
-            onClick={() => onModeration(li.id, 'approved')}
-          >
-            Approve
-          </Button>
+          <Flex sx={{ gap: 2, rowGap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button
+              variant={status === 'approved' ? 'primary' : 'outline'}
+              sx={{ fontSize: 0 }}
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                await onModeration(i.id, 'approved');
+                onRefresh();
+                setBusy(false);
+              }}
+            >
+              Approve
+            </Button>
 
-          <Button
-            variant="outline"
-            sx={{
-              fontSize: 0,
-              color: li.moderation === 'rejected' ? 'white' : 'red',
-              borderColor: 'red',
-              bg: li.moderation === 'rejected' ? 'red' : 'transparent',
-              '&:hover': {
-                bg: li.moderation === 'rejected' ? 'red' : 'rgba(255,0,0,0.08)',
-              },
-            }}
-            onClick={() => onModeration(li.id, 'rejected')}
-          >
-            Reject
-          </Button>
+            <Button
+              variant="outline"
+              sx={{
+                fontSize: 0,
+                color: status === 'rejected' ? 'white' : 'red',
+                borderColor: 'red',
+                bg: status === 'rejected' ? 'red' : 'transparent',
+                '&:hover': { bg: status === 'rejected' ? 'red' : 'rgba(255,0,0,0.08)' },
+              }}
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                await onModeration(i.id, 'rejected');
+                onRefresh();
+                setBusy(false);
+              }}
+            >
+              Reject
+            </Button>
 
-          <Text sx={{ fontSize: 1, ml: 2 }}>Stage override:</Text>
+            <Text sx={{ fontSize: 1 }}>Stage override:</Text>
 
-          <Select
-            value={local?.stageOverride ?? ''}
-            onChange={(e) => onStageOverride(li.id, e.target.value as ScisStage | '')}
-            sx={selectSx}
-          >
-            <option value="">Auto ({effStage})</option>
-            {STAGE_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                Stage {s}
-              </option>
-            ))}
-          </Select>
+            <Select
+              value={i.stage_override ?? ''}
+              onChange={async (e) => {
+                const val = e.target.value as ScisStage | '';
+                setBusy(true);
+                await onStageOverride(i.id, val);
+                onRefresh();
+                setBusy(false);
+              }}
+              disabled={busy}
+              sx={selectSx}
+            >
+              <option value="">Auto ({effStage})</option>
+              {STAGE_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  Stage {s}
+                </option>
+              ))}
+            </Select>
 
-          <Button
-            variant="outline"
-            onClick={() => onDelete(li.id)}
-            sx={{ color: 'red', borderColor: 'red', fontSize: 0 , marginLeft:360}}
-          >
-            Delete
-          </Button>
-        </Flex>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                if (!confirm('Delete this initiative? This cannot be undone.')) return;
+                setBusy(true);
+                await onDelete(i.id);
+                onRefresh();
+                setBusy(false);
+              }}
+              disabled={busy}
+              sx={{ color: 'red', borderColor: 'red', fontSize: 0, marginLeft: 200 }}
+            >
+              Delete
+            </Button>
+          </Flex>
+        </Box>
       )}
+
+      <Box sx={{ mt: 3, borderTop: '1px solid', borderColor: 'muted', pt: 2 }}>
+        <Button variant="outline" sx={{ fontSize: 0 }} onClick={() => setDetailsExpanded(!detailsExpanded)}>
+          {detailsExpanded ? 'Hide' : 'View'} supporters & contributors
+        </Button>
+
+        {detailsExpanded && (
+          <Box sx={{ mt: 2 }}>
+            {detailsLoading ? (
+              <Text sx={{ fontSize: 0, color: 'grey' }}>Loading…</Text>
+            ) : (
+              <>
+                <Heading as="h5" sx={{ fontSize: 1, mb: 1 }}>
+                  Supporters ({supporters.length})
+                </Heading>
+
+                {supporters.length === 0 ? (
+                  <Text sx={{ fontSize: 0, color: 'grey', mb: 2 }}>None yet</Text>
+                ) : (
+                  <Box sx={{ mb: 2, maxHeight: 120, overflowY: 'auto' }}>
+                    {supporters.map((s) => (
+                      <Text key={s.id} sx={{ fontSize: 0, display: 'block' }}>
+                        {s.name || '—'} · {s.email || '—'} · {s.postal_code || '—'}
+                      </Text>
+                    ))}
+                  </Box>
+                )}
+
+                <Heading as="h5" sx={{ fontSize: 1, mb: 1 }}>
+                  Contributions (volunteers, members, champions, donations) ({contributions.length})
+                </Heading>
+
+                {contributions.length === 0 ? (
+                  <Text sx={{ fontSize: 0, color: 'grey' }}>None yet</Text>
+                ) : (
+                  <Box sx={{ maxHeight: 120, overflowY: 'auto' }}>
+                    {contributions.map((c) => (
+                      <Text key={c.id} sx={{ fontSize: 0, display: 'block' }}>
+                        {c.type} · {c.payload ? JSON.stringify(c.payload) : '—'}
+                      </Text>
+                    ))}
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
 
 export const AdminInitiativesPage = () => {
-  const [localInitiatives, setLocalInitiatives] = useState<ScisLocalInitiative[]>([]);
-  const [serverInitiatives, setServerInitiatives] = useState<any[]>([]);
-  const [version, setVersion] = useState(0);
+  const [initiatives, setInitiatives] = useState<NormalizedInitiative[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLocalInitiatives(scisStore.listLocalInitiatives());
-    scisService.getInitiatives().then(setServerInitiatives);
-  }, [version]);
-
-  useEffect(() => {
-    return scisStore.subscribe(() => setVersion((v) => v + 1));
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const list = await scisService.getInitiatives('all');
+    setInitiatives(list);
+    setLoading(false);
   }, []);
 
-  const handleModeration = (initiativeId: string, status: ScisModerationStatus) => {
-    scisStore.setModeration(initiativeId, status);
-    setVersion((v) => v + 1);
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const handleModeration = async (initiativeId: string, status: ScisModerationStatus) => {
+    await scisService.updateInitiative(initiativeId, { status });
   };
 
-  const handleStageOverride = (initiativeId: string, stage: ScisStage | '') => {
-    scisStore.setStageOverride(initiativeId, stage ? (stage as ScisStage) : undefined);
-    setVersion((v) => v + 1);
+  const handleStageOverride = async (initiativeId: string, stage: ScisStage | '') => {
+    await scisService.updateInitiative(initiativeId, {
+      stageOverride: stage ? (stage as number) : null,
+    });
   };
 
-  const handleDelete = (initiativeId: string) => {
-    if (confirm('Delete this local initiative? This cannot be undone.')) {
-      scisStore.deleteLocalInitiative(initiativeId);
-      setVersion((v) => v + 1);
-    }
+  const handleDelete = async (initiativeId: string) => {
+    await scisService.deleteInitiative(initiativeId);
   };
 
-  const supporterCountStrict = (initiativeId: string, serverCount = 0) =>
-    scisStore.getSupporterCountStrict(initiativeId, serverCount);
-
-  const membershipCount = (id: string, serverCount = 0) => scisStore.getUniqueMembershipCount(id, serverCount);
-
-  const championCount = (id: string, serverCount = 0) => scisStore.getUniqueChampionCount(id, serverCount);
-
-  const volunteerCount = (id: string) => scisStore.getCountByType(id, 'volunteer_skills');
-  const donateCount = (id: string) => scisStore.getCountByType(id, 'donate');
-
-  const handleUpdateInitiative = (
+  const handleUpdate = async (
     initiativeId: string,
     updates: { title?: string; description?: string; projectType?: ScisProjectType },
   ) => {
-    scisStore.updateLocalInitiative(initiativeId, updates);
-    setVersion((v) => v + 1);
+    await scisService.updateInitiative(initiativeId, updates);
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
-      <Flex sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Heading as="h1">Admin: SCIS Initiatives</Heading>
-        <Link to="/map">
-          <Button variant="outline">Back to Map</Button>
-        </Link>
+    <Box sx={{ maxWidth: 960, mx: 'auto', p: [3, 4] }}>
+      <Flex sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+        <Heading as="h1" sx={{ fontSize: [3, 4] }}>
+          Admin: SCIS Initiatives
+        </Heading>
+
+        <Flex sx={{ gap: 2 }}>
+          <Button variant="outline" onClick={refresh} disabled={loading}>
+            Refresh
+          </Button>
+
+          <Link to="/map">
+            <Button variant="outline">Back to Map</Button>
+          </Link>
+        </Flex>
       </Flex>
 
-      <Box sx={{ mb: 4 }}>
-        <Heading as="h2" variant="small" sx={{ mb: 2 }}>
-          Local Submissions (client-first)
-        </Heading>
-
-        {localInitiatives.length === 0 ? (
-          <Text sx={{ color: 'grey' }}>No local initiatives yet.</Text>
-        ) : (
-          <Flex sx={{ flexDirection: 'column', gap: 2 }}>
-            {localInitiatives.map((li) => (
-              <LocalInitiativeCard
-                key={li.id}
-                li={li}
-                onModeration={handleModeration}
-                onStageOverride={handleStageOverride}
-                onDelete={handleDelete}
-                onUpdate={handleUpdateInitiative}
-                supporterCountStrict={(id) => supporterCountStrict(id)}
-                membershipCount={(id) => membershipCount(id)}
-                championCount={(id) => championCount(id)}
-                volunteerCount={volunteerCount}
-                donateCount={donateCount}
-              />
-            ))}
-          </Flex>
-        )}
-      </Box>
-
-      <Box>
-        <Heading as="h2" variant="small" sx={{ mb: 2 }}>
-          Server / Demo Initiatives
-        </Heading>
-
-        {serverInitiatives.length === 0 ? (
-          <Text sx={{ color: 'grey' }}>No server initiatives.</Text>
-        ) : (
-          <Flex sx={{ flexDirection: 'column', gap: 2 }}>
-            {serverInitiatives.map((si) => {
-              const rawId = String(si.id);
-              const local = scisStore.getLocalState(rawId);
-              const baseStage = Number(si.stage ?? 1);
-
-              const serverCounts = {
-                supporters: Number(si.supporter_count ?? 0),
-                members: Number(si.member_count ?? 0),
-                champions: Number(si.champion_count ?? 0),
-              };
-
-              const effStage = computeEffectiveStage(baseStage, local, serverCounts);
-              const supportCount = supporterCountStrict(rawId, serverCounts.supporters);
-
-              return (
-                <Box
-                  key={si.id}
-                  sx={{
-                    p: 3,
-                    border: '1px solid',
-                    borderColor: 'muted',
-                    borderRadius: 2,
-                    bg: 'background',
-                  }}
-                >
-                  <Heading as="h3" sx={{ fontSize: 2, mb: 1 }}>
-                    {si.title}
-                  </Heading>
-
-                  <Text sx={{ fontSize: 1, color: 'grey', mb: 1 }}>{si.description || '—'}</Text>
-
-                  <Text sx={{ fontSize: 0, color: 'grey' }}>
-                    Base stage {baseStage} · Effective stage {effStage} · {supportCount} supporters (strict) ·{' '}
-                    {membershipCount(rawId, serverCounts.members)} members · {championCount(rawId, serverCounts.champions)} champions
-                  </Text>
-
-                  <Flex sx={{ gap: 2, mt: 2, alignItems: 'center' }}>
-                    <Text sx={{ fontSize: 1 }}>Stage override:</Text>
-
-                    <Select
-                      value={local?.stageOverride ?? ''}
-                      onChange={(e) => handleStageOverride(rawId, e.target.value as ScisStage | '')}
-                      sx={selectSx}
-                    >
-                      <option value="">Auto ({effStage})</option>
-                      {STAGE_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          Stage {s}
-                        </option>
-                      ))}
-                    </Select>
-                  </Flex>
-                </Box>
-              );
-            })}
-          </Flex>
-        )}
-      </Box>
+      {loading ? (
+        <Text sx={{ color: 'grey' }}>Loading…</Text>
+      ) : initiatives.length === 0 ? (
+        <Text sx={{ color: 'grey' }}>No initiatives yet.</Text>
+      ) : (
+        <Flex sx={{ flexDirection: 'column', gap: 3 }}>
+          {initiatives.map((initiative) => (
+            <InitiativeCard
+              key={initiative.id}
+              initiative={initiative}
+              onModeration={handleModeration}
+              onStageOverride={handleStageOverride}
+              onDelete={handleDelete}
+              onUpdate={handleUpdate}
+              onRefresh={refresh}
+            />
+          ))}
+        </Flex>
+      )}
     </Box>
   );
 };

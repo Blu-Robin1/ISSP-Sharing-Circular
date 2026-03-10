@@ -23,7 +23,26 @@ export const loader = async ({ request }) => {
       .update({ last_active: nowUtc })
       .eq('auth_id', claims.data.claims.sub)
       .select(
-        `*,
+        `id,
+        created_at,
+        auth_id,
+        username,
+        display_name,
+        city,
+        about,
+        photo,
+        cover_images,
+        roles,
+        impact,
+        visitor_policy,
+        is_blocked_from_messaging,
+        is_contactable,
+        last_active,
+        website,
+        patreon,
+        total_views,
+        donations_enabled,
+        profile_type,
         tags:profile_tags_relations(
           profile_tags(
             id,
@@ -59,8 +78,9 @@ export const loader = async ({ request }) => {
 
     const profileFactory = new ProfileFactory(client);
     const profile = profileFactory.fromDB(data);
+    const json = { ...profile, roles: data.roles ?? profile.roles ?? null };
 
-    return Response.json(profile, { headers, status: 200 });
+    return Response.json(json, { headers, status: 200 });
   } catch (error) {
     console.error(error);
     return Response.json({ error }, { headers, status: 500 });

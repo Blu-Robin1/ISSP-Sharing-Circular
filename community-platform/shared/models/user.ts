@@ -5,6 +5,10 @@ export enum UserRole {
   ADMIN = 'admin',
   BETA_TESTER = 'beta-tester',
   RESEARCH_CREATOR = 'research_creator',
+  /** SCIS: community members who support/contribute to initiatives */
+  CONTRIBUTOR = 'contributor',
+  /** SCIS: users who create or organize initiatives */
+  ORGANIZER = 'organizer',
 }
 
 // Below are primarily used for PP

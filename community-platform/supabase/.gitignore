@@ -12,3 +12,7 @@ signing_key.json
 .env.keys
 .env.local
 .env.*.local
+
+# Team provisioning - never commit
+team-emails.txt
+team-credentials-*.txt

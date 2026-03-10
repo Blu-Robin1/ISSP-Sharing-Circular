@@ -32,6 +32,10 @@ Our platform helps communities to grow and makes it easier to collaborate on env
 
 ### Have a look on our [website](https://www.onearmy.earth/community-platform) to have a clear overview
 
+## 🏘 SCIS (Sharing & Circular Innovation Society)
+
+SCIS extends this platform with a community-infrastructure module for shared projects (tool libraries, repair cafés, skill shares). Users can propose initiatives, support them at multiple levels (name/email, membership pledges, volunteer skills, donations, champion roles), and track progress through development stages. Admins moderate initiatives, edit details, and manage stage progression. **SCIS uses dedicated tables (`initiatives`, `initiative_supports`, `initiative_contributions`), not legacy projects.** For setup and admin instructions, see [SCIS Setup](./docs/SCIS_SETUP.md) and [SCIS Admin Guide](./docs/SCIS_ADMIN_GUIDE.md).
+
 ## 👐 Open Source
 
 Society and the environment are kind of screwed 💩 in many ways. We think free knowledge and open source are the fastest and most efficient ways to bring about innovation to tackle some of the most pressing humanity’s fuck ups. Simple.
