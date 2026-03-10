@@ -13,6 +13,8 @@ export const PasswordField = ({ name, component, ...rest }) => {
       type={isPasswordVisible ? 'text' : 'password'}
       sx={{
         paddingRight: 8,
+        border: '1px solid rgba(0,0,0,0.25)',
+        borderRadius: '10px',
       }}
       endAdornment={
         <Icon

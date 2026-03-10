@@ -8,9 +8,11 @@ import { fields, headings } from 'src/pages/UserSettings/labels';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { required, validateUrl } from 'src/utils/validators';
 import { Flex, Heading, Text } from 'theme-ui';
-import { GROUP_PROFILE_DESCRIPTION_MAX_LENGTH, MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH } from '../../constants';
+import {
+  GROUP_PROFILE_DESCRIPTION_MAX_LENGTH,
+  MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH,
+} from '../../constants';
 import { ProfileSection } from '../elements';
-import { ProfileTags } from './ProfileTags.section';
 
 const countryOptions = getCountryDataList().map((country) => ({
   label: `${getEmojiFlag(country.iso2)} ${country.native}`,
@@ -31,6 +33,7 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
     <ProfileSection>
       <Flex data-testid="UserInfosSection" sx={{ flexDirection: 'column', gap: [3, 5] }}>
         <Heading as="h2">{headings.infos}</Heading>
+
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
           <Text>
             {userName.title} <Text color="red">*</Text>
@@ -38,7 +41,14 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
           <Text variant="quiet" sx={{ fontSize: 2 }}>
             {userName.description}
           </Text>
-          <Field data-cy="userName" name="userName" component={FieldInput} validate={required} validateFields={[]} disabled />
+          <Field
+            data-cy="userName"
+            name="userName"
+            component={FieldInput}
+            validate={required}
+            validateFields={[]}
+            disabled
+          />
         </Flex>
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
@@ -52,13 +62,10 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
             data-cy="displayName"
             name="displayName"
             component={FieldInput}
-            placeholder="Pick a name to display on your profile"
             validate={required}
             validateFields={[]}
           />
         </Flex>
-
-        <ProfileTags typeName={formValues.type || ''} />
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
           <Text>
@@ -69,9 +76,12 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
             name="about"
             component={FieldTextarea}
             showCharacterCount
-            maxLength={isMemberProfile ? MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH : GROUP_PROFILE_DESCRIPTION_MAX_LENGTH}
+            maxLength={
+              isMemberProfile
+                ? MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH
+                : GROUP_PROFILE_DESCRIPTION_MAX_LENGTH
+            }
             placeholder={about.placeholder}
-            validate={required}
             validateFields={[]}
           />
         </Flex>
@@ -79,7 +89,13 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
           <Text>{country.title}</Text>
           <Field data-cy="country-dropdown" name="country">
-            {(field) => <SelectField options={countryOptions} placeholder="Select your country..." {...field} />}
+            {(field) => (
+              <SelectField
+                options={countryOptions}
+                placeholder="Select your country..."
+                {...field}
+              />
+            )}
           </Field>
           <Flex sx={{ gap: 1, alignItems: 'center' }}>
             <Text sx={{ fontSize: 1 }} variant="quiet">

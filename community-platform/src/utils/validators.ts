@@ -6,7 +6,7 @@ import { isUrl } from './urlHelper';
  * **************************************************************************/
 
 const required = (value: any) => {
-  return value ? undefined : 'Make sure this field is filled correctly';
+  return value ? undefined : 'Required';
 };
 
 const noSpecialCharacters = (value: string) => {

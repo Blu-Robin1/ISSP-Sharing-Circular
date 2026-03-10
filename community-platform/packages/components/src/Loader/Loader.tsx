@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import type { ThemeWithName } from 'oa-themes';
 import type { ThemeUIStyleObject } from 'theme-ui';
 import { Flex, Image, Text, useThemeUI } from 'theme-ui';
+import bcitLogo from '../../../themes/assets/images/loading-logo.png'
 
 const rotate = keyframes`
   from {
@@ -25,9 +26,11 @@ export interface Props {
 }
 
 export const Loader = ({ label, sx }: Props) => {
-  const themeUi = useThemeUI();
-  const theme = themeUi.theme as ThemeWithName;
-  const logo = theme.logo || null;
+
+  const logo = bcitLogo
+  // const themeUi = useThemeUI();
+  // const theme = themeUi.theme as ThemeWithName;
+  // const logo = theme.logo || null;
 
   return (
     <Flex sx={{ flexWrap: 'wrap', justifyContent: 'center', ...sx }}>

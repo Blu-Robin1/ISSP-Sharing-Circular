@@ -15,7 +15,7 @@ import MenuMobilePanel from 'src/pages/common/Header/Menu/MenuMobile/MenuMobileP
 import Profile from 'src/pages/common/Header/Menu/Profile/Profile';
 import { notificationSupabaseService } from 'src/services/notificationsSupabaseService';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
-import { Flex, Text, useThemeUI } from 'theme-ui';
+import { Box, Flex, Text, useThemeUI } from 'theme-ui';
 import { EnvironmentContext } from '../EnvironmentContext';
 import { NotificationsContext } from '../NotificationsContext';
 import { NotificationsSupabase } from './Menu/Notifications/NotificationsSupabase';
@@ -72,7 +72,6 @@ const Header = observer(() => {
 
   const [isVisible, setIsVisible] = useState(false);
 
-  // New notifications states
   const [notificationsSupabase, setNotificationsSupabase] = useState<NotificationDisplay[] | null>(
     null,
   );
@@ -97,25 +96,21 @@ const Header = observer(() => {
         updateNotifications,
       }}
     >
-      <MobileMenuContext.Provider
-        value={{
-          isVisible,
-          setIsVisible,
-        }}
-      >
+      <MobileMenuContext.Provider value={{ isVisible, setIsVisible }}>
         <Flex
           data-cy="header"
           sx={{
             backgroundColor: '#F5F1E8',
             px: [4, 4, 0],
+            py: [3, 3, 4],
             zIndex: (theme as any).zIndex.header,
             position: 'relative',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            minHeight: [null, null, 80],
+            minHeight: [85, 95, 125],
           }}
         >
-          <Flex>
+          {/* LEFT: Logo + Beta */}
+          <Flex sx={{ alignItems: 'center' }}>
             <Logo />
             {isLoggedIn && (
               <AuthWrapper roleRequired={UserRole.BETA_TESTER} borderLess>
@@ -136,54 +131,69 @@ const Header = observer(() => {
               </AuthWrapper>
             )}
           </Flex>
-          {isLoggedIn && (
-            <MobileNotificationsWrapper>
-              <NotificationsSupabase device="mobile" />
-            </MobileNotificationsWrapper>
-          )}
-          <Flex
-            className="menu-desktop"
+
+          {/* CENTER: Desktop navigation */}
+          <Box
             sx={{
-              alignItems: 'center',
-              paddingX: 2,
-              position: 'relative',
-              display: ['none', 'none', 'flex'],
-              gap: 2,
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: ['none', 'none', 'block'],
             }}
           >
             <MenuDesktop />
-            {isLoggedIn && <NotificationsSupabase device="desktop" />}
-            {isModuleSupported(env?.VITE_SUPPORTED_MODULES || '', MODULE.USER) && (
-              <Profile isMobile={false} />
+          </Box>
+
+          {/* RIGHT: Desktop icons/profile + Mobile notifications + Mobile menu */}
+          <Flex sx={{ alignItems: 'center', ml: 'auto' }}>
+            {/* Desktop notifications/profile */}
+            <Flex
+              sx={{
+                alignItems: 'center',
+                display: ['none', 'none', 'flex'],
+                gap: 2,
+                paddingX: 2,
+              }}
+            >
+              {isLoggedIn && <NotificationsSupabase device="desktop" />}
+              {isModuleSupported(env?.VITE_SUPPORTED_MODULES || '', MODULE.USER) && (
+                <Profile isMobile={false} />
+              )}
+            </Flex>
+
+            {/* Mobile notifications */}
+            {isLoggedIn && (
+              <MobileNotificationsWrapper>
+                <NotificationsSupabase device="mobile" />
+              </MobileNotificationsWrapper>
             )}
+
+            {/* Mobile menu button */}
+            <ClientOnly fallback={<></>}>
+              {() => (
+                <MobileMenuWrapper className="menu-mobile">
+                  <Flex sx={{ paddingLeft: 5 }}>
+                    <Button
+                      type="button"
+                      showIconOnly={true}
+                      icon={isVisible ? 'close' : 'menu'}
+                      onClick={() => setIsVisible(!isVisible)}
+                      large={true}
+                      sx={{
+                        marginRight: -3,
+                        backgroundColor: 'white',
+                        borderWidth: '0px',
+                        '&:hover': { backgroundColor: 'white' },
+                        '&:active': { backgroundColor: 'white' },
+                      }}
+                    />
+                  </Flex>
+                </MobileMenuWrapper>
+              )}
+            </ClientOnly>
           </Flex>
-          <ClientOnly fallback={<></>}>
-            {() => (
-              <MobileMenuWrapper className="menu-mobile">
-                <Flex sx={{ paddingLeft: 5 }}>
-                  <Button
-                    type="button"
-                    showIconOnly={true}
-                    icon={isVisible ? 'close' : 'menu'}
-                    onClick={() => setIsVisible(!isVisible)}
-                    large={true}
-                    sx={{
-                      marginRight: -3,
-                      backgroundColor: 'white',
-                      borderWidth: '0px',
-                      '&:hover': {
-                        backgroundColor: 'white',
-                      },
-                      '&:active': {
-                        backgroundColor: 'white',
-                      },
-                    }}
-                  />
-                </Flex>
-              </MobileMenuWrapper>
-            )}
-          </ClientOnly>
         </Flex>
+
         {isVisible && (
           <AnimationContainer key="mobilePanelContainer">
             <MobileMenuWrapper>

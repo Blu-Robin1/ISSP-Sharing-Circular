@@ -1,5 +1,6 @@
 import { HeroBanner, Icon } from 'oa-components';
-import { Box, Card, Flex, Heading, Text } from 'theme-ui';
+import { Box, Card, Flex, Heading, Text, Image } from 'theme-ui';
+import bcitLogo from 'oa-themes/assets/images/bcit-footer.png';
 
 const SignUpMessagePage = ({ email }) => {
   return (
@@ -10,7 +11,7 @@ const SignUpMessagePage = ({ email }) => {
         width: '100%',
         maxWidth: '620px',
         mx: 'auto',
-        mt: [5, 10],
+        mt: [15, 20],
         mb: 3,
       }}
     >
@@ -30,14 +31,19 @@ const SignUpMessagePage = ({ email }) => {
               zIndex: 3,
             }}
           >
-            <Icon
-              glyph="star-active"
-              size={60}
+            <Image
+              src={bcitLogo}
+              alt="BCIT Logo"
               sx={{
-                backgroundColor: '#ffedd6',
+                width: '68px',
+                height: '68px',
+                backgroundColor: '#fff',
                 border: '5px solid #fff',
-                borderRadius: 25,
-                padding: 2,
+                borderRadius: '50%',
+                padding: 0,
+                objectFit: 'contain',
+                display: 'block',
+                margin: '0 auto'
               }}
             />
           </Box>
@@ -58,11 +64,11 @@ const SignUpMessagePage = ({ email }) => {
                   textAlign: 'center',
                 }}
               >
-                <Heading>Yay! Welcome to One Army!</Heading>
+                <Heading>Welcome to BCIT!</Heading>
               </Flex>
               <Text sx={{ textAlign: 'center', color: 'grey' }}>
                 <p>
-                  Before you dive in, please confirm you email through the link we've sent to{' '}
+                  Please confirm your email address by clicking the verification link sent to {' '}
                   <Text
                     sx={{
                       background: 'linear-gradient(0deg, #ffe2e1 60%, #fff 40%)',

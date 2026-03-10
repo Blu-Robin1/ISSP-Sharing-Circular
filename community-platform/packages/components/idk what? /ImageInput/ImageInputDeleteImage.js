@@ -1,0 +1,29 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { Flex } from 'theme-ui';
+import { Button } from '../Button/Button';
+const alignCenterWrapperStyles = {
+    height: '100%',
+    width: '100%',
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+};
+const UploadImageOverlay = (props) => (_jsx(Flex, { sx: {
+        ...alignCenterWrapperStyles,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        opacity: 0,
+        visibility: 'hidden',
+        transition: 'opacity 300ms ease-in',
+        borderRadius: 1,
+        '.image-input__wrapper:hover &': {
+            visibility: 'visible',
+            opacity: 1,
+        },
+    }, children: props.children }));
+export const ImageInputDeleteImage = ({ onClick }) => {
+    return (_jsx(UploadImageOverlay, { children: _jsx(Button, { "data-cy": "delete-image", "data-testid": "delete-image", small: true, variant: "secondary", icon: "delete", type: "button", onClick: (event) => onClick(event), children: "Delete" }) }));
+};

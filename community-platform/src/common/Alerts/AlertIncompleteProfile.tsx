@@ -14,7 +14,7 @@ export const AlertIncompleteProfile = observer(() => {
     <InternalLink to="/settings">
       <Flex data-cy="incompleteProfileBanner">
         <Banner sx={{ backgroundColor: 'softblue', color: 'black', cursor: 'hand' }}>
-          Hey there! 👋 Please complete your profile before posting!
+          Welcome! Please complete your profile before creating posts.
         </Banner>
       </Flex>
     </InternalLink>

@@ -94,7 +94,7 @@ export default function Index() {
   });
 
   return (
-    <Main style={{ flex: 1 }}>
+    <Main style={{ flex: 1 }} sx={{ fontFamily: 'Times New Roman, Times, serif' }}>
       <Form
         onSubmit={() => {}}
         validate={async (values: any) => {
@@ -120,11 +120,10 @@ export default function Index() {
                 sx={{ width: '100%' }}
                 css={{ maxWidth: '620px' }}
                 mx={'auto'}
-                mt={[5, 10]}
+                mt={[15, 20]}
                 mb={3}
               >
                 <Flex sx={{ flexDirection: 'column', width: '100%' }}>
-                  <HeroBanner type="celebration" />
                   <Card sx={{ borderRadius: 3 }}>
                     <Flex
                       sx={{
@@ -166,9 +165,13 @@ export default function Index() {
                           data-cy="username"
                           name="username"
                           type="userName"
-                          placeholder="yourusername"
                           component={FieldInput}
                           validate={composeValidators(required, noSpecialCharacters)}
+                          sx={{
+                            border: '1px solid rgba(0,0,0,0.25)',
+                            borderRadius: '10px',
+                            px: 3,
+                          }}
                         />
                       </Flex>
                       <Flex
@@ -179,15 +182,18 @@ export default function Index() {
                       >
                         <Label htmlFor="email">Email</Label>
                         <Text color={'grey'} sx={{ fontSize: 1 }}>
-                          It can be personal or work email.
                         </Text>
                         <Field
                           data-cy="email"
                           name="email"
                           type="email"
                           component={FieldInput}
-                          placeholder="yourname@domain.com"
                           validate={required}
+                          sx={{
+                            border: '1px solid rgba(0,0,0,0.25)',
+                            borderRadius: '10px',
+                            px: 3,
+                          }}
                         />
                       </Flex>
                       <Flex
@@ -200,7 +206,6 @@ export default function Index() {
                         <PasswordField
                           data-cy="password"
                           name="password"
-                          placeholder="Password"
                           component={FieldInput}
                           validate={required}
                         />
@@ -215,7 +220,6 @@ export default function Index() {
                         <PasswordField
                           data-cy="confirm-password"
                           name="confirm-password"
-                          placeholder="Confirm your Password"
                           component={FieldInput}
                           validate={required}
                         />
@@ -253,7 +257,14 @@ export default function Index() {
                           sx={{
                             borderRadius: 3,
                             width: '100%',
+                            backgroundColor: '#3F6B66',
+                            color: '#ffffff',
+                            fontWeight: 'bold',
+                            fontFamily: '"Times New Roman", Times, serif',
                             justifyContent: 'center',
+                            '&: hover': {
+                              backgroundColor: '#355c58'
+                            }
                           }}
                           data-cy="submit"
                           variant="primary"
