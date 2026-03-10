@@ -42,7 +42,7 @@ export const fields: ILabels = {
       "Describe in details what you do and who you are.",
   },
   country: {
-    title: 'Country',
+    title: 'City',
     description:
       "Thought about adding yourself to our map? If you do, we'll automatically set this field.",
   },

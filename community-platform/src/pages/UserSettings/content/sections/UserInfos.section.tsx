@@ -69,7 +69,7 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
           <Text>
-            {about.title} <Text color="red">*</Text>
+            {about.title}
           </Text>
           <Field
             data-cy="info-about"
