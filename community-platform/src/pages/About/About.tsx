@@ -1,11 +1,13 @@
 import { Box, Flex, Heading, Image, Text, Grid } from 'theme-ui'
+import ourStoryImage from 'packages/themes/assets/images/photos/our-story.webp'
+import ourMissionImage from 'packages/themes/assets/images/photos/our-mission.webp'
 
 export const About = () => {
   return (
     <>
       <Box
         sx={{
-          bg: '#f4efe6',
+          bg: '#F5F1E8',
           pt: [5, 6, 7],
           pb: 6,
         }}
@@ -20,15 +22,18 @@ export const About = () => {
           }}
         >
           <Image
-            src="/images/library.jpg"
+            src={ourMissionImage}
             sx={{
-              width: ['100%', '100%', '48%'],
+              width: ['100%', '100%', '420px'],
+              maxHeight: '480px',
+              objectFit: 'cover',
               borderRadius: '20px',
+              flexShrink: 0,
             }}
           />
 
           <Box sx={{ width: ['100%', '100%', '52%'] }}>
-            <Heading sx={headingStyle}>OUR MISSION.</Heading>
+            <Heading sx={headingStyle}>OUR MISSION</Heading>
 
             <Text sx={paragraph}>
               To advance the circular economy by facilitating the development,
@@ -39,7 +44,7 @@ export const About = () => {
             </Text>
 
             <Heading sx={{ ...headingStyle, mt: 6 }}>
-              OUR VISION.
+              OUR VISION
             </Heading>
 
             <Text sx={paragraph}>
@@ -52,23 +57,23 @@ export const About = () => {
         </Flex>
       </Box>
 
-      <Box sx={{ bg: '#f4efe6', py: 7 }}>
+      <Box sx={{ bg: '#F5F1E8', py: 7 }}>
         <Grid
           sx={{
             maxWidth: '1000px',
             mx: 'auto',
             gridTemplateColumns: ['1fr', '1fr', '1fr 1fr 1fr'],
             gap: 6,
-            alignItems: 'start'
+            alignItems: 'start',
           }}
         >
-          <Heading sx={headingStyle}>OUR VALUES.</Heading>
+          <Heading sx={headingStyle}>OUR VALUES</Heading>
 
           <Grid
             sx={{
               gridColumn: ['auto', 'auto', 'span 2'],
               gridTemplateColumns: ['1fr', '1fr', '1fr 1fr'],
-              gap: 6
+              gap: 6,
             }}
           >
             <Value
@@ -103,7 +108,7 @@ export const About = () => {
               mb: 5,
             }}
           >
-            <Heading sx={{ fontSize: [9, 10, 11] }}>OUR STORY.</Heading>
+            <Heading sx={{ fontSize: [9, 10, 11] }}>OUR STORY</Heading>
 
             <Box sx={{ maxWidth: '650px' }}>
               <Text sx={{ fontSize: 3, lineHeight: 1.6 }}>
@@ -112,11 +117,7 @@ export const About = () => {
                 and other sharing-based systems grew, we saw the need for a
                 dedicated nonprofit that could help communities build, fund,
                 and manage these spaces—especially in areas where access and
-                opportunity are limited.
-              </Text>
-
-              <Text sx={{ mt: 3 }}>
-                We believe that circular innovation shouldn’t be a luxury—it
+                opportunity are limited. We believe that circular innovation shouldn’t be a luxury—it
                 should be a right. Our work focuses on equipping communities
                 with the tools and support they need to reduce material waste
                 and increase social connection.
@@ -125,7 +126,7 @@ export const About = () => {
           </Flex>
 
           <Image
-            src="/images/team.jpg"
+            src={ourStoryImage}
             sx={{
               width: '100%',
               borderRadius: '20px',
@@ -155,7 +156,7 @@ const Value = ({ title, text }) => (
   <Box
     sx={{
       borderTop: '1px solid #2e2e2e',
-      pt: 4
+      pt: 4,
     }}
   >
     <Heading sx={{ fontSize: 5, mb: 2 }}>

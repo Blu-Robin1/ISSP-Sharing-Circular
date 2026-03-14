@@ -1,10 +1,11 @@
-import { Box, Flex, Heading, Image, Text, Grid } from 'theme-ui'
-import arrow from 'packages/components/assets/icons/icon-arrow-down.svg'
+import { Box, Flex, Heading, Image, Text } from 'theme-ui'
+import onceFunded from 'packages/themes/assets/images/photos/funded.webp'
 
 export const HowItWorks = () => {
   return (
     <>
-      <Box sx={{ bg: '#f4efe6', py: 7 }}>
+      {/* Top Section */}
+      <Box sx={{ bg: '#F5F1E8', py: 7 }}>
         <Flex
           sx={{
             maxWidth: '1000px',
@@ -15,10 +16,11 @@ export const HowItWorks = () => {
           }}
         >
           <Image
-            src="/images/workshop.jpg"
+            src={onceFunded}
             sx={{
               width: ['100%', '100%', '48%'],
               borderRadius: '20px',
+              maxHeight: '480px'
             }}
           />
 
@@ -38,7 +40,8 @@ export const HowItWorks = () => {
         </Flex>
       </Box>
 
-      <Box sx={{ bg: '#f4efe6', py: 7 }}>
+      {/* Steps Section */}
+      <Box sx={{ bg: '#F5F1E8', py: 7 }}>
         <Flex
           sx={{
             maxWidth: '1000px',
@@ -47,6 +50,7 @@ export const HowItWorks = () => {
             flexDirection: ['column', 'column', 'row'],
           }}
         >
+          {/* Left text */}
           <Box sx={{ width: ['100%', '100%', '40%'] }}>
             <Heading sx={headingStyle}>FOR HOSTS.</Heading>
 
@@ -70,42 +74,39 @@ export const HowItWorks = () => {
             </Box>
           </Box>
 
-          <Box sx={{ width: ['100%', '100%', '60%'], position: 'relative' }}>
-            <Box
-              sx={{
-                position: 'absolute',
-                left: '18px',
-                top: 0,
-                bottom: 0,
-                width: '2px',
-                bg: '#3F6B66',
-              }}
-            />
+          {/* Steps */}
+          <Box sx={{ width: ['100%', '100%', '60%'] }}>
 
             <Step
+              number="1"
               title="EXPRESSION OF INTEREST"
               text="You reach out to SCIS with an interest in hosting a Thingery or similar lending project."
             />
 
             <Step
+              number="2"
               title="COMMUNITY ENGAGEMENT"
               text="We help assess community needs and interest, often through meetings or surveys."
             />
 
             <Step
+              number="3"
               title="SITE SELECTION & PLANNING"
               text="We work with you to identify a suitable location and confirm project requirements."
             />
 
             <Step
+              number="4"
               title="BUILD & INSTALL"
               text="Once funding is confirmed, we assist with infrastructure setup—including procurement and installation support."
             />
 
             <Step
+              number="5"
               title="LAUNCH & SUPPORT"
               text="We help promote your launch, onboard members, and ensure the space operates smoothly."
             />
+
           </Box>
         </Flex>
       </Box>
@@ -113,20 +114,35 @@ export const HowItWorks = () => {
   )
 }
 
-const Step = ({ title, text }) => (
-  <Flex sx={{ gap: 4, mb: 6, position: 'relative' }}>
-    <Box sx={{ minWidth: '36px' }}>
-      <img
-        src={arrow}
-        style={{ width: '22px', marginTop: '4px' }}
-      />
-    </Box>
+const Step = ({ number, title, text }) => (
+  <Flex
+    sx={{
+      gap: 1,
+      mb: 6,
+      alignItems: 'flex-start',
+    }}
+  >
+    <Text
+      sx={{
+        fontSize: 8,
+        fontWeight: 600,
+        color: '#3F6B66',
+        lineHeight: 1,
+        minWidth: '40px',
+        fontFamily: 'serif',
+      }}
+    >
+      {number}
+    </Text>
 
     <Box>
       <Heading sx={{ fontSize: 4, mb: 2 }}>
         {title}
       </Heading>
-      <Text sx={{ fontSize: 2 }}>{text}</Text>
+
+      <Text sx={{ fontSize: 2 }}>
+        {text}
+      </Text>
     </Box>
   </Flex>
 )

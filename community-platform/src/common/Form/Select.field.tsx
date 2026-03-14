@@ -30,7 +30,6 @@ const getValueFromSelect = (
   return typeof v === 'string' ? v : v.value;
 };
 
-// given current values find the relevant select options
 const getValueForSelect = (opts: ISelectOption[] = [], v: string | string[] | null | undefined) => {
   const findVal = (optVal: string) => opts.find((o) => o.value === optVal);
   return v
