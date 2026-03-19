@@ -1,141 +1,81 @@
-import { Box, Flex, Heading, Image, Text, Grid } from 'theme-ui'
-import arrow from 'packages/components/assets/icons/icon-arrow-down.svg'
+import { Box, Heading, Text } from 'theme-ui'
+import ourImpactImage from 'packages/themes/assets/images/photos/impacts.webp'
 
 export const Impact = () => {
   return (
-    <>
-      <Box sx={{ bg: '#f4efe6', py: 7 }}>
-        <Flex
-          sx={{
-            maxWidth: '1000px',
-            mx: 'auto',
-            gap: 6,
-            alignItems: 'center',
-            flexDirection: ['column', 'column', 'row'],
-          }}
-        >
-          <Image
-            src="/images/workshop.jpg"
-            sx={{
-              width: ['100%', '100%', '48%'],
-              borderRadius: '20px',
-            }}
-          />
+    <Box
+      sx={{
+        background: `linear-gradient(rgba(245, 241, 232, 0.8), rgba(245, 241, 232, 0.8)), url(${ourImpactImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        width: '100%',
+        pt: [5, 6, 7],
+        pb: [5, 6, 7],
+        px: [3, 4, 0],
+      }}
+    >
+      <Box
+        sx={{
+          maxWidth: '800px',
+          width: '100%',
+          mx: 'auto',
+          textAlign: 'center',
+        }}
+      >
+        <Heading sx={headingStyle}>MEASURING WHAT MATTERS</Heading>
+        <Text sx={paragraph}>
+          We believe in data-backed, community-centered progress. SCIS tracks the 
+          environmental and social impact of every shared infrastructure project we 
+          support—ensuring that funders, hosts, and the public can see the difference 
+          these spaces make.
+        </Text>
 
-          <Box sx={{ width: ['100%', '100%', '52%'] }}>
-            <Heading sx={headingStyle}>
-              WHAT HAPPENS ONCE WE’RE FUNDED?
-            </Heading>
+        <Heading sx={{ ...headingStyle, mt: 6 }}>
+          REDUCING WASTE BY KEEPING MATERIALS IN USE
+        </Heading>
+        <Text sx={paragraph}>
+          Each SCIS site helps reduce waste by enabling borrowing instead of 
+          buying—and by extending the life of donated items. This cuts down 
+          on unnecessary consumption and keeps usable goods out of landfills.
+        </Text>
 
-            <Text sx={paragraph}>
-              At SCIS, we make it easier for communities to build and operate
-              shared infrastructure—especially equipment lending libraries
-              known as Thingeries. Once we secure funding, we partner with
-              community groups, housing co-ops, or municipalities to bring
-              these projects to life using a proven step-by-step process.
-            </Text>
-          </Box>
-        </Flex>
+        <Heading sx={{ ...headingStyle, mt: 6 }}>
+          LOWERING EMISSIONS THROUGH SHARED USE
+        </Heading>
+        <Text sx={paragraph}>
+          The project we support reduces the need for new manufacturing, 
+          shipping, and packaging, while also eliminating emissions from 
+          individual trips to rent or buy. SCIS estimated GHG savings across 
+          these categories.
+        </Text>
+
+        <Heading sx={{ ...headingStyle, mt: 6 }}>
+          CREATING EQUITABLE ACCESS AND NEW COMMUNITY TIES
+        </Heading>
+        <Text sx={paragraph}>
+          Everyone, regardless of income, gains affordable access to tools, 
+          equipment, and spaces that enable creativity, learning, and self- 
+          reliance.
+        </Text>
+
+        <Heading sx={{ ...headingStyle, mt: 6 }}>
+          STRONGER COMMUNITY CONNECTIONS
+        </Heading>
+        <Text sx={paragraph}>
+          Shared spaces and equipment foster collaboration, skill-sharing, 
+          and trust among neighbors.
+        </Text>
       </Box>
-
-      <Box sx={{ bg: '#f4efe6', py: 7 }}>
-        <Flex
-          sx={{
-            maxWidth: '1000px',
-            mx: 'auto',
-            gap: 6,
-            flexDirection: ['column', 'column', 'row'],
-          }}
-        >
-          <Box sx={{ width: ['100%', '100%', '40%'] }}>
-            <Heading sx={headingStyle}>FOR HOSTS.</Heading>
-
-            <Text sx={{ mb: 4 }}>
-              Are you a community organization or resident group looking to
-              host shared infrastructure? Here’s what to expect:
-            </Text>
-
-            <Box
-              sx={{
-                bg: '#3F6B66',
-                color: 'white',
-                px: 4,
-                py: 3,
-                borderRadius: '8px',
-                width: 'fit-content',
-                fontSize: 1,
-              }}
-            >
-              INTERESTED IN HOSTING? CONTACT US →
-            </Box>
-          </Box>
-
-          <Box sx={{ width: ['100%', '100%', '60%'], position: 'relative' }}>
-            <Box
-              sx={{
-                position: 'absolute',
-                left: '18px',
-                top: 0,
-                bottom: 0,
-                width: '2px',
-                bg: '#3F6B66',
-              }}
-            />
-
-            <Step
-              title="EXPRESSION OF INTEREST"
-              text="You reach out to SCIS with an interest in hosting a Thingery or similar lending project."
-            />
-
-            <Step
-              title="COMMUNITY ENGAGEMENT"
-              text="We help assess community needs and interest, often through meetings or surveys."
-            />
-
-            <Step
-              title="SITE SELECTION & PLANNING"
-              text="We work with you to identify a suitable location and confirm project requirements."
-            />
-
-            <Step
-              title="BUILD & INSTALL"
-              text="Once funding is confirmed, we assist with infrastructure setup—including procurement and installation support."
-            />
-
-            <Step
-              title="LAUNCH & SUPPORT"
-              text="We help promote your launch, onboard members, and ensure the space operates smoothly."
-            />
-          </Box>
-        </Flex>
-      </Box>
-    </>
+    </Box>
   )
 }
 
-const Step = ({ title, text }) => (
-  <Flex sx={{ gap: 4, mb: 6, position: 'relative' }}>
-    <Box sx={{ minWidth: '36px' }}>
-      <img
-        src={arrow}
-        style={{ width: '22px', marginTop: '4px' }}
-      />
-    </Box>
-
-    <Box>
-      <Heading sx={{ fontSize: 4, mb: 2 }}>
-        {title}
-      </Heading>
-      <Text sx={{ fontSize: 2 }}>{text}</Text>
-    </Box>
-  </Flex>
-)
-
 const headingStyle = {
-  fontSize: [8, 9, 10],
+  fontSize: [6, 7, 8],
   fontFamily: 'serif',
   fontWeight: 500,
-  color: '#3F6B66',
+  color: '#2e5e5d',
   mb: 3,
   lineHeight: 1.1,
 }
@@ -143,4 +83,10 @@ const headingStyle = {
 const paragraph = {
   fontSize: 3,
   lineHeight: 1.6,
+  color: '#2e2e2e',
+  maxWidth: '700px',
+  mx: 'auto',
+  mb: 4,
 }
+
+export default Impact

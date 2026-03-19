@@ -4,7 +4,6 @@ import onceFunded from 'packages/themes/assets/images/photos/funded.webp'
 export const HowItWorks = () => {
   return (
     <>
-      {/* Top Section */}
       <Box sx={{ bg: '#F5F1E8', py: 7 }}>
         <Flex
           sx={{
@@ -40,7 +39,6 @@ export const HowItWorks = () => {
         </Flex>
       </Box>
 
-      {/* Steps Section */}
       <Box sx={{ bg: '#F5F1E8', py: 7 }}>
         <Flex
           sx={{
@@ -50,7 +48,6 @@ export const HowItWorks = () => {
             flexDirection: ['column', 'column', 'row'],
           }}
         >
-          {/* Left text */}
           <Box sx={{ width: ['100%', '100%', '40%'] }}>
             <Heading sx={headingStyle}>FOR HOSTS.</Heading>
 
@@ -59,54 +56,53 @@ export const HowItWorks = () => {
               host shared infrastructure? Here’s what to expect:
             </Text>
 
-            <Box
-              sx={{
-                bg: '#3F6B66',
-                color: 'white',
-                px: 4,
-                py: 3,
-                borderRadius: '8px',
-                width: 'fit-content',
-                fontSize: 1,
-              }}
-            >
-              INTERESTED IN HOSTING? CONTACT US →
-            </Box>
+            <a href="/sign-up" style={{ textDecoration: 'none' }}>
+              <Box
+                sx={{
+                  bg: '#3F6B66',
+                  color: 'white',
+                  px: 4,
+                  py: 3,
+                  borderRadius: '8px',
+                  width: 'fit-content',
+                  fontSize: 1,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bg: '#2e514d',
+                  },
+                }}
+              >
+                INTERESTED IN HOSTING? Sign-in →
+              </Box>
+            </a>
           </Box>
 
-          {/* Steps */}
           <Box sx={{ width: ['100%', '100%', '60%'] }}>
-
             <Step
               number="1"
               title="EXPRESSION OF INTEREST"
               text="You reach out to SCIS with an interest in hosting a Thingery or similar lending project."
             />
-
             <Step
               number="2"
               title="COMMUNITY ENGAGEMENT"
               text="We help assess community needs and interest, often through meetings or surveys."
             />
-
             <Step
               number="3"
               title="SITE SELECTION & PLANNING"
               text="We work with you to identify a suitable location and confirm project requirements."
             />
-
             <Step
               number="4"
               title="BUILD & INSTALL"
               text="Once funding is confirmed, we assist with infrastructure setup—including procurement and installation support."
             />
-
             <Step
               number="5"
               title="LAUNCH & SUPPORT"
               text="We help promote your launch, onboard members, and ensure the space operates smoothly."
             />
-
           </Box>
         </Flex>
       </Box>
@@ -139,7 +135,6 @@ const Step = ({ number, title, text }) => (
       <Heading sx={{ fontSize: 4, mb: 2 }}>
         {title}
       </Heading>
-
       <Text sx={{ fontSize: 2 }}>
         {text}
       </Text>
@@ -160,3 +155,5 @@ const paragraph = {
   fontSize: 3,
   lineHeight: 1.6,
 }
+
+export default HowItWorks

@@ -67,7 +67,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       client,
     );
 
-    // This will error if there is already a profile with this auth_id + tenant_id
     if (response.error) {
       return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers });
     }

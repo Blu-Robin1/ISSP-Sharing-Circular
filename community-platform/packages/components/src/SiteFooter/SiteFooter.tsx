@@ -5,7 +5,6 @@ import { Field, Form } from 'react-final-form';
 import { Box, Flex, Image, Text, Heading, useThemeUI } from 'theme-ui';
 import type { ThemeWithName } from 'oa-themes';
 import bcitFooterLogo from '../../../themes/assets/images/bcit-footer.png';
-import { backgroundColor, fontWeight } from 'styled-system';
 
 type SiteFooterProps = {
   siteName: string;
@@ -14,7 +13,7 @@ type SiteFooterProps = {
 const FooterContainer = styled(Flex)`
   width: 100%;
   padding: 90px ${(props) => (props.theme as any).space[4]}px;
-  background: #F5F1E8;
+  background: #f5f1e8;
 
   @media only screen and (min-width: ${(props) =>
       (props.theme as any).breakpoints[2]}) {
@@ -63,19 +62,16 @@ export const SiteFooter = ({ siteName }: SiteFooterProps) => {
   const themeUi = useThemeUI();
   const theme = themeUi.theme as ThemeWithName;
 
-  const footerLogo = (theme as any)?.logo || '';
   const year = new Date().getFullYear();
-
   const [submitted, setSubmitted] = useState(false);
 
   return (
     <FooterContainer as="footer">
       <Inner>
-        {/* LEFT */}
         <LeftBlock>
           <Image
             src={bcitFooterLogo}
-            alt={`BCIT Footer Logo`}
+            alt="BCIT Footer Logo"
             sx={{
               width: ['90px', '100px', '110px'],
               height: ['90px', '100px', '110px'],
@@ -135,9 +131,7 @@ export const SiteFooter = ({ siteName }: SiteFooterProps) => {
                         name="email"
                         type="email"
                         component={FieldInput}
-                        placeholder={
-                          submitted ? 'Thank you!' : 'Email Address'
-                        }
+                        placeholder={submitted ? 'Thank you!' : 'Email Address'}
                         disabled={submitted}
                         sx={{
                           width: '100%',
@@ -148,14 +142,11 @@ export const SiteFooter = ({ siteName }: SiteFooterProps) => {
                           px: 3,
                           '&:focus': {
                             borderColor: '#000',
-                            boxShadow:
-                              '0 0 0 1px rgba(0,0,0,0.15)',
+                            boxShadow: '0 0 0 1px rgba(0,0,0,0.15)',
                             outline: 'none',
                           },
                           '&::placeholder': {
-                            color: submitted
-                              ? '#000'
-                              : 'rgba(0,0,0,0.45)',
+                            color: submitted ? '#000' : 'rgba(0,0,0,0.45)',
                           },
                         }}
                       />
@@ -169,8 +160,7 @@ export const SiteFooter = ({ siteName }: SiteFooterProps) => {
                         borderRadius: '10px',
                         backgroundColor: '#3F6B66',
                         color: '#ffffff',
-                        fontFamily:
-                          '"Times New Roman", Times, serif',
+                        fontFamily: '"Times New Roman", Times, serif',
                         fontWeight: 'bold',
                         letterSpacing: '1px',
                         textTransform: 'uppercase',
@@ -185,6 +175,58 @@ export const SiteFooter = ({ siteName }: SiteFooterProps) => {
                 </form>
               )}
             />
+          </Box>
+
+          <Box sx={{ mt: 5 }}>
+            <Heading
+              as="h2"
+              sx={{
+                fontFamily: '"Times New Roman", Times, serif',
+                fontWeight: 700,
+                letterSpacing: '0.5px',
+                fontSize: [4, 5, 6],
+                m: 0,
+                color: '#000',
+                textTransform: 'uppercase',
+              }}
+            >
+              NEED HELP?
+            </Heading>
+
+            <Text
+              sx={{
+                color: '#000',
+                fontSize: 3,
+                mt: 2,
+                m: 0,
+                maxWidth: '520px',
+              }}
+            >
+              Have questions about the platform or a project? Contact Us!
+            </Text>
+
+            <Box sx={{ mt: 3 }}>
+              <a href="/contact-us" style={{ textDecoration: 'none' }}>
+                <Button
+                  sx={{
+                    px: 4,
+                    py: 2,
+                    borderRadius: '10px',
+                    backgroundColor: '#3F6B66',
+                    color: '#ffffff',
+                    fontFamily: '"Times New Roman", Times, serif',
+                    fontWeight: 'bold',
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                    '&:hover': {
+                      backgroundColor: '#355c58',
+                    },
+                  }}
+                >
+                  CONTACT US
+                </Button>
+              </a>
+            </Box>
           </Box>
         </RightBlock>
       </Inner>
