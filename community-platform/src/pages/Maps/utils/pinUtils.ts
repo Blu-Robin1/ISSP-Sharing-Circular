@@ -31,47 +31,69 @@ export const filterPins = (
     badges?: string[];
     settings?: string[];
     boundaries?: LatLngBounds;
+
+    // SCIS additions
+    initiativeStages?: number[];
+    onlyInitiatives?: boolean;
   },
 ): MapPin[] => {
   if (!allPins?.length) {
     return [];
   }
-  const { tags, types, badges, settings, boundaries } = filters;
 
-  let filteredPins = structuredClone(allPins);
+  const { tags, types, badges, settings, boundaries, initiativeStages, onlyInitiatives } = filters;
 
+  // Split initiatives away from maker pins (do NOT mutate originals)
+  let initiatives = allPins.filter((p: any) => p?.type === 'initiative') as any[];
+  let makerPins = allPins.filter((p: any) => p?.type !== 'initiative') as any[];
+
+  // Apply SCIS stage filters to initiatives (if selected)
+  if (initiativeStages?.length) {
+    initiatives = initiatives.filter((p: any) => {
+      const s = Number(p?.effectiveStage ?? p?.stage ?? p?.scis?.stage);
+      return Number.isFinite(s) && initiativeStages.includes(s);
+    });
+  }
+
+  // Apply existing OneArmy filters only to maker pins
   if (tags?.length) {
-    filteredPins = filteredPins.filter((x) =>
-      tags.every((tag) => x.profile?.tags?.some((profileTag) => profileTag.id === tag)),
+    makerPins = makerPins.filter((x: any) =>
+      tags.every((tag) => x.profile?.tags?.some((profileTag: any) => profileTag.id === tag)),
     );
   }
 
   if (types?.length) {
-    filteredPins = filteredPins.filter(
-      (x) => x.profile?.type?.name && types.includes(x.profile?.type?.name),
+    makerPins = makerPins.filter(
+      (x: any) => x.profile?.type?.name && types.includes(x.profile?.type?.name),
     );
   }
 
   if (badges?.length) {
-    filteredPins = filteredPins.filter((x) =>
-      x.profile?.badges?.some((badge) => badges.includes(badge.name)),
+    makerPins = makerPins.filter((x: any) =>
+      x.profile?.badges?.some((badge: any) => badges.includes(badge.name)),
     );
   }
 
   if (settings?.length) {
     // Right now visitor filter is only setting filter. This should be smarter.
-    filteredPins = filteredPins.filter((x) => x.profile?.visitorPolicy?.policy === 'open');
+    makerPins = makerPins.filter((x: any) => x.profile?.visitorPolicy?.policy === 'open');
   }
 
+  // Merge results (or show only initiatives)
+  let mergedPins: MapPin[] = onlyInitiatives
+    ? (initiatives as any)
+    : ([...makerPins, ...initiatives] as any);
+
+  // Boundaries apply to everything
   if (boundaries) {
-    filteredPins = filterByLatLong(
+    mergedPins = filterByLatLong(
       {
         _northEast: boundaries.getNorthEast(),
         _southWest: boundaries.getSouthWest(),
       },
-      filteredPins,
+      mergedPins,
     );
   }
 
-  return filteredPins;
+  return mergedPins;
 };
