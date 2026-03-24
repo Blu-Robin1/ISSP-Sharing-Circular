@@ -1,4 +1,4 @@
-import logo from '../../assets/images/scis-logo.webp';
+import logo from '../../assets/images/bcit-logo.png';
 import { baseTheme } from '../common';
 import { getButtons } from '../common/button';
 
