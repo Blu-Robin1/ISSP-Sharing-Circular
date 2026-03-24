@@ -11,7 +11,7 @@ const inputStyles = ({ invalid }: IFormElement) => css`
   border-style: solid;
   border-color: ${invalid ? 'error' : 'transparent'};
   border-radius: 5px;
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 12px;
   background-color: background;
   width: 100%;

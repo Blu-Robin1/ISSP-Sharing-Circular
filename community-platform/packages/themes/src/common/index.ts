@@ -11,18 +11,33 @@ export const baseTheme = {
     header: 3000,
   },
   text: {
+    // heading: {
+    //   fontFamily: '"Varela Round", Arial, sans-serif',
+    //   fontSize: 6,
+    //   fontWeight: 'normal',
+    // },
+    // small: {
+    //   fontFamily: '"Varela Round", Arial, sans-serif',
+    //   fontSize: 4,
+    //   fontWeight: 'normal',
+    // },
+    // subHeading: {
+    //   fontFamily: '"Varela Round", Arial, sans-serif',
+    //   fontSize: 3,
+    //   fontWeight: 'bold',
+    // },
     heading: {
-      fontFamily: '"Varela Round", Arial, sans-serif',
+      fontFamily: commonStyles.fontFamily.title,
       fontSize: 6,
       fontWeight: 'normal',
     },
     small: {
-      fontFamily: '"Varela Round", Arial, sans-serif',
+      fontFamily: commonStyles.fontFamily.title,
       fontSize: 4,
       fontWeight: 'normal',
     },
     subHeading: {
-      fontFamily: '"Varela Round", Arial, sans-serif',
+      fontFamily: commonStyles.fontFamily.title,
       fontSize: 3,
       fontWeight: 'bold',
     },
@@ -99,7 +114,7 @@ export const baseTheme = {
   fontSizes: [10, 12, 14, 16, 18, 22, 30, 38, 42, 46, 50, 58, 66, 74],
   cards: {
     primary: {
-      background: 'white',
+      background: commonStyles.colors.background,
       border: `2px solid ${commonStyles.colors.black}`,
       borderRadius: 1,
       overflow: 'hidden',
@@ -113,7 +128,7 @@ export const baseTheme = {
       overflow: 'hidden',
     },
     borderless: {
-      background: 'white',
+      background: commonStyles.colors.background,
       border: 'none',
       borderRadius: 2,
       overflow: 'hidden',

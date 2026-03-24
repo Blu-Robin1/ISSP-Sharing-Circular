@@ -6,44 +6,40 @@ interface IPageNavigation {
   title: string;
 }
 
-const QuestionModule: IPageNavigation = {
-  module: MODULE.QUESTION,
-  path: '/questions',
-  title: 'Questions',
-};
-
-const ResearchModule: IPageNavigation = {
-  module: MODULE.RESEARCH,
-  path: '/research',
-  title: 'Research',
-};
-
-const library: IPageNavigation = {
+const discover: IPageNavigation = {
   module: MODULE.HOWTO,
   path: '/library',
-  title: 'Library',
+  title: 'Discover',
 };
+
+const about: IPageNavigation = {
+  module: MODULE.CORE,
+  path: '/about',
+  title: 'About',
+};
+
+const howItWorks: IPageNavigation = {
+  module: MODULE.CORE,
+  path: '/how-it-works',
+  title: 'How It Works',
+};
+
+const impact: IPageNavigation = {
+  module: MODULE.CORE,
+  path: '/impact',
+  title: 'Impact',
+};
+
 const settings: IPageNavigation = {
   module: MODULE.CORE,
   path: '/settings',
   title: 'Settings',
 };
-const academy: IPageNavigation = {
-  module: MODULE.ACADEMY,
-  path: '/academy',
-  title: 'Academy',
-};
 
 const maps: IPageNavigation = {
-  module: MODULE.MAP,
+  module: MODULE.CORE,
   path: '/map',
   title: 'Map',
-};
-
-const news: IPageNavigation = {
-  module: MODULE.NEWS,
-  path: '/news',
-  title: 'News',
 };
 
 export const getAvailablePageList = (supportedModules: MODULE[]): IPageNavigation[] => {
@@ -51,12 +47,11 @@ export const getAvailablePageList = (supportedModules: MODULE[]): IPageNavigatio
 };
 
 export const COMMUNITY_PAGES: IPageNavigation[] = [
-  news,
-  library,
+  discover,
   maps,
-  academy,
-  ResearchModule,
-  QuestionModule,
+  about,
+  howItWorks,
+  impact,
 ];
 
 /** Additional pages to show in signed-in profile dropdown */

@@ -60,12 +60,11 @@ export default function Index() {
                   width: '100%',
                   maxWidth: '620px',
                   mx: 'auto',
-                  mt: [5, 10],
+                  mt: [15, 20],
                   mb: 3,
                 }}
               >
                 <Flex sx={{ flexDirection: 'column', width: '100%' }}>
-                  <HeroBanner type="celebration" />
                   <Card sx={{ borderRadius: 3 }}>
                     <Flex
                       sx={{

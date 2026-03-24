@@ -34,25 +34,25 @@ export const SettingsPage = observer(() => {
       {
         title: 'Profile',
         route: '/settings/profile',
-        header: isComplete === false && (
-          <Flex sx={{ gap: 2, flexDirection: 'column' }} data-cy="CompleteProfileHeader">
-            <Text as="h3">✏️ Complete your profile</Text>
-            <Text>
-              In order to post comments or create content, we'd like you to share something about
-              yourself.
-            </Text>
-            {missingFields && missingFields.length > 0 && (
-              <Text>
-                Missing required fields:
-                <ul style={{ margin: '0.5em 0 0 0', paddingLeft: '1.5em' }}>
-                  {missingFields.map((field) => (
-                    <li key={field}>{field}</li>
-                  ))}
-                </ul>
-              </Text>
-            )}
-          </Flex>
-        ),
+        // header: isComplete === false && (
+        //   <Flex sx={{ gap: 2, flexDirection: 'column' }} data-cy="CompleteProfileHeader">
+        //     <Text as="h3">✏️ Complete your profile</Text>
+        //     <Text>
+        //       In order to post comments or create content, we'd like you to share something about
+        //       yourself.
+        //     </Text>
+        //     {missingFields && missingFields.length > 0 && (
+        //       <Text>
+        //         Missing required fields:
+        //         <ul style={{ margin: '0.5em 0 0 0', paddingLeft: '1.5em' }}>
+        //           {missingFields.map((field) => (
+        //             <li key={field}>{field}</li>
+        //           ))}
+        //         </ul>
+        //       </Text>
+        //     )}
+        //   </Flex>
+        // ),
         body: SettingsPageUserProfile,
         glyph: 'profile' as availableGlyphs,
       },
