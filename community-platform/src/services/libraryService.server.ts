@@ -66,7 +66,6 @@ const getUserProjects = async (
   });
 
   if (error) {
-    console.error('Error fetching user projects:', error);
     return [];
   }
 
@@ -76,6 +75,52 @@ const getUserProjects = async (
     slug: x.slug,
     usefulCount: x.total_useful,
   }));
+};
+
+const getAllUserProjects = async (
+  client: SupabaseClient,
+  username: string,
+): Promise<Partial<Project>[]> => {
+  try {
+    // First, get the profile ID for the username
+    const { data: profileData, error: profileError } = await client
+      .from('profiles')
+      .select('id')
+      .eq('username', username)
+      .single();
+
+    if (profileError) {
+      return [];
+    }
+
+    if (!profileData) {
+      return [];
+    }
+
+    // Then fetch all projects created by this user (including drafts and non-accepted)
+    const { data: projects, error } = await client
+      .from('projects')
+      .select('id, title, slug, total_views, created_by, deleted, is_draft')
+      .eq('created_by', profileData.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return [];
+    }
+
+    if (!projects || projects.length === 0) {
+      return [];
+    }
+
+    return projects.map((x) => ({
+      id: x.id,
+      title: x.title,
+      slug: x.slug,
+      usefulCount: 0,
+    }));
+  } catch (err) {
+    return [];
+  }
 };
 
 const getProjectPublicMedia = (projectDb: DBProject, client: SupabaseClient) => {
@@ -196,6 +241,7 @@ export const libraryServiceServer = {
   getBySlug,
   getById,
   getUserProjects,
+  getAllUserProjects,
   getProjectPublicMedia,
   isAllowedToEditProject,
   isAllowedToEditProjectById,

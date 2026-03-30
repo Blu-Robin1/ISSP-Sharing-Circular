@@ -1,4 +1,5 @@
 import type { UserCreatedDocs } from 'oa-shared';
+import { UserRole } from 'oa-shared';
 import type { LoaderFunctionArgs } from 'react-router';
 import { useLoaderData } from 'react-router';
 import { redirect } from 'react-router';
@@ -27,14 +28,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect('/sign-in', { headers });
   }
 
-  // Check if user has organizer role (assuming research_creator or admin)
-  const hasOrganizerRole = profile.roles?.includes('research_creator') || profile.roles?.includes('admin');
+  // Check if user has organizer role
+  const hasOrganizerRole = profile.roles?.includes(UserRole.ORGANIZER) || profile.roles?.includes(UserRole.ADMIN);
   if (!hasOrganizerRole) {
     return redirect('/dashboard', { headers });
   }
 
   const [projects, research, questions] = await Promise.all([
-    libraryServiceServer.getUserProjects(client, profile.username),
+    libraryServiceServer.getAllUserProjects(client, profile.username),
     researchServiceServer.getUserResearch(client, profile.username),
     questionServiceServer.getQuestionsByUser(client, profile.username),
   ]);

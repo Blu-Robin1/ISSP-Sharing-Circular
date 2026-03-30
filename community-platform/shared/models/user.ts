@@ -4,7 +4,7 @@ export enum UserRole {
   SUBSCRIBER = 'subscriber',
   ADMIN = 'admin',
   BETA_TESTER = 'beta-tester',
-  RESEARCH_CREATOR = 'research_creator',
+  ORGANIZER = 'organizer',
 }
 
 // Below are primarily used for PP
