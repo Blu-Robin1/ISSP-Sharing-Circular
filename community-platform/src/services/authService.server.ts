@@ -6,10 +6,19 @@ type CreateProfileArgs = {
 };
 
 const createUserProfile = async (args: CreateProfileArgs, client: SupabaseClient) => {
+  const tenantId = process.env.TENANT_ID;
+  if (!tenantId) {
+    return {
+      data: null,
+      error: { message: 'TENANT_ID is not configured', code: 'TENANT_ID_MISSING', details: '' },
+    };
+  }
+
   const { data: typeData, error: typeError } = await client
     .from('profile_types')
     .select('id')
     .eq('name', 'member')
+    .eq('tenant_id', tenantId)
     .limit(1);
 
   if (typeError) {
@@ -19,7 +28,10 @@ const createUserProfile = async (args: CreateProfileArgs, client: SupabaseClient
 
   const memberTypeId = typeData?.[0]?.id;
   if (memberTypeId == null) {
-    console.error('[createUserProfile] No profile_type with name "member" found');
+    console.error(
+      `[createUserProfile] No profile_type "member" for tenant_id="${tenantId}". ` +
+        'Apply migrations or run supabase/scripts/fix-sign-up-issues.sql for this tenant.',
+    );
     return {
       data: null,
       error: { message: 'Default member type not found', code: 'MEMBER_TYPE_MISSING', details: '' },
@@ -30,7 +42,7 @@ const createUserProfile = async (args: CreateProfileArgs, client: SupabaseClient
     auth_id: args.user.id,
     username: args.username,
     display_name: args.username,
-    tenant_id: process.env.TENANT_ID,
+    tenant_id: tenantId,
     profile_type: memberTypeId,
   });
 };

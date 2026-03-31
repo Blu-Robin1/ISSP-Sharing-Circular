@@ -15,29 +15,21 @@ const MenuLink = styled(NavLink)`
   color: ${'black'};
   position: relative;
   > div {
-    z-index: ${(props) => props.theme.zIndex.default};
+    // z-index: ${(props) => props.theme.zIndex.default};
     position: relative;
+    display: inline-block;
     &:hover {
       opacity: 0.7;
     }
   }
-  &.active {
-    &:after {
-      content: '';
-      width: 70px;
-      height: 20px;
-      display: block;
-      position: absolute;
-      bottom: -6px;
-      background-color: ${(props) => props.theme.colors.accent.base};
-      mask-size: contain;
-      mask-image: url(\"${MenuCurrent}\");
-      mask-repeat: no-repeat;
-      z-index: ${(props) => props.theme.zIndex.level};
-      left: 50%;
-      transform: translateX(-50%);
-      pointer-events: none;
-    }
+  &.active > div::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 1.5px;
+    background-color: black;
   }
 `;
 

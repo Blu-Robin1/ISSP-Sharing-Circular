@@ -18,16 +18,36 @@ const ResearchModule: IPageNavigation = {
   title: 'Research',
 };
 
-const library: IPageNavigation = {
+const discover: IPageNavigation = {
   module: MODULE.HOWTO,
   path: '/library',
-  title: 'Library',
+  title: 'Discover',
 };
+
+const about: IPageNavigation = {
+  module: MODULE.CORE,
+  path: '/about',
+  title: 'About',
+};
+
+const howItWorks: IPageNavigation = {
+  module: MODULE.CORE,
+  path: '/how-it-works',
+  title: 'How It Works',
+};
+
+const impact: IPageNavigation = {
+  module: MODULE.CORE,
+  path: '/impact',
+  title: 'Impact',
+};
+
 const settings: IPageNavigation = {
   module: MODULE.CORE,
   path: '/settings',
   title: 'Settings',
 };
+
 const academy: IPageNavigation = {
   module: MODULE.ACADEMY,
   path: '/academy',
@@ -51,19 +71,21 @@ const news: IPageNavigation = {
   path: '/news',
   title: 'News',
 };
-
 export const getAvailablePageList = (supportedModules: MODULE[]): IPageNavigation[] => {
   return COMMUNITY_PAGES.filter((pageItem) => supportedModules.includes(pageItem.module));
 };
 
 export const COMMUNITY_PAGES: IPageNavigation[] = [
   news,
-  library,
+  discover,
   maps,
   initiatives,
   academy,
   ResearchModule,
   QuestionModule,
+  about,
+  howItWorks,
+  impact,
 ];
 
 /** Additional pages to show in signed-in profile dropdown */

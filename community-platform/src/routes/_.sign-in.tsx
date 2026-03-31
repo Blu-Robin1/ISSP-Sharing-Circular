@@ -75,7 +75,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       );
     }
 
-    console.error(error);
+    if (error.code === 'invalid_credentials') {
+      return Response.json(
+        { error: 'Invalid email or password.' },
+        { headers, status: 400 },
+      );
+    }
+
+    console.error('[sign-in] auth error:', error.code, error.message);
     return Response.json(
       {
         error: 'Invalid email or password.',
@@ -100,7 +107,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const path = isAdmin ? '/admin/initiatives' : requestedPath;
 
   try {
-    // This will fail if there is already a profile for the current auth_id, or the auth_id is invalid (can be invalid the the credentials are wrong)
     await new ProfileServiceServer(client).ensureProfile(data.user);
   } catch (error) {
     console.error(error);
@@ -140,12 +146,11 @@ export default function Index() {
                   width: '100%',
                   maxWidth: '620px',
                   mx: 'auto',
-                  mt: [5, 10],
+                  mt: [15, 20],
                   mb: 3,
                 }}
               >
                 <Flex sx={{ flexDirection: 'column', width: '100%' }}>
-                  <HeroBanner type="celebration" />
                   <Card sx={{ borderRadius: 3 }}>
                     <Flex
                       sx={{
@@ -179,6 +184,11 @@ export default function Index() {
                           data-cy="email"
                           component={FieldInput}
                           validate={required}
+                          sx={{
+                            border: '1px solid rgba(0,0,0,0.25)',
+                            borderRadius: '10px',
+                            px: 3,
+                          }}
                         />
                       </Flex>
                       <Flex sx={{ flexDirection: 'column' }}>
@@ -203,9 +213,16 @@ export default function Index() {
                           large
                           data-cy="submit"
                           sx={{
-                            borderRadius: 3,
                             width: '100%',
+                            backgroundColor: '#3F6B66',
+                            color: '#ffffff',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            fontFamily: '"Times New Roman", Times, serif',
                             justifyContent: 'center',
+                            '&:hover': {
+                              backgroundColor: '#355c58',
+                            },
                           }}
                           variant="primary"
                           disabled={submitting || invalid}

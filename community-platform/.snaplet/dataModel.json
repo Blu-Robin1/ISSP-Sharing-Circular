@@ -476,20 +476,6 @@
           "hasDefaultValue": false
         },
         {
-          "name": "prefixes",
-          "type": "prefixes",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "prefixesTobuckets",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
           "name": "s3_multipart_uploads",
           "type": "s3_multipart_uploads",
           "isRequired": false,
@@ -1271,7 +1257,7 @@
           "name": "auth_code",
           "columnName": "auth_code",
           "type": "text",
-          "isRequired": true,
+          "isRequired": false,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -1285,7 +1271,7 @@
           "name": "code_challenge_method",
           "columnName": "code_challenge_method",
           "type": "code_challenge_method",
-          "isRequired": true,
+          "isRequired": false,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -1299,7 +1285,7 @@
           "name": "code_challenge",
           "columnName": "code_challenge",
           "type": "text",
-          "isRequired": true,
+          "isRequired": false,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -1403,6 +1389,76 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "auth.flow_state.invite_token",
+          "name": "invite_token",
+          "columnName": "invite_token",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "auth.flow_state.referrer",
+          "name": "referrer",
+          "columnName": "referrer",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "auth.flow_state.oauth_client_state_id",
+          "name": "oauth_client_state_id",
+          "columnName": "oauth_client_state_id",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "auth.flow_state.linking_target_id",
+          "name": "linking_target_id",
+          "columnName": "linking_target_id",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "auth.flow_state.email_optional",
+          "name": "email_optional",
+          "columnName": "email_optional",
+          "type": "bool",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
           "isId": false,
           "maxLength": null
         },
@@ -3948,6 +4004,20 @@
           "maxLength": null
         },
         {
+          "id": "public.notifications.title",
+          "name": "title",
+          "columnName": "title",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "profiles_notifications_owned_by_idToprofiles",
           "type": "profiles",
           "isRequired": true,
@@ -4665,6 +4735,20 @@
           "maxLength": null
         },
         {
+          "id": "auth.oauth_clients.token_endpoint_auth_method",
+          "name": "token_endpoint_auth_method",
+          "columnName": "token_endpoint_auth_method",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "oauth_authorizations",
           "type": "oauth_authorizations",
           "isRequired": false,
@@ -5010,20 +5094,6 @@
           "name": "user_metadata",
           "columnName": "user_metadata",
           "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "storage.objects.level",
-          "name": "level",
-          "columnName": "level",
-          "type": "int4",
           "isRequired": false,
           "kind": "scalar",
           "isList": false,
@@ -11971,6 +12041,9 @@
         },
         {
           "name": "newContent"
+        },
+        {
+          "name": "newReply"
         }
       ]
     },
@@ -11981,10 +12054,16 @@
           "name": "comment"
         },
         {
+          "name": "comments"
+        },
+        {
           "name": "library"
         },
         {
           "name": "news"
+        },
+        {
+          "name": "projects"
         },
         {
           "name": "questions"
@@ -11997,6 +12076,9 @@
         },
         {
           "name": "researchUpdate"
+        },
+        {
+          "name": "research_updates"
         }
       ]
     },
@@ -12010,6 +12092,9 @@
           "name": "news"
         },
         {
+          "name": "projects"
+        },
+        {
           "name": "questions"
         },
         {
@@ -12017,6 +12102,9 @@
         },
         {
           "name": "researchUpdate"
+        },
+        {
+          "name": "research_updates"
         }
       ]
     },

@@ -1,6 +1,7 @@
-import { HeroBanner, Icon } from 'oa-components';
+import { HeroBanner } from 'oa-components';
 import { Link } from 'react-router';
-import { Box, Button, Card, Flex, Heading, Text } from 'theme-ui';
+import { Box, Button, Card, Flex, Heading, Text, Image } from 'theme-ui';
+import bcitLogo from 'oa-themes/assets/images/bcit-footer.png';
 
 /** When true, Supabase sends confirmation emails. Match auth.email.enable_confirmations in Supabase. */
 const requireEmailConfirmation =
@@ -15,7 +16,7 @@ const SignUpMessagePage = ({ email }: { email: string | null }) => {
         width: '100%',
         maxWidth: '620px',
         mx: 'auto',
-        mt: [5, 10],
+        mt: [15, 20],
         mb: 3,
       }}
     >
@@ -35,14 +36,19 @@ const SignUpMessagePage = ({ email }: { email: string | null }) => {
               zIndex: 3,
             }}
           >
-            <Icon
-              glyph="star-active"
-              size={60}
+            <Image
+              src={bcitLogo}
+              alt="BCIT Logo"
               sx={{
-                backgroundColor: '#ffedd6',
+                width: '68px',
+                height: '68px',
+                backgroundColor: '#fff',
                 border: '5px solid #fff',
-                borderRadius: 25,
-                padding: 2,
+                borderRadius: '50%',
+                padding: 0,
+                objectFit: 'contain',
+                display: 'block',
+                margin: '0 auto'
               }}
             />
           </Box>
@@ -63,7 +69,7 @@ const SignUpMessagePage = ({ email }: { email: string | null }) => {
                   textAlign: 'center',
                 }}
               >
-                <Heading>Yay! Welcome to One Army!</Heading>
+                <Heading>Welcome to BCIT!</Heading>
               </Flex>
               {requireEmailConfirmation ? (
                 <Text sx={{ textAlign: 'center', color: 'grey' }}>
