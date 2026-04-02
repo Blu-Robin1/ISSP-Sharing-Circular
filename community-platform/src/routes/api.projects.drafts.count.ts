@@ -12,6 +12,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return Response.json({}, { headers, status: 401 });
   }
 
+  const { data: userData, error: getUserError } = await client.auth.getUser();
+  if (getUserError) {
+    console.error('Failed to fetch user from auth for projects drafts count', getUserError);
+  }
+
+  if (userData?.user) {
+    await new ProfileServiceServer(client).ensureProfile(userData.user);
+  }
+
   const profileService = new ProfileServiceServer(client);
   const profile = await profileService.getByAuthId(claims.data.claims.sub);
 

@@ -21,6 +21,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirectServiceServer.redirectSignIn('/organizer-dashboard', headers);
   }
 
+  const { data: userData, error: getUserError } = await client.auth.getUser();
+  if (getUserError) {
+    console.error('Failed to fetch user from auth for organizer dashboard', getUserError);
+  }
+
+  if (userData?.user) {
+    await new ProfileServiceServer(client).ensureProfile(userData.user);
+  }
+
   const profileService = new ProfileServiceServer(client);
   const profile = await profileService.getByAuthId(claims.data.claims.sub);
 

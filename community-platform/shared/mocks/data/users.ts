@@ -122,7 +122,7 @@ export const users: Users = {
     profileType: 'machine-builder',
   },
   settings_member_new: {
-    country: 'Poland',
+    city: 'Poland',
     username: 'settings_member_new',
     email: 'settings_member_new@test.com',
     password: 'test1234',
@@ -263,7 +263,7 @@ export const users: Users = {
     ],
     website: 'http://profile_views.example.com',
     about: 'Hi! I have 99 views',
-    country: 'nl',
+    city: 'nl',
     photo: {
       id: 'string',
       publicUrl: 'string',

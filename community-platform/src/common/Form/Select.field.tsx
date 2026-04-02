@@ -63,6 +63,7 @@ export const SelectField = ({
       data-cy={rest['data-cy']}
     >
       <Select
+        suppressHydrationWarning
         onChange={(v) => {
           const value = getValueFromSelect(v);
           input.onChange(value);

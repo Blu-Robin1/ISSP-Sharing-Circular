@@ -26,8 +26,6 @@ export class ProfileServiceServer {
           id,
           name,
           display_name,
-          image_url,
-          small_image_url,
           description,
           map_pin_name,
           is_space
@@ -43,6 +41,20 @@ export class ProfileServiceServer {
     return data as DBProfile;
   }
 
+  async getByAuthIdOrCreate(authId: string, user?: User): Promise<DBProfile | null> {
+    // First try to get existing profile
+    let profile = await this.getByAuthId(authId);
+
+    // If no profile exists and we have user data, create one
+    if (!profile && user) {
+      await this.ensureProfile(user);
+      // Try again after creation
+      profile = await this.getByAuthId(authId);
+    }
+
+    return profile;
+  }
+
   async getById(id: number): Promise<DBProfile | null> {
     const { data } = await this.client
       .from('profiles')
@@ -52,8 +64,6 @@ export class ProfileServiceServer {
           id,
           name,
           display_name,
-          image_url,
-          small_image_url,
           description,
           map_pin_name,
           is_space
@@ -82,7 +92,7 @@ export class ProfileServiceServer {
         display_name,
         photo,
         cover_images,
-        country,
+        city,
         tags:profile_tags_relations(
           profile_tags(
             id,
@@ -103,8 +113,6 @@ export class ProfileServiceServer {
           id,
           name,
           display_name,
-          image_url,
-          small_image_url,
           description,
           map_pin_name,
           is_space
@@ -190,7 +198,7 @@ export class ProfileServiceServer {
 
     const valuesToUpdate = {
       about: values.about,
-      country: values.country,
+      city: values.country,
       display_name: values.displayName,
       website: values.website,
       is_contactable: values.isContactable,
@@ -343,7 +351,11 @@ export class ProfileServiceServer {
     }
 
     if (!user.user_metadata.username) {
-      console.error('Cannot create profile without username in user metadata');
+      console.error('Cannot create profile without username in user metadata', {
+        userId: user.id,
+        userMetadata: user.user_metadata,
+      });
+      throw new Error('Cannot create profile without username in user metadata');
     }
 
     // Doesn't exist - create it
@@ -362,6 +374,7 @@ export class ProfileServiceServer {
 
     if (error) {
       console.error('Error creating profile for user:', error);
+      throw error;
     }
   }
 

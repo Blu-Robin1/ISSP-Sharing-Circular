@@ -26,7 +26,7 @@ export class DBProfile {
   display_name: string;
   photo: DBMedia | null;
   cover_images: DBMedia[] | null;
-  country: string;
+  city: string;
   patreon?: IPatreonUser;
   roles: string[] | null;
   visitor_policy: string | null;
@@ -51,7 +51,7 @@ export class Profile {
   createdAt: Date;
   username: string;
   displayName: string;
-  country: string;
+  city: string;
   about: string | null;
   type: ProfileType | null;
   impact: IUserImpact | null;
@@ -91,7 +91,7 @@ export class Profile {
     return new Profile({
       id: dbProfile.id,
       createdAt: dbProfile.created_at,
-      country: dbProfile.country,
+      city: dbProfile.city,
       displayName: dbProfile.display_name,
       username: dbProfile.username,
       photo: photo ?? null,
@@ -125,7 +125,7 @@ export type NotificationContentType = (typeof NotificationContentTypes)[number];
 export type BasicAuthorDetails = Pick<Profile, 'id' | 'username' | 'photo'>;
 export type ProfileListItem = Pick<
   Profile,
-  'id' | 'username' | 'displayName' | 'photo' | 'country' | 'badges' | 'type'
+  'id' | 'username' | 'displayName' | 'photo' | 'city' | 'badges' | 'type'
 >;
 
 type NotificationContent = News | Comment | Question | ResearchUpdate;
@@ -455,7 +455,7 @@ export type DBPinProfile = Pick<
   | 'id'
   | 'display_name'
   | 'username'
-  | 'country'
+  | 'city'
   | 'cover_images'
   | 'photo'
   | 'tags'
@@ -471,7 +471,7 @@ export type PinProfile = Pick<
   | 'id'
   | 'displayName'
   | 'username'
-  | 'country'
+  | 'city'
   | 'coverImages'
   | 'photo'
   | 'tags'

@@ -62,9 +62,9 @@ export const OrganizerDashboard = ({ userCreatedDocs }: OrganizerDashboardProps)
           )}
 
           {/* Other Content */}
-          <Box sx={{ mt: 4 }}>
+          {/* <Box sx={{ mt: 4 }}>
             <UserCreatedDocuments columns={1} docs={userCreatedDocs} />
-          </Box>
+          </Box> */}
         </>
       )}
     </Box>

@@ -12,8 +12,39 @@ export const loader = async ({ request }) => {
   try {
     const claims = await client.auth.getClaims();
 
+    console.log('Profile loader: claims', {
+      hasClaims: !!claims.data?.claims,
+      sub: claims.data?.claims?.sub,
+    });
+
     if (!claims.data?.claims) {
       return Response.json({}, { headers, status: 401 });
+    }
+
+    const authId = claims.data.claims.sub;
+
+    const { data: userData, error: getUserError } = await client.auth.getUser();
+    if (getUserError) {
+      console.error('Failed to fetch user from auth for profile loader', getUserError);
+      return Response.json({ error: 'Failed to fetch user' }, { headers, status: 500 });
+    }
+
+    if (!userData?.user) {
+      console.error('No user data returned from auth.getUser()');
+      return Response.json({ error: 'No user data' }, { headers, status: 401 });
+    }
+
+    console.log('Profile loader: user data', {
+      userId: userData.user.id,
+      username: userData.user.user_metadata.username,
+      email: userData.user.email,
+    });
+
+    try {
+      await new ProfileServiceServer(client).ensureProfile(userData.user);
+    } catch (ensureError) {
+      console.error('Failed to ensure profile in loader', ensureError);
+      return Response.json({ error: 'Failed to create profile' }, { headers, status: 500 });
     }
 
     const nowUtc = new Date().toISOString();
@@ -21,7 +52,7 @@ export const loader = async ({ request }) => {
     const { data, error } = await client
       .from('profiles')
       .update({ last_active: nowUtc })
-      .eq('auth_id', claims.data.claims.sub)
+      .eq('auth_id', authId)
       .select(
         `*,
         tags:profile_tags_relations(
@@ -44,8 +75,6 @@ export const loader = async ({ request }) => {
           id,
           name,
           display_name,
-          image_url,
-          small_image_url,
           description,
           map_pin_name,
           is_space
@@ -101,8 +130,37 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     const claims = await client.auth.getClaims();
 
+    console.log('Profile action: claims', {
+      hasClaims: !!claims.data?.claims,
+      sub: claims.data?.claims?.sub,
+    });
+
     if (!claims.data?.claims) {
       return Response.json({}, { headers, status: 401 });
+    }
+
+    const { data: userData, error: getUserError } = await client.auth.getUser();
+    if (getUserError) {
+      console.error('Failed to fetch user from auth for profile action', getUserError);
+      return Response.json({ error: 'Failed to fetch user' }, { headers, status: 500 });
+    }
+
+    if (!userData?.user) {
+      console.error('No user data returned from auth.getUser() in action');
+      return Response.json({ error: 'No user data' }, { headers, status: 401 });
+    }
+
+    console.log('Profile action: user data', {
+      userId: userData.user.id,
+      username: userData.user.user_metadata.username,
+      email: userData.user.email,
+    });
+
+    try {
+      await new ProfileServiceServer(client).ensureProfile(userData.user);
+    } catch (ensureError) {
+      console.error('Failed to ensure profile in action', ensureError);
+      return Response.json({ error: 'Failed to create profile' }, { headers, status: 500 });
     }
 
     const profileData = await new ProfileServiceServer(client).getByAuthId(claims.data.claims.sub);

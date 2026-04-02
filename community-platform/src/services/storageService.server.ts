@@ -3,6 +3,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { DBMedia } from 'oa-shared';
 import { Image, MediaFile } from 'oa-shared';
 
+const bucketId = process.env.TENANT_ID || 'precious-plastic';
+
+if (!bucketId) {
+  throw new Error('TENANT_ID environment variable is required for storage operations');
+}
+
 const getPublicUrls = (
   client: SupabaseClient,
   images: DBMedia[],
@@ -12,7 +18,7 @@ const getPublicUrls = (
 
   for (const x of images || []) {
     try {
-      const { data } = client.storage.from(process.env.TENANT_ID as string).getPublicUrl(
+      const { data } = client.storage.from(bucketId).getPublicUrl(
         x.path,
         size
           ? {
@@ -39,7 +45,7 @@ const uploadImage = async (files: File[], path: string, client: SupabaseClient) 
 
   for (const file of files) {
     const result = await client.storage
-      .from(process.env.TENANT_ID as string)
+      .from(bucketId)
       .upload(`${path}/${file.name}`, file, { upsert: true });
 
     if (result.data === null) {

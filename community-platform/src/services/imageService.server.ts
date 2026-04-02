@@ -49,12 +49,18 @@ export class ImageServiceServer {
       return null;
     }
 
+    const bucketId = process.env.TENANT_ID || 'precious-plastic';
+
+    if (!bucketId) {
+      throw new Error('TENANT_ID environment variable is required for image uploads');
+    }
+
     const errors: string[] = [];
     const media: DBMedia[] = [];
 
     for (const file of files) {
       const result = await this.client.storage
-        .from(process.env.TENANT_ID as string)
+        .from(bucketId)
         .upload(`${path}/${file.name}`, file, { upsert: true });
 
       if (result.data === null) {

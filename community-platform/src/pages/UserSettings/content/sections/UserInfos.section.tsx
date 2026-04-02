@@ -101,7 +101,6 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
             component={FieldInput}
             validate={required}
             validateFields={[]}
-            disabled
           />
         </Flex>
 
