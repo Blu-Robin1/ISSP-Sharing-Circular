@@ -14,7 +14,7 @@ import { ChangePasswordForm } from './content/sections/ChangePassword.form';
 export const SettingsPageAccount = observer(() => {
   const { description, title } = fields.deleteAccount;
   const { isUserAuthorized } = useProfileStore();
-  const isAdmin = isUserAuthorized?.(UserRole.ADMIN);
+  const isAdmin = isUserAuthorized(UserRole.ADMIN);
 
   return (
     <Flex
@@ -33,7 +33,7 @@ export const SettingsPageAccount = observer(() => {
       <ChangePasswordForm />
       <ChangeEmailForm />
 
-      {isAdmin && (
+      {isAdmin || (
         <Link to="/admin/initiatives">
           <Button variant="secondary">Admin panel</Button>
         </Link>

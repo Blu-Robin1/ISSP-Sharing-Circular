@@ -1,8 +1,9 @@
 import type { ProfileType } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getProfileTypes = async () => {
   try {
-    const response = await fetch('/api/profile-types', {
+    const response = await apiFetch('/api/profile-types', {
       cache: 'force-cache',
       headers: {
         'Cache-Control': 'max-age=1800', // 30 minutes

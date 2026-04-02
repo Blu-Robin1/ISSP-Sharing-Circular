@@ -3,10 +3,11 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { Button, Loader } from 'oa-components';
 import type { ProfileFormData } from 'oa-shared';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { Form } from 'react-final-form';
 import { UnsavedChangesDialog } from 'src/common/Form/UnsavedChangesDialog';
 import { logger } from 'src/logger';
+import { SessionContext } from 'src/pages/common/SessionContext';
 import { profileService } from 'src/services/profileService';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { isContactable, isMessagingModuleOff } from 'src/utils/helpers';
@@ -22,6 +23,7 @@ import { buttons } from './labels';
 
 export const SettingsPageUserProfile = observer(() => {
   const [notification, setNotification] = useState<IFormNotification | undefined>(undefined);
+  const claims = useContext(SessionContext);
 
   const { profileTypes, profile, update, refresh } = useProfileStore();
 
@@ -55,20 +57,25 @@ export const SettingsPageUserProfile = observer(() => {
     }
   };
 
-  const existingCoverImages = profile.coverImages
-    ? profile?.coverImages?.slice(0, 4).map((image) => toJS(image))
-    : [];
-  const coverImages = new Array(4 - (existingCoverImages?.length || 0));
+  const initialValues = useMemo<ProfileFormData>(() => {
+    const existingCoverImages = profile.coverImages
+      ? profile?.coverImages?.slice(0, 4).map((image) => toJS(image))
+      : [];
+    const coverImages = new Array(4 - (existingCoverImages?.length || 0));
 
-  const initialValues = useMemo<ProfileFormData>(
-    () => ({
+    const usernameFromAuth =
+      claims?.user_metadata && typeof claims.user_metadata === 'object'
+        ? String((claims.user_metadata as { username?: string }).username ?? '')
+        : '';
+
+    return {
       type: profile.type?.name || 'member',
       displayName: profile.displayName || '',
-      userName: profile.username,
+      userName: profile.username || usernameFromAuth || '',
       about: profile.about || '',
       isContactable: isContactable(profile.isContactable),
-      coverImages: coverImages,
-      existingCoverImages: existingCoverImages,
+      coverImages,
+      existingCoverImages,
       existingPhoto: profile.photo ? toJS(profile.photo) : undefined,
       country: profile.country,
       showVisitorPolicy: !!profile.visitorPolicy,
@@ -76,9 +83,8 @@ export const SettingsPageUserProfile = observer(() => {
       visitorPreferenceDetails: profile.visitorPolicy?.details,
       website: profile.website || '',
       tagIds: profile.tags?.map((x) => x.id) || null,
-    }),
-    [],
-  );
+    };
+  }, [profile, claims]);
   const formId = 'userProfileForm';
 
   return (
@@ -86,6 +92,7 @@ export const SettingsPageUserProfile = observer(() => {
       id={formId}
       onSubmit={async (values) => await saveProfile(values)}
       initialValues={initialValues}
+      enableReinitialize
       mutators={{ ...arrayMutators }}
       validateOnBlur
       render={({

@@ -1,4 +1,5 @@
 import type { ContentType } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 import { getCleanFileName } from 'src/utils/storage';
 
 const imageUpload = async (id: number | null, contentType: ContentType, imageFile: File) => {
@@ -9,7 +10,7 @@ const imageUpload = async (id: number | null, contentType: ContentType, imageFil
   body.append('contentType', contentType);
   body.append('imageFile', imageFile, getCleanFileName(imageFile.name));
 
-  const response = await fetch(`/api/images`, {
+  const response = await apiFetch(`/api/images`, {
     method: 'POST',
     body,
   });

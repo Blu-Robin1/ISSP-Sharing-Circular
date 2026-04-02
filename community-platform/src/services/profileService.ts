@@ -7,13 +7,14 @@ import type {
   ProfileFormData,
 } from 'oa-shared';
 import { logger } from 'src/logger';
+import { apiFetch } from 'src/utils/apiFetch';
 import { getCleanFileName } from 'src/utils/storage';
 
 const get = async (): Promise<Profile | undefined> => {
   try {
     const url = new URL('/api/profile', window.location.origin);
 
-    const response = await fetch(url, { credentials: 'include' });
+    const response = await apiFetch(url);
 
     return (await response.json()) as Profile;
   } catch (error) {
@@ -73,7 +74,7 @@ const update = async (value: ProfileFormData) => {
     }
   }
 
-  const response = await fetch(url, {
+  const response = await apiFetch(url, {
     body: data,
     method: 'POST',
   });
@@ -98,7 +99,7 @@ const upsertPin = async (pin: MapPinFormData): Promise<MapPin> => {
   data.append('lat', pin.lat.toString());
   data.append('lng', pin.lng.toString());
 
-  const response = await fetch(`/api/settings/map`, {
+  const response = await apiFetch(`/api/settings/map`, {
     method: 'POST',
     body: data,
   });
@@ -113,7 +114,7 @@ const upsertPin = async (pin: MapPinFormData): Promise<MapPin> => {
 };
 
 const deletePin = async () => {
-  const response = await fetch(`/api/settings/map`, {
+  const response = await apiFetch(`/api/settings/map`, {
     method: 'DELETE',
   });
 
@@ -130,7 +131,7 @@ const updateImpact = async (year: number, fields: IImpactDataField[]): Promise<I
   data.append('year', year.toString());
   data.append('fields', JSON.stringify(fields));
 
-  const response = await fetch('/api/settings/impact', {
+  const response = await apiFetch('/api/settings/impact', {
     method: 'POST',
     body: data,
   });

@@ -47,9 +47,17 @@ const createUserProfile = async (args: CreateProfileArgs, client: SupabaseClient
   });
 };
 
-const isUsernameAvailable = async (username: string, client: SupabaseClient) => {
+/** True if username is available, false if taken. Null if the check failed (do not treat as taken). */
+const isUsernameAvailable = async (
+  username: string,
+  client: SupabaseClient,
+): Promise<boolean | null> => {
   const result = await client.rpc('is_username_available', { username });
-  return result.data;
+  if (result.error) {
+    console.error('[isUsernameAvailable] RPC error:', result.error);
+    return null;
+  }
+  return result.data === true;
 };
 
 export const authServiceServer = {

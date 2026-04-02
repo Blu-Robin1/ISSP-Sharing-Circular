@@ -1,4 +1,4 @@
-import { Button, FieldInput, HeroBanner, TextNotification } from 'oa-components';
+import { Button, FieldInput, TextNotification } from 'oa-components';
 import { Field, Form } from 'react-final-form';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
 import { Link, redirect, useActionData, useSubmit } from 'react-router';
@@ -36,28 +36,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (error) {
     if (error.code === 'email_not_confirmed') {
-      const url = new URL(request.url);
-      const protocol = url.host.startsWith('localhost') ? 'http:' : 'https:';
-      const emailRedirectUrl = `${protocol}//${url.host}/email-confirmation`;
-      const resendResult = await client.auth.resend({
-        type: 'signup',
-        email,
-        options: {
-          emailRedirectTo: emailRedirectUrl,
-        },
-      });
-      if (resendResult.error?.message?.toLowerCase().includes('rate limit')) {
-        return Response.json(
-          {
-            error:
-              'Email rate limit exceeded. Please try again in an hour or check your inbox for an existing confirmation link.',
-          },
-          { headers, status: 429 },
-        );
-      }
+      // Do not call auth.resend() here: every failed login would trigger another email and
+      // quickly hit Supabase rate limits. The user already received a link at sign-up.
       return Response.json(
         {
-          error: 'We need to confirm your email before logging in. Please check your inbox :)',
+          error:
+            'Please confirm your email before signing in. Check your inbox and spam for the confirmation link.',
         },
         { headers },
       );

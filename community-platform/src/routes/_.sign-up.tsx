@@ -1,4 +1,4 @@
-import { Button, ExternalLink, FieldInput, HeroBanner, TextNotification } from 'oa-components';
+import { Button, ExternalLink, FieldInput, TextNotification } from 'oa-components';
 import { FRIENDLY_MESSAGES } from 'oa-shared';
 import { Field, Form } from 'react-final-form';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
@@ -37,7 +37,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const emailRedirectTo = `${protocol}//${url.host}/email-confirmation`;
 
   const username = formData.get('username') as string;
-  if (!(await authServiceServer.isUsernameAvailable(username, client))) {
+  const usernameFree = await authServiceServer.isUsernameAvailable(username, client);
+  if (usernameFree === null) {
+    return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers, status: 500 });
+  }
+  if (!usernameFree) {
     return Response.json({ error: FRIENDLY_MESSAGES['sign-up/username-taken'] }, { headers });
   }
 
@@ -56,7 +60,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (error) {
     console.error('[sign-up] auth.signUp error:', error.message, error.code);
     if (error.code === 'weak_password') {
-      return Response.json({ error: FRIENDLY_MESSAGES['password-weak'] }, { headers });
+      return Response.json({ error: FRIENDLY_MESSAGES['sign-up/password-weak'] }, { headers });
     }
     if (error.code === 'user_already_exists' || error.message?.toLowerCase().includes('already registered')) {
       return Response.json({ error: 'This email is already registered. Try signing in or use a different email.' }, { headers });
@@ -143,7 +147,7 @@ export default function Index() {
       .required(FRIENDLY_MESSAGES['sign-up/password-required']),
     'confirm-password': string()
       .oneOf([ref('password'), ''], FRIENDLY_MESSAGES['sign-up/password-mismatch'])
-      .required(FRIENDLY_MESSAGES['sign-up/email-required']),
+      .required(FRIENDLY_MESSAGES['sign-up/confirm-password-required']),
     consent: bool().oneOf([true], FRIENDLY_MESSAGES['sign-up/terms']),
   });
 

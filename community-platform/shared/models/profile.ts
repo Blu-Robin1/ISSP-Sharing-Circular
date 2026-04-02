@@ -88,10 +88,13 @@ export class Profile {
       console.error('error parsing impact');
     }
 
+    const countryFromRow =
+      (dbProfile as { city?: string | null }).city ?? dbProfile.country ?? '';
+
     return new Profile({
       id: dbProfile.id,
       createdAt: dbProfile.created_at,
-      country: dbProfile.country,
+      country: countryFromRow,
       displayName: dbProfile.display_name,
       username: dbProfile.username,
       photo: photo ?? null,
