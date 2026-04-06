@@ -3,7 +3,7 @@ import type { UserCreatedDocs } from "oa-shared";
 import { Box, Button, Card, Flex, Grid, Heading, Text } from "theme-ui";
 
 interface OrganizerDashboardProps {
-  userCreatedDocs?: UserCreatedDocs;
+  userCreatedDocs: UserCreatedDocs;
 }
 
 type DashboardTab = "projects" | "donations" | "saved";
