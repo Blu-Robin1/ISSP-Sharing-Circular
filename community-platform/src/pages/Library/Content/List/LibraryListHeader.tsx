@@ -13,7 +13,7 @@ import { FieldContainer } from "src/common/Form/FieldContainer";
 import { UserAction } from "src/common/UserAction";
 import DraftButton from "src/pages/common/Drafts/DraftButton";
 import { ListHeader } from "src/pages/common/Layout/ListHeader";
-import { categoryService } from "src/services/categoryService";
+import { getStageLabel } from "src/utils/projectStageLogic";
 import { Button, Flex } from "theme-ui";
 import { listing } from "../../labels";
 import { LibrarySearchParams } from "../../library.service";
@@ -29,26 +29,28 @@ interface IProps {
 
 export const LibraryListHeader = (props: IProps) => {
   const { itemCount, draftCount, handleShowDrafts, showDrafts } = props;
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [stages, setStages] = useState<Category[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get(LibrarySearchParams.q);
   const [searchString, setSearchString] = useState<string>(q ?? "");
 
-  const categoryParam = Number(searchParams.get(LibrarySearchParams.category));
-  const category = categories?.find((x) => x.id === categoryParam) ?? null;
+  useEffect(() => {
+    setStages(
+      [1, 2, 3, 4].map((stage) => ({
+        id: stage,
+        name: `Stage ${stage}: ${getStageLabel(stage as 1 | 2 | 3 | 4)}`,
+        createdAt: new Date(stage),
+        modifiedAt: null,
+        type: "projects",
+      })),
+    );
+  }, []);
+
+  const stageParam = Number(searchParams.get(LibrarySearchParams.stage));
+  const activeStage = stages.find((x) => x.id === stageParam) ?? null;
   const sort = searchParams.get(LibrarySearchParams.sort) as LibrarySortOption;
 
   const headingTitle = import.meta.env.VITE_HOWTOS_HEADING;
-
-  useEffect(() => {
-    const initCategories = async () => {
-      const categories =
-        (await categoryService.getCategories("projects")) || [];
-      setCategories(categories);
-    };
-
-    initCategories();
-  }, []);
 
   const updateFilter = useCallback(
     (key: LibrarySearchParams, value: string) => {
@@ -87,13 +89,10 @@ export const LibraryListHeader = (props: IProps) => {
 
   const categoryComponent = (
     <CategoryHorizonalList
-      allCategories={categories}
-      activeCategory={category}
-      setActiveCategory={(updatedCategory) =>
-        updateFilter(
-          LibrarySearchParams.category,
-          (updatedCategory?.id || "").toString(),
-        )
+      allCategories={stages}
+      activeCategory={activeStage}
+      setActiveCategory={(updatedStage) =>
+        updateFilter(LibrarySearchParams.stage, (updatedStage?.id || "").toString())
       }
     />
   );

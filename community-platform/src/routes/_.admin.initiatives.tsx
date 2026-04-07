@@ -1,7 +1,6 @@
 import { UserRole } from 'oa-shared';
 import type { LoaderFunctionArgs } from 'react-router';
 import { redirect } from 'react-router';
-import { ClientOnly } from 'remix-utils/client-only';
 import Main from 'src/pages/common/Layout/Main';
 import { AdminInitiativesPage } from 'src/pages/Maps/Admin/AdminInitiativesPage.client';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -9,22 +8,25 @@ import { redirectServiceServer } from 'src/services/redirectService.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client, headers } = createSupabaseServerClient(request);
+  const claims = await client.auth.getClaims();
 
-  const { data: userData } = await client.auth.getUser();
-  const userId = userData?.user?.id;
-
-  if (!userId) {
+  if (!claims.data?.claims) {
     return redirectServiceServer.redirectSignIn('/admin/initiatives', headers);
   }
 
-  const { data: profile } = await client
+  const { data, error } = await client
     .from('profiles')
     .select('id,roles')
-    .eq('auth_id', userId)
+    .eq('auth_id', claims.data.claims.sub)
     .limit(1)
     .maybeSingle();
 
-  if (!profile?.roles?.includes(UserRole.ADMIN)) {
+  if (error) {
+    console.error('Failed to load profile for admin initiatives route', error);
+    return redirect('/forbidden?page=admin-initiatives', { headers });
+  }
+
+  if (!data?.roles?.includes(UserRole.ADMIN)) {
     return redirect('/forbidden?page=admin-initiatives', { headers });
   }
 
@@ -33,8 +35,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function AdminInitiativesRoute() {
   return (
-    <Main ignoreMaxWidth={true}>
-      <ClientOnly fallback={<></>}>{() => <AdminInitiativesPage />}</ClientOnly>
+    <Main style={{ flex: 1 }}>
+      <AdminInitiativesPage />
     </Main>
   );
 }

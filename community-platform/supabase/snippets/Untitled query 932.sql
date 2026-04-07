@@ -1,0 +1,2 @@
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS lat numeric;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS lng numeric;

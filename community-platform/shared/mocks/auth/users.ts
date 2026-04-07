@@ -8,7 +8,7 @@ export interface IMockAuthUser {
   roles: UserRole[];
 }
 
-type IMockUsers = { [key in UserRole]: IMockAuthUser };
+type IMockUsers = { [key: string]: IMockAuthUser };
 /** A list of specific demo/mock users that are prepopulated onto testing sites for use in development */
 
 export const MOCK_AUTH_USERS: IMockUsers = {
@@ -32,13 +32,6 @@ export const MOCK_AUTH_USERS: IMockUsers = {
     email: 'demo_admin@example.com',
     password: 'demo_admin',
     roles: [UserRole.ADMIN],
-  },
-  organizer: {
-    uid: 'organizer',
-    label: 'Organizer',
-    email: 'organizer@test.com',
-    password: 'organizer',
-    roles: [UserRole.ORGANIZER],
   },
   contributor: {
     uid: 'demo_contributor',

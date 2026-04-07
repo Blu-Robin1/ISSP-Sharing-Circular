@@ -3,7 +3,9 @@ import type { INotification } from './notifications';
 export enum UserRole {
   SUBSCRIBER = 'subscriber',
   ADMIN = 'admin',
-  ORGANIZER = 'organizer'
+  ORGANIZER = 'organizer',
+  BETA_TESTER = 'beta-tester',
+  CONTRIBUTOR = 'contributor'
 }
 
 // Below are primarily used for PP

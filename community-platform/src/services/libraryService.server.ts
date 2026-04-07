@@ -25,6 +25,8 @@ const getBySlug = (client: SupabaseClient, slug: string) => {
         file_link, 
         file_download_count,
         time,
+        lat,
+        lng,
         difficulty_level,
         comment_count,
         moderation,

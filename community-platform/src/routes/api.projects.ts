@@ -11,6 +11,7 @@ import { ProfileServiceServer } from 'src/services/profileService.server';
 import { storageServiceServer } from 'src/services/storageService.server';
 import { subscribersServiceServer } from 'src/services/subscribersService.server';
 import { updateUserActivity } from 'src/utils/activity.server';
+import { computeEffectiveStage } from 'src/utils/projectStageLogic';
 import { convertToSlug } from 'src/utils/slug';
 import { validateImage } from 'src/utils/storage';
 
@@ -18,7 +19,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
   const q = searchParams.get('q');
-  const category = Number(searchParams.get('category')) || undefined;
+  const stage = Number(searchParams.get('stage')) || undefined;
   const sort = searchParams.get('sort') as LibrarySortOption;
   const skip = Number(searchParams.get('skip')) || 0;
 
@@ -29,26 +30,67 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const { data, error } = await client.rpc('get_projects', {
     search_query: q || null,
-    category_id: category,
+    category_id: null,
     sort_by: sort,
-    offset_val: skip,
-    limit_val: ITEMS_PER_PAGE,
+    offset_val: stage ? 0 : skip,
+    limit_val: stage ? 1000 : ITEMS_PER_PAGE,
     current_username: username,
   });
-
-  const countResult = await client.rpc('get_projects_count', {
-    search_query: q || null,
-    category_id: category,
-    current_username: username,
-  });
-  const count = countResult.data || 0;
 
   if (error) {
     console.error(error);
     return Response.json({}, { status: 500, headers });
   }
 
-  const dbItems = data as DBProject[];
+  const allDbItems = (data as DBProject[]) ?? [];
+  const stageFilteredItems =
+    stage === undefined
+      ? allDbItems
+      : allDbItems.filter((item) => {
+          const effectiveStage = computeEffectiveStage({
+            stage: item.stage,
+            stageOverride: item.stage_override,
+            supporterCount: item.supporter_count || 0,
+            memberCount: item.member_count || 0,
+            championCount: item.champion_count || 0,
+            volunteerCount: item.volunteer_count || 0,
+            donateCount: item.donate_count || 0,
+            moderation: item.moderation,
+          });
+
+          return effectiveStage === stage;
+        });
+  const dbItems =
+    stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+  const count =
+    stage === undefined
+      ? ((await client.rpc('get_projects_count', {
+          search_query: q || null,
+          category_id: null,
+          current_username: username,
+        })).data ?? 0)
+      : stageFilteredItems.length;
+
+  if (dbItems.length > 0) {
+    const { data: locationRows } = await client
+      .from('projects')
+      .select('id, lat, lng')
+      .in(
+        'id',
+        dbItems.map((item) => item.id),
+      );
+
+    const locationById = new Map((locationRows ?? []).map((row) => [row.id, row]));
+
+    for (const item of dbItems) {
+      const location = locationById.get(item.id);
+      if (location) {
+        item.lat = location.lat;
+        item.lng = location.lng;
+      }
+    }
+  }
+
   const items = dbItems.map((x) => {
     const images = x.cover_image
       ? storageServiceServer.getPublicUrls(client, [x.cover_image], IMAGE_SIZES.LIST)
@@ -99,6 +141,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         : null,
       moderation: isDraft ? undefined : ('awaiting-moderation' as Moderation),
       stepCount: parseInt(formData.get('stepCount') as string),
+      lat: formData.has('lat') && formData.get('lat') !== '' ? Number(formData.get('lat')) : null,
+      lng: formData.has('lng') && formData.get('lng') !== '' ? Number(formData.get('lng')) : null,
       slug: convertToSlug((formData.get('title') as string) || ''),
       uploadedCoverImage: formData.get('coverImage') as File | null,
       uploadedFiles: formData.getAll('files') as File[] | null,
@@ -237,6 +281,8 @@ async function createProject(
     difficultyLevel: string | null;
     time: string | null;
     moderation?: Moderation;
+    lat: number | null;
+    lng: number | null;
     slug: string;
   },
   profile: DBProfile,
@@ -254,6 +300,8 @@ async function createProject(
       file_link: data.fileLink,
       difficulty_level: data.difficultyLevel,
       time: data.time,
+      lat: data.lat,
+      lng: data.lng,
       moderation: data.moderation,
       tenant_id: process.env.TENANT_ID,
     })

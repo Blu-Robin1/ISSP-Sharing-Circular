@@ -19,7 +19,7 @@ import './styles.css';
 const MapsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isPlacingInitiative, setIsPlacingInitiative] = useState(false);
+  const [isPlacingProject, setIsPlacingProject] = useState(false);
   const [boundaries, setBoundaries] = useState<LatLngBounds | null>(null);
   const [allPins, setAllPins] = useState<MapPin[] | null>(null);
   const [allProfileTypes, setAllProfileTypes] = useState<ProfileType[]>([]);
@@ -32,8 +32,8 @@ const MapsPage = () => {
   const [activeTagFilters, setActiveTags] = useState<number[]>([]);
 
   // SCIS filter state
-  const [activeInitiativeStages, setActiveInitiativeStages] = useState<number[]>([]);
-  const [onlyInitiatives, setOnlyInitiatives] = useState(false);
+  const [activeProjectStages, setActiveProjectStages] = useState<number[]>([]);
+  const [onlyProjects, setOnlyProjects] = useState(false);
 
   const [pinLocation, setPinLocation] = useState<ILatLng>({ lat: 30.0, lng: 19.0 });
   const [selectedPin, selectPin] = useState<MapPin | null | undefined>(undefined);
@@ -99,8 +99,8 @@ const MapsPage = () => {
       boundaries: boundaries ?? undefined,
 
       // SCIS additions
-      initiativeStages: activeInitiativeStages,
-      onlyInitiatives,
+      projectStages: activeProjectStages,
+      onlyProjects,
     });
   }, [
     allPins,
@@ -109,8 +109,8 @@ const MapsPage = () => {
     activeProfileTypeFilters,
     activeTagFilters,
     boundaries,
-    activeInitiativeStages,
-    onlyInitiatives,
+    activeProjectStages,
+    onlyProjects,
   ]);
 
   // Keep selectedPin in sync with allPins when store updates (e.g. after adding support)
@@ -135,45 +135,54 @@ const MapsPage = () => {
     }
   }, [filteredPins, selectedPin, allPins, boundaries]);
 
-  const refreshInitiatives = useCallback(async () => {
+  const refreshProjects = useCallback(async () => {
     try {
-      const initiatives = await scisService.getInitiatives('approved_and_pending', true);
-      const initiativePins = initiatives.map((i) => {
-        const rawId = String(i.id);
-        const baseStage = Number(i.stage ?? 1);
-        const serverCounts = { supporters: i.supporter_count, members: i.member_count, champions: i.champion_count };
+      const projects = await scisService.getInitiatives('approved_and_pending', true);
+      const projectPins = projects.map((p) => {
+        const rawId = String(p.id);
+        const baseStage = Number(p.stage ?? 1);
+        const serverCounts = { supporters: p.supporter_count, members: p.member_count, champions: p.champion_count };
         const local = {
-          stageOverride: (i.stage_override != null ? i.stage_override : undefined) as ScisStage | undefined,
-          stage3Milestones: i.stage3_milestones ?? undefined,
+          stageOverride: (p.stage_override != null ? p.stage_override : undefined) as ScisStage | undefined,
+          stage3Milestones: p.stage3_milestones ?? undefined,
         };
         const effectiveStage = computeEffectiveStage(baseStage, local, serverCounts);
         return {
-          id: `initiative-${rawId}`,
-          _id: `initiative-${rawId}`,
-          _created: i.created_at ?? new Date().toISOString(),
+          id: `project-${rawId}`,
+          _id: `project-${rawId}`,
+          _created: p.created_at ?? new Date().toISOString(),
           _updated: new Date().toISOString(),
-          type: 'initiative',
+          type: 'project',
           stage: baseStage,
           effectiveStage,
-          lat: i.lat,
-          lng: i.lng,
-          title: i.title,
-          description: i.description,
-          supporterCount: i.supporter_count,
-          memberCount: i.member_count,
-          championCount: i.champion_count,
-          volunteerCount: i.volunteer_count,
-          donateCount: i.donate_count,
-          imageUrl: i.image_url ?? '',
-          stage3Milestones: i.stage3_milestones,
-          initiativeId: rawId,
-          status: i.status,
-          profile: { name: i.title, username: `initiative-${rawId}`, avatar: i.image_url ?? '', type: 'member' },
+          lat: p.lat,
+          lng: p.lng,
+          title: p.title,
+          description: p.description,
+          supporterCount: p.supporter_count,
+          memberCount: p.member_count,
+          championCount: p.champion_count,
+          volunteerCount: p.volunteer_count,
+          donateCount: p.donate_count,
+          imageUrl: p.image_url ?? '',
+          stage3Milestones: p.stage3_milestones,
+          projectId: rawId,
+          status: p.status,
+          moderation: p.status === 'approved' ? 'accepted' : 'awaiting-moderation',
+          profile: {
+            name: p.title,
+            username: `project-${rawId}`,
+            photo: p.image_url
+              ? { id: `project-photo-${rawId}`, publicUrl: p.image_url }
+              : undefined,
+            avatar: p.image_url ?? '',
+            type: 'member',
+          },
         };
       }) as any[];
       setAllPins((prev) => {
-        const nonInitiatives = (prev ?? []).filter((p: any) => p?.type !== 'initiative');
-        return sortPinsByBadgeThenLastActive([...nonInitiatives, ...initiativePins], 'pro');
+        const nonProjects = (prev ?? []).filter((p: any) => p?.type !== 'project');
+        return sortPinsByBadgeThenLastActive([...nonProjects, ...projectPins], 'pro');
       });
     } catch {
       // Fallback to full refresh
@@ -197,58 +206,62 @@ const MapsPage = () => {
 
         // SCIS: fetch approved + pending (pending show on map as "Pending approval")
         // noCache when refreshing (e.g. after Add my name) so supporter count updates immediately
-        const initiatives = await scisService.getInitiatives('approved_and_pending', scisVersion > 0);
+        const projects = await scisService.getInitiatives('approved_and_pending', scisVersion > 0);
 
-        const initiativePins = initiatives.map((i) => {
-          const rawId = String(i.id);
-          const baseStage = Number(i.stage ?? 1);
+        const projectPins = projects.map((p) => {
+          const rawId = String(p.id);
+          const baseStage = Number(p.stage ?? 1);
           const serverCounts = {
-            supporters: i.supporter_count,
-            members: i.member_count,
-            champions: i.champion_count,
+            supporters: p.supporter_count,
+            members: p.member_count,
+            champions: p.champion_count,
           };
           const local = {
-            stageOverride: (i.stage_override != null ? i.stage_override : undefined) as ScisStage | undefined,
-            stage3Milestones: i.stage3_milestones ?? undefined,
+            stageOverride: (p.stage_override != null ? p.stage_override : undefined) as ScisStage | undefined,
+            stage3Milestones: p.stage3_milestones ?? undefined,
           };
           const effectiveStage = computeEffectiveStage(baseStage, local, serverCounts);
 
           return {
-            id: `initiative-${rawId}`,
-            _id: `initiative-${rawId}`,
-            _created: i.created_at ?? new Date().toISOString(),
+            id: `project-${rawId}`,
+            _id: `project-${rawId}`,
+            _created: p.created_at ?? new Date().toISOString(),
             _updated: new Date().toISOString(),
 
-            type: 'initiative',
+            type: 'project',
             stage: baseStage,
             effectiveStage,
 
-            lat: i.lat,
-            lng: i.lng,
+            lat: p.lat,
+            lng: p.lng,
 
-            title: i.title,
-            description: i.description,
-            supporterCount: i.supporter_count,
-            memberCount: i.member_count,
-            championCount: i.champion_count,
-            volunteerCount: i.volunteer_count,
-            donateCount: i.donate_count,
-            imageUrl: i.image_url ?? '',
-            stage3Milestones: i.stage3_milestones,
+            title: p.title,
+            description: p.description,
+            supporterCount: p.supporter_count,
+            memberCount: p.member_count,
+            championCount: p.champion_count,
+            volunteerCount: p.volunteer_count,
+            donateCount: p.donate_count,
+            imageUrl: p.image_url ?? '',
+            stage3Milestones: p.stage3_milestones,
 
-            initiativeId: rawId,
-            status: i.status,
+            projectId: rawId,
+            status: p.status,
+            moderation: p.status === 'approved' ? 'accepted' : 'awaiting-moderation',
 
             profile: {
-              name: i.title,
-              username: `initiative-${rawId}`,
-              avatar: i.image_url ?? '',
+              name: p.title,
+              username: `project-${rawId}`,
+              photo: p.image_url
+                ? { id: `project-photo-${rawId}`, publicUrl: p.image_url }
+                : undefined,
+              avatar: p.image_url ?? '',
               type: 'member',
             },
           };
         }) as any[];
 
-        pinsToSet = [...pinsToSet, ...initiativePins];
+        pinsToSet = [...pinsToSet, ...projectPins];
 
         // might be missing because it's not approved
         const existingPinIndex = pinsToSet.findIndex((x) => x.id === userPin?.id);
@@ -387,15 +400,15 @@ const MapsPage = () => {
         toggleActiveTagFilter,
 
         // SCIS filters
-        activeInitiativeStages,
-        setActiveInitiativeStages,
-        onlyInitiatives,
-        setOnlyInitiatives,
+activeProjectStages: activeProjectStages,
+      setActiveProjectStages: setActiveProjectStages,
+      onlyProjects: onlyProjects,
+      setOnlyProjects: setOnlyProjects,
 
         // SCIS submission mode
-        isPlacingInitiative,
-        setIsPlacingInitiative,
-        refreshInitiatives,
+isPlacingProject,
+      setIsPlacingProject,
+      refreshProjects: refreshProjects,
 
         isMobile,
         setIsMobile,

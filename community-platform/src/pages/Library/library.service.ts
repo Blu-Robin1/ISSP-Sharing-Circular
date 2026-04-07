@@ -4,16 +4,16 @@ import { getCleanFileName } from 'src/utils/storage';
 import type { LibrarySortOption } from './Content/List/LibrarySortOptions';
 
 export enum LibrarySearchParams {
-  category = 'category',
+  stage = 'stage',
   q = 'q',
   sort = 'sort',
 }
 
-const search = async (q: string, category: string, sort: LibrarySortOption, skip: number = 0) => {
+const search = async (q: string, stage: string, sort: LibrarySortOption, skip: number = 0) => {
   try {
     const url = new URL('/api/projects', window.location.origin);
     url.searchParams.append('q', q);
-    url.searchParams.append('category', category);
+    url.searchParams.append('stage', stage);
     url.searchParams.append('sort', sort);
     url.searchParams.append('skip', skip.toString());
 
@@ -65,6 +65,14 @@ const upsert = async (id: number | null, formData: ProjectFormData, isDraft = fa
 
   if (formData.difficultyLevel) {
     data.append('difficultyLevel', formData.difficultyLevel);
+  }
+
+  if (formData.lat !== undefined && formData.lat !== null) {
+    data.append('lat', formData.lat.toString());
+  }
+
+  if (formData.lng !== undefined && formData.lng !== null) {
+    data.append('lng', formData.lng.toString());
   }
 
   if (formData.description) {

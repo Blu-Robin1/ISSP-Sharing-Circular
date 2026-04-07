@@ -63,9 +63,9 @@ export const MapView = () => {
   };
 
   const handleMapClick = (e: { latlng: { lat: number; lng: number } }) => {
-    if (mapState.isPlacingInitiative) {
+    if (mapState.isPlacingProject) {
       setPendingInitiativePlacement({ lat: e.latlng.lat, lng: e.latlng.lng });
-      mapState.setIsPlacingInitiative(false);
+      mapState.setIsPlacingProject(false);
     } else {
       mapState.selectPin(null);
     }
@@ -104,18 +104,18 @@ export const MapView = () => {
         }}
       >
         <ButtonZoomIn setCenter={(value) => mapState.setLocation(value)} setZoom={mapState.setZoom} />
-        {mapState.isPlacingInitiative && (
+        {mapState.isPlacingProject && (
           <Text sx={{ fontSize: 0, color: 'primary', bg: 'white', p: 2, borderRadius: 2 }}>
-            Click on the map to place your initiative
+            Click on the map to place your project
           </Text>
         )}
         <Button
           data-cy="SubmitInitiativeButton"
-          variant={mapState.isPlacingInitiative ? 'primary' : 'outline'}
-          onClick={() => mapState.setIsPlacingInitiative(!mapState.isPlacingInitiative)}
+          variant={mapState.isPlacingProject ? 'primary' : 'outline'}
+          onClick={() => mapState.setIsPlacingProject(!mapState.isPlacingProject)}
           small
         >
-          {mapState.isPlacingInitiative ? 'Cancel placement' : 'Submit initiative'}
+          {mapState.isPlacingProject ? 'Cancel placement' : 'Submit project'}
         </Button>
       </Box>
 

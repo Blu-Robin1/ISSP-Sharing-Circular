@@ -36,6 +36,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         ? (formData.get('difficultyLevel') as string)
         : null,
       stepCount: parseInt(formData.get('stepCount') as string),
+      lat: formData.has('lat') && formData.get('lat') !== '' ? Number(formData.get('lat')) : null,
+      lng: formData.has('lng') && formData.get('lng') !== '' ? Number(formData.get('lng')) : null,
       slug: convertToSlug(formData.get('title') as string),
     };
     const existingCoverImageId = formData.get('existingCoverImage') as string;
@@ -218,6 +220,8 @@ async function updateProject(
     fileLink: string | null;
     difficultyLevel: string | null;
     time: string | null;
+    lat: number | null;
+    lng: number | null;
     slug: string;
   },
   files: MediaFile[] | null,
@@ -253,6 +257,8 @@ async function updateProject(
       file_link: data.fileLink,
       difficulty_level: data.difficultyLevel,
       time: data.time,
+      lat: data.lat,
+      lng: data.lng,
       files,
       moderation,
       cover_image,

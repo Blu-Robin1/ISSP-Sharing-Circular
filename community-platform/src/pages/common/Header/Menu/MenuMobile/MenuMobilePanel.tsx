@@ -34,7 +34,7 @@ const MenuMobilePanel = () => {
           <MenuMobileLink path={page.path} content={page.title} key={page.path} />
         ))}
         <AuthWrapper roleRequired={UserRole.ADMIN}>
-          <MenuMobileLink path="/admin/initiatives" content="Admin" />
+          <MenuMobileLink path="/admin/projects" content="Admin" />
         </AuthWrapper>
         <Profile isMobile={true} />
       </Flex>

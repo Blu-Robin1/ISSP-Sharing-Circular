@@ -8,15 +8,15 @@
 - **Community members** to support initiatives at multiple levels (name/email, membership pledges, volunteer skills, donations, champion roles)
 - **SCIS staff** to moderate initiatives, track progress through development stages, and manage readiness for implementation
 
-SCIS initiatives use dedicated database tables (`initiatives`, `initiative_supports`, `initiative_contributions`). They are **not** the same as Library projects or legacy content.
+SCIS initiatives use the `projects` table with additional fields for stage progression and supporter tracking. They are **not** the same as legacy content but share the same table structure as Library projects.
 
 ---
 
-## Who can access `/admin/initiatives`?
+## Who can access `/admin/projects`?
 
 Only users whose `profiles.roles` array includes `'admin'` can access the admin initiatives page.
 
-- Non-admin users who visit `/admin/initiatives` directly are redirected to `/forbidden`.
+- Non-admin users who visit `/admin/projects` directly are redirected to `/forbidden`.
 - The Admin link in the header and settings page is hidden for non-admins.
 - API endpoints that return all initiatives or allow edits are protected and return 403 for non-admins.
 
@@ -36,7 +36,7 @@ To promote a user to admin, see [SCIS Setup](./SCIS_SETUP.md#promote-a-user-to-a
 
 ## How admins approve or reject initiatives
 
-1. Go to **Admin** → **SCIS Initiatives** (`/admin/initiatives`).
+1. Go to **Admin** → **SCIS Projects** (`/admin/projects`).
 2. Each initiative card shows its **status badge**: Pending approval, Approved, or Rejected.
 3. Use the **Approve** or **Reject** button in the Moderation section.
 4. Approved initiatives appear on the map for public users. Pending initiatives show limited options. Rejected initiatives are marked but remain visible to admins.

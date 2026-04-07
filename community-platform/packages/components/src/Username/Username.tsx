@@ -20,6 +20,7 @@ const getLocation = (city: string | undefined) => {
 
 export const Username = ({ user, sx, target, isLink = true }: IProps) => {
   const { username, badges } = user;
+  const displayLabel = (user as Partial<Author> & { name?: string }).name?.trim() || username;
 
   const location = getLocation(user.city);
 
@@ -66,9 +67,9 @@ export const Username = ({ user, sx, target, isLink = true }: IProps) => {
           textOverflow: 'ellipsis',
           maxWidth: '100%',
         }}
-        title={username}
+        title={displayLabel}
       >
-        {username}
+        {displayLabel}
       </Text>
 
       {badges &&

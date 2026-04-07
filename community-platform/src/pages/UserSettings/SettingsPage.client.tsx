@@ -19,7 +19,7 @@ import type { ISettingsTab } from './types';
 
 import '../../styles/leaflet.css';
 
-/** Tab panel body is unused: the tab links out to `/admin/initiatives`. */
+/** Tab panel body is unused: the tab links out to `/admin/projects`. */
 function AdminSettingsNavPlaceholder() {
   return null;
 }
@@ -102,7 +102,7 @@ export const SettingsPage = observer(() => {
         ? [
             {
               title: 'Admin',
-              route: '/admin/initiatives',
+              route: '/admin/projects',
               body: AdminSettingsNavPlaceholder,
               glyph: 'employee',
             },
