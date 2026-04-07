@@ -82,18 +82,33 @@ function normalizeInitiative(i: ScisInitiativeFromApi): NormalizedInitiative {
   };
 }
 
+function toProjectSupportFormData(actionType: string, data: Record<string, unknown>) {
+  const formData = new FormData();
+  formData.append('actionType', actionType);
+  formData.append('data', JSON.stringify(data));
+  return formData;
+}
+
+function mapStatusToModeration(status?: string) {
+  if (!status) return undefined;
+  if (status === 'approved') return 'accepted';
+  if (status === 'rejected') return 'rejected';
+  return 'awaiting-moderation';
+}
+
 export const scisService = {
   async getInitiatives(
     status: 'approved' | 'pending' | 'approved_and_pending' | 'all' = 'approved',
     noCache = false,
   ): Promise<NormalizedInitiative[]> {
     try {
-      // Use projects API instead of initiatives API since initiatives functionality was transferred to projects
       const url = noCache ? `/api/projects?status=${status}&_=${Date.now()}` : `/api/projects?status=${status}`;
       const res = await fetch(url, {
         credentials: 'include',
         ...(noCache ? { cache: 'no-store' as RequestCache } : {}),
       });
+      if (!res.ok) return [];
+
       const payload = (await res.json()) as {
         projects?: ScisInitiativeFromApi[];
         items?: ScisInitiativeFromApi[];
@@ -117,12 +132,26 @@ export const scisService = {
     lng: number;
   }): Promise<NormalizedInitiative | null> {
     try {
+      const formData = new FormData();
+      formData.append('title', input.title);
+      formData.append('description', input.description);
+      formData.append('draft', 'true');
+      formData.append('stepCount', '0');
+      formData.append('lat', String(input.lat));
+      formData.append('lng', String(input.lng));
+
+      if (input.projectType) {
+        formData.append('projectType', input.projectType);
+      }
+
       const res = await fetch('/api/projects', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
+        body: formData,
         credentials: 'include',
       });
+
+      if (!res.ok) return null;
+
       const { project } = (await res.json()) as { project?: ScisInitiativeFromApi };
       return project ? normalizeInitiative(project) : null;
     } catch {
@@ -135,10 +164,15 @@ export const scisService = {
     input: { name?: string; email?: string; postalCode?: string },
   ): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}/support`, {
+      const formData = toProjectSupportFormData('add_my_name', {
+        displayName: input.name?.trim() || undefined,
+        email: input.email?.trim() || undefined,
+        postalCode: input.postalCode?.trim() || undefined,
+      });
+
+      const res = await fetch(`/api/projects/${initiativeId}/support`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
+        body: formData,
         credentials: 'include',
       });
       return res.ok;
@@ -153,10 +187,10 @@ export const scisService = {
     payload?: Record<string, unknown>,
   ): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}/contribution`, {
+      const formData = toProjectSupportFormData(type, payload ?? {});
+      const res = await fetch(`/api/projects/${initiativeId}/support`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, payload: payload ?? {} }),
+        body: formData,
         credentials: 'include',
       });
       return res.ok;
@@ -177,10 +211,13 @@ export const scisService = {
     },
   ): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}`, {
+      const res = await fetch(`/api/projects/${initiativeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
+        body: JSON.stringify({
+          ...updates,
+          moderation: mapStatusToModeration(updates.status),
+        }),
         credentials: 'include',
       });
       return res.ok;
@@ -191,21 +228,21 @@ export const scisService = {
 
   async deleteInitiative(initiativeId: string): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`/api/projects/${initiativeId}`, { method: 'DELETE', credentials: 'include' });
       return res.ok;
     } catch {
       return false;
     }
   },
 
-  /** Admin-only: fetch initiative with supporters and contributions */
+  /** Admin-only: fetch project with supporters and contributions */
   async getInitiativeDetails(initiativeId: string): Promise<{
     initiative: ScisInitiativeFromApi;
     supporters: { id: string; name: string | null; email: string | null; postal_code: string | null; created_at: string }[];
     contributions: { id: string; type: string; payload: Record<string, unknown> | null; created_at: string }[];
   } | null> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}/details`, { credentials: 'include' });
+      const res = await fetch(`/api/projects/${initiativeId}/details`, { credentials: 'include' });
       if (!res.ok) return null;
       return (await res.json()) as {
         initiative: ScisInitiativeFromApi;

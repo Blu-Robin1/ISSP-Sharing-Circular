@@ -2,7 +2,7 @@ import { UserRole } from 'oa-shared';
 import type { LoaderFunctionArgs } from 'react-router';
 import { redirect } from 'react-router';
 import Main from 'src/pages/common/Layout/Main';
-import { AdminInitiativesPage } from 'src/pages/Maps/Admin/AdminInitiativesPage.client';
+import { AdminProjectsPage } from 'src/pages/Maps/Admin/AdminInitiativesPage.client';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
 import { redirectServiceServer } from 'src/services/redirectService.server';
 
@@ -22,12 +22,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
     .maybeSingle();
 
   if (error) {
-    console.error('Failed to load profile for admin initiatives route', error);
-    return redirect('/forbidden?page=admin-initiatives', { headers });
+    console.error('Failed to load profile for admin projects route', error);
+    return redirect('/forbidden?page=admin-projects', { headers });
   }
 
   if (!data?.roles?.includes(UserRole.ADMIN)) {
-    return redirect('/forbidden?page=admin-initiatives', { headers });
+    return redirect('/forbidden?page=admin-projects', { headers });
   }
 
   return null;
@@ -36,7 +36,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function AdminInitiativesRoute() {
   return (
     <Main style={{ flex: 1 }}>
-      <AdminInitiativesPage />
+      <AdminProjectsPage />
     </Main>
   );
 }

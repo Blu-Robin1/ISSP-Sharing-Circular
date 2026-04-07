@@ -47,7 +47,7 @@ export const MenuDesktop = () => {
       ))}
       <AuthWrapper roleRequired={UserRole.ADMIN}>
         <Flex>
-          <MenuLink to="/admin/projects" data-cy="admin-link">
+          <MenuLink to="/admin/initiatives" data-cy="admin-link">
             <Flex>Admin</Flex>
           </MenuLink>
         </Flex>
