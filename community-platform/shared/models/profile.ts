@@ -89,7 +89,7 @@ export class Profile {
     }
 
     const countryFromRow =
-      (dbProfile as { city?: string | null }).city ?? dbProfile.country ?? '';
+      (dbProfile as { city?: string | null }).city ?? dbProfile.city ?? '';
 
     return new Profile({
       id: dbProfile.id,
