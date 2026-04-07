@@ -115,7 +115,7 @@ export class ProfileStore {
     const isMember = this.profile.type?.name === 'member';
 
     if (isMember) {
-      return !this.profile.country;
+      return !this.profile.city;
     }
 
     return !this.profile.coverImages || !this.profile.coverImages[0]?.publicUrl;

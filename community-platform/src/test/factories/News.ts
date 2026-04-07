@@ -30,7 +30,7 @@ export const FactoryNewsItem = (newsOverloads: Partial<News> = {}): News => ({
   ],
   author: {
     id: faker.number.int(),
-    country: faker.location.countryCode(),
+    city: faker.location.city(),
     displayName: faker.internet.username(),
     badges: [
       {

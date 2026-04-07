@@ -371,7 +371,7 @@ export type ProfileFormData = {
   displayName: string;
   tagIds: number[] | null;
   about: string;
-  country: string;
+  city: string;
   website: string;
   isContactable: boolean;
   type: string;

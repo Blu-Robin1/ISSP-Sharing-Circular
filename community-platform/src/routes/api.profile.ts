@@ -101,7 +101,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   try {
     const formData = await request.formData();
-    const country = formData.get('country');
+    const city = formData.get('city');
 
     let existingPhoto: Image | null = null;
 
@@ -112,7 +112,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const data = {
       displayName: formData.get('displayName') as string,
       about: formData.get('about') as string,
-      country: country === 'null' ? null : country,
+      city: city === 'null' ? null : city,
       type: formData.get('type'),
       existingPhoto,
       isContactable: formData.get('isContactable') === 'true',

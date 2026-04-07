@@ -70,7 +70,7 @@ export const SettingsPageUserProfile = observer(() => {
       coverImages: coverImages,
       existingCoverImages: existingCoverImages,
       existingPhoto: profile.photo ? toJS(profile.photo) : undefined,
-      country: profile.country,
+      city: profile.city,
       showVisitorPolicy: !!profile.visitorPolicy,
       visitorPreferencePolicy: profile.visitorPolicy?.policy || 'open',
       visitorPreferenceDetails: profile.visitorPolicy?.details,

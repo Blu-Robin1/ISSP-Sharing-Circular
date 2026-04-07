@@ -5,23 +5,23 @@ import { describe, expect, it } from 'vitest';
 import { render } from '../test/utils';
 import { Username } from './Username';
 import {
-  InvalidCountryCode,
   // OneBadge,
   // TwoBadges,
-  WithoutFlag,
+  WithoutLocation,
+  WithLocation,
 } from './Username.stories';
 
 describe('Username', () => {
-  it('shows an unknown flag for empty value', () => {
-    const { getByTestId } = render(<Username {...WithoutFlag.args} />);
+  it('shows an unknown flag for empty location', () => {
+    const { getByTestId } = render(<Username {...WithoutLocation.args} />);
 
     expect(getByTestId('Username: unknown flag')).toBeInTheDocument();
   });
 
-  it('shows an unknown flag for an invalid country code', () => {
-    const { getByTestId } = render(<Username {...InvalidCountryCode.args} />);
+  it('renders the city location when provided', () => {
+    const { getByTestId } = render(<Username {...WithLocation.args} />);
 
-    expect(getByTestId('Username: unknown flag')).toBeInTheDocument();
+    expect(getByTestId('Username: location')).toHaveTextContent('Tokyo');
   });
 
   // it('shows one badge', () => {

@@ -27,7 +27,7 @@ const update = async (value: ProfileFormData) => {
 
   data.append('displayName', value.displayName);
   data.append('about', value.about);
-  data.append('country', value.country);
+  data.append('city', value.city);
   data.append('type', value.type.toString());
   data.append('isContactable', value.isContactable ? 'true' : 'false');
   data.append('website', value.website);

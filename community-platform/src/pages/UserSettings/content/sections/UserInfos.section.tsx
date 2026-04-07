@@ -81,7 +81,7 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
   const { profile } = useProfileStore();
 
   const isMemberProfile = !profile?.type?.isSpace;
-  const { about, country, displayName, userName, website } = fields;
+  const { about, city, displayName, userName, website } = fields;
 
   return (
     <ProfileSection>
@@ -138,8 +138,8 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
         </Flex>
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
-          <Text>{country.title} <Text color="red">*</Text></Text>
-          <Field data-cy="country-dropdown" name="country">
+          <Text>{city.title} <Text color="red">*</Text></Text>
+          <Field data-cy="city-dropdown" name="city">
             {(field) => (
               <SelectField
                 options={cityOptions}
@@ -157,7 +157,7 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
               <Username
                 user={{
                   ...profile,
-                  country: formValues.country,
+                  city: formValues.city,
                 }}
               />
             )}

@@ -14,7 +14,7 @@ describe('UserStatistics', () => {
       username: 'Test User',
       badges: [],
       totalViews: 100,
-      country: 'Greenland',
+      city: 'Vancouver',
     },
     pin: { country: 'Greenland' },
     libraryCount: 10,

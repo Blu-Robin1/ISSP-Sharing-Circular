@@ -50,7 +50,7 @@ export class ProfileFactory {
     return new Profile({
       id: dbProfile.id,
       createdAt: new Date(dbProfile.created_at),
-      country: dbProfile.country,
+      city: dbProfile.city,
       displayName: dbProfile.display_name,
       username: dbProfile.username,
       photo: photo || null,

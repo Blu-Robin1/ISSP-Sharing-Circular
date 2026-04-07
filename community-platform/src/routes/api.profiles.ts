@@ -27,7 +27,7 @@ export const loader = async ({ request }) => {
       username,
       display_name,
       photo,
-      country,
+      city,
       created_at,
       badges:profile_badges_relations(
         profile_badges(

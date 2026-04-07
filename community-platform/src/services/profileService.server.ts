@@ -198,7 +198,7 @@ export class ProfileServiceServer {
 
     const valuesToUpdate = {
       about: values.about,
-      city: values.country,
+      city: values.city,
       display_name: values.displayName,
       website: values.website,
       is_contactable: values.isContactable,

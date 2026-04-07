@@ -29,7 +29,7 @@ const getBySlug = (client: SupabaseClient, slug: string) => {
         comment_count,
         moderation,
         moderation_feedback,
-        author:profiles(id, display_name, username, photo, country, donations_enabled,
+        author:profiles(id, display_name, username, photo, city, donations_enabled,
           profile_type(id, display_name, name, is_space, image_url, small_image_url),
           badges:profile_badges_relations(
             profile_badges(
