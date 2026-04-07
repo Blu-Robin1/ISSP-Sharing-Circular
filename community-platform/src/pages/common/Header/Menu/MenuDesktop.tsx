@@ -1,7 +1,9 @@
 import styled from '@emotion/styled';
 import { useContext } from 'react';
 import { NavLink } from 'react-router';
+import { UserRole } from 'oa-shared';
 import MenuCurrent from 'src/assets/images/menu-current.svg';
+import { AuthWrapper } from 'src/common/AuthWrapper';
 import { getSupportedModules } from 'src/modules';
 import { getAvailablePageList } from 'src/pages/PageList';
 import { Flex } from 'theme-ui';
@@ -43,6 +45,13 @@ export const MenuDesktop = () => {
           </MenuLink>
         </Flex>
       ))}
+      <AuthWrapper roleRequired={UserRole.ADMIN}>
+        <Flex>
+          <MenuLink to="/admin/initiatives" data-cy="admin-link">
+            <Flex>Admin</Flex>
+          </MenuLink>
+        </Flex>
+      </AuthWrapper>
     </Flex>
   );
 };

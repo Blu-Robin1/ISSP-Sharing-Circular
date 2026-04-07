@@ -1,8 +1,9 @@
 import type { ProfileTag } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getAllTags = async () => {
   try {
-    const response = await fetch('/api/profile-tags');
+    const response = await apiFetch('/api/profile-tags');
 
     const profileTags = (await response.json()) as ProfileTag[];
 

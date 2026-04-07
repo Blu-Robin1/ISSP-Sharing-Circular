@@ -52,4 +52,7 @@ export const MapContext = createContext<{
     // SCIS submission mode
   isPlacingInitiative: boolean;
   setIsPlacingInitiative: (value: boolean) => void;
+
+  // Called when initiatives change (create, support, contribution) to refetch
+  refreshInitiatives: () => void;
 } | null>(null);

@@ -1,8 +1,8 @@
-import { Button, ExternalLink, FieldInput, HeroBanner, TextNotification } from 'oa-components';
+import { Button, ExternalLink, FieldInput, TextNotification } from 'oa-components';
 import { FRIENDLY_MESSAGES } from 'oa-shared';
 import { Field, Form } from 'react-final-form';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
-import { Link, redirect, useActionData } from 'react-router';
+import { Link, redirect, useActionData, useSubmit } from 'react-router';
 import { PasswordField } from 'src/common/Form/PasswordField';
 import Main from 'src/pages/common/Layout/Main';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -37,7 +37,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const emailRedirectTo = `${protocol}//${url.host}/email-confirmation`;
 
   const username = formData.get('username') as string;
-  if (!(await authServiceServer.isUsernameAvailable(username, client))) {
+  const usernameFree = await authServiceServer.isUsernameAvailable(username, client);
+  if (usernameFree === null) {
+    return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers, status: 500 });
+  }
+  if (!usernameFree) {
     return Response.json({ error: FRIENDLY_MESSAGES['sign-up/username-taken'] }, { headers });
   }
 
@@ -54,11 +58,38 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 
   if (error) {
+    console.error('[sign-up] auth.signUp error:', error.message, error.code);
     if (error.code === 'weak_password') {
-      return Response.json({ error: FRIENDLY_MESSAGES['password-weak'] }, { headers });
+      return Response.json({ error: FRIENDLY_MESSAGES['sign-up/password-weak'] }, { headers });
     }
+    if (error.code === 'user_already_exists' || error.message?.toLowerCase().includes('already registered')) {
+      return Response.json({ error: 'This email is already registered. Try signing in or use a different email.' }, { headers });
+    }
+    if (
+      error.message?.toLowerCase().includes('rate limit') ||
+      error.message?.toLowerCase().includes('rate_limit') ||
+      (error as { status?: number }).status === 429
+    ) {
+      return Response.json(
+        {
+          error:
+            'Email rate limit exceeded. Supabase limits how many sign-up or password-reset emails can be sent per hour. Please try again in an hour, or use an existing account to sign in.',
+        },
+        { headers, status: 429 },
+      );
+    }
+    return Response.json(
+      { error: error.message || FRIENDLY_MESSAGES['generic-error'] },
+      { headers },
+    );
+  }
 
-    return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers });
+  if (!process.env.TENANT_ID) {
+    console.error('[sign-up] TENANT_ID is not set');
+    return Response.json(
+      { error: 'Server configuration error. Please try again later.' },
+      { headers, status: 500 },
+    );
   }
 
   if (data.user) {
@@ -68,17 +99,45 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
 
     if (response.error) {
-      return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers });
+      console.error('[sign-up] createUserProfile error:', response.error);
+      const err = response.error as { code?: string; message?: string };
+      if (err.code === '23505') {
+        return Response.json(
+          { error: 'An account with this email or username may already exist. Try signing in.' },
+          { headers },
+        );
+      }
+      if (err.code === 'MEMBER_TYPE_MISSING' || err.message?.includes('member type')) {
+        return Response.json(
+          { error: 'Server is missing required setup. Please contact support.' },
+          { headers, status: 500 },
+        );
+      }
+      return Response.json(
+        { error: err.message || FRIENDLY_MESSAGES['generic-error'] },
+        { headers },
+      );
     }
   }
 
-  return redirect(`/sign-up-message?email=${email}`, { headers });
+  return redirect(`/sign-up-message?email=${encodeURIComponent(email ?? '')}`, { headers });
 };
 
 const rowWidth = ['100%', '100%', `100%`];
 
 export default function Index() {
+  const submit = useSubmit();
   const actionResponse: any = useActionData<typeof action>();
+
+  const handleSubmit = (values: Record<string, unknown>) => {
+    const formData = new FormData();
+    formData.append('username', String(values.username ?? ''));
+    formData.append('email', String(values.email ?? ''));
+    formData.append('password', String(values.password ?? ''));
+    formData.append('confirm-password', String(values['confirm-password'] ?? ''));
+    formData.append('consent', values.consent ? 'on' : '');
+    submit(formData, { method: 'post' });
+  };
 
   const validationSchema = object({
     username: string().min(2, FRIENDLY_MESSAGES['sign-up/username-short']).required('Required'),
@@ -88,14 +147,14 @@ export default function Index() {
       .required(FRIENDLY_MESSAGES['sign-up/password-required']),
     'confirm-password': string()
       .oneOf([ref('password'), ''], FRIENDLY_MESSAGES['sign-up/password-mismatch'])
-      .required(FRIENDLY_MESSAGES['sign-up/email-required']),
+      .required(FRIENDLY_MESSAGES['sign-up/confirm-password-required']),
     consent: bool().oneOf([true], FRIENDLY_MESSAGES['sign-up/terms']),
   });
 
   return (
     <Main style={{ flex: 1 }} sx={{ fontFamily: 'Times New Roman, Times, serif' }}>
       <Form
-        onSubmit={() => {}}
+        onSubmit={handleSubmit}
         validate={async (values: any) => {
           try {
             await validationSchema.validate(values, { abortEarly: false });

@@ -40,4 +40,18 @@ export const MOCK_AUTH_USERS: IMockUsers = {
     password: 'organizer',
     roles: [UserRole.ORGANIZER],
   },
+  contributor: {
+    uid: 'demo_contributor',
+    label: 'Contributor',
+    email: 'contributor@example.com',
+    password: 'contributor',
+    roles: [UserRole.CONTRIBUTOR],
+  },
+  organizer: {
+    uid: 'demo_organizer',
+    label: 'Organizer',
+    email: 'organizer@example.com',
+    password: 'organizer',
+    roles: [UserRole.ORGANIZER],
+  },
 };

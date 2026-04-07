@@ -128,6 +128,7 @@ enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
+# On Supabase Cloud, a separate hourly rate limit applies (e.g. 4 emails/hour on free tier). Use custom SMTP in production to increase limits.
 max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6

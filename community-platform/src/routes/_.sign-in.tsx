@@ -1,7 +1,7 @@
-import { Button, FieldInput, HeroBanner, TextNotification } from 'oa-components';
+import { Button, FieldInput, TextNotification } from 'oa-components';
 import { Field, Form } from 'react-final-form';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
-import { Link, redirect, useActionData } from 'react-router';
+import { Link, redirect, useActionData, useSubmit } from 'react-router';
 import { PasswordField } from 'src/common/Form/PasswordField';
 import Main from 'src/pages/common/Layout/Main';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -36,26 +36,37 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (error) {
     if (error.code === 'email_not_confirmed') {
-      const url = new URL(request.url);
-      const protocol = url.host.startsWith('localhost') ? 'http:' : 'https:';
-      const emailRedirectUrl = `${protocol}//${url.host}/email-confirmation`;
-      await client.auth.resend({
-        type: 'signup',
-        email,
-        options: {
-          emailRedirectTo: emailRedirectUrl,
-        },
-      });
-
+      // Do not call auth.resend() here: every failed login would trigger another email and
+      // quickly hit Supabase rate limits. The user already received a link at sign-up.
       return Response.json(
         {
-          error: 'We need to confirm your email before logging in. Please check your inbox :)',
+          error:
+            'Please confirm your email before signing in. Check your inbox and spam for the confirmation link.',
         },
         { headers },
       );
     }
+    if (
+      error.message?.toLowerCase().includes('rate limit') ||
+      (error as { status?: number }).status === 429
+    ) {
+      return Response.json(
+        {
+          error:
+            'Email rate limit exceeded. Please try again in an hour.',
+        },
+        { headers, status: 429 },
+      );
+    }
 
-    console.error(error);
+    if (error.code === 'invalid_credentials') {
+      return Response.json(
+        { error: 'Invalid email or password.' },
+        { headers, status: 400 },
+      );
+    }
+
+    console.error('[sign-in] auth error:', error.code, error.message);
     return Response.json(
       {
         error: 'Invalid email or password.',
@@ -67,7 +78,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const fallbackPath = data.user?.user_metadata.username
     ? `/u/${data.user?.user_metadata.username}`
     : '/';
-  const path = getReturnUrl(request, fallbackPath);
+  const requestedPath = getReturnUrl(request, fallbackPath);
+
+  const { data: profileData } = await client
+    .from('profiles')
+    .select('roles')
+    .eq('auth_id', data.user!.id)
+    .limit(1);
+
+  const roles = profileData?.at(0)?.roles ?? [];
+  const isAdmin = roles.includes('admin');
+  const path = isAdmin ? '/admin/initiatives' : requestedPath;
 
   try {
     await new ProfileServiceServer(client).ensureProfile(data.user);
@@ -85,12 +106,20 @@ export const meta = mergeMeta<typeof loader>(() => {
 });
 
 export default function Index() {
+  const submit = useSubmit();
   const actionResponse: any = useActionData<typeof action>();
+
+  const handleSubmit = (values: Record<string, unknown>) => {
+    const formData = new FormData();
+    formData.append('email', String(values.email ?? ''));
+    formData.append('password', String(values.password ?? ''));
+    submit(formData, { method: 'post' });
+  };
 
   return (
     <Main style={{ flex: 1 }}>
       <Form
-        onSubmit={() => {}}
+        onSubmit={handleSubmit}
         render={({ submitting, invalid }) => {
           return (
             <form data-cy="login-form" method="post">

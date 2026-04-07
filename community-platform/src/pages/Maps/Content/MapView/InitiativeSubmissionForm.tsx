@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Box, Button, Flex, Heading, Input, Label, Select, Text, Textarea } from 'theme-ui';
 import type { ScisProjectType } from '../../scis.store';
-import { scisStore } from '../../scis.store';
+import { MapContext } from '../../MapContext';
+import { scisService } from '../../scis.service';
 
 const PROJECT_TYPE_OPTIONS: { value: ScisProjectType; label: string }[] = [
   { value: 'tool_library', label: 'Tool Library' },
@@ -24,24 +25,32 @@ export const InitiativeSubmissionForm = ({
   onSave,
   onCancel,
 }: InitiativeSubmissionFormProps) => {
+  const mapContext = useContext(MapContext);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [projectType, setProjectType] = useState<ScisProjectType>('other');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     setSubmitting(true);
+    setError(null);
     try {
-      scisStore.createLocalInitiative({
+      const created = await scisService.createInitiative({
         title: title.trim(),
         description: description.trim(),
         projectType,
         lat,
         lng,
       });
-      onSave();
+      if (created) {
+        mapContext?.refreshInitiatives?.();
+        onSave();
+      } else {
+        setError('Failed to save. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -126,6 +135,9 @@ export const InitiativeSubmissionForm = ({
           sx={{ mb: 3 }}
         />
 
+        {error && (
+          <Text sx={{ color: 'red', fontSize: 0, mb: 2 }}>{error}</Text>
+        )}
         <Flex sx={{ gap: 2 }}>
           <Button type="submit" disabled={submitting || !title.trim()}>
             {submitting ? 'Saving...' : 'Save Initiative'}

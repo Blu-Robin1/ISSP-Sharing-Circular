@@ -1,8 +1,13 @@
-import { HeroBanner, Icon } from 'oa-components';
-import { Box, Card, Flex, Heading, Text, Image } from 'theme-ui';
+import { HeroBanner } from 'oa-components';
+import { Link } from 'react-router';
+import { Box, Button, Card, Flex, Heading, Text, Image } from 'theme-ui';
 import bcitLogo from 'oa-themes/assets/images/bcit-footer.png';
 
-const SignUpMessagePage = ({ email }) => {
+/** When true, Supabase sends confirmation emails. Match auth.email.enable_confirmations in Supabase. */
+const requireEmailConfirmation =
+  import.meta.env.VITE_REQUIRE_EMAIL_CONFIRMATION === 'true';
+
+const SignUpMessagePage = ({ email }: { email: string | null }) => {
   return (
     <Flex
       sx={{
@@ -66,19 +71,38 @@ const SignUpMessagePage = ({ email }) => {
               >
                 <Heading>Welcome to BCIT!</Heading>
               </Flex>
-              <Text sx={{ textAlign: 'center', color: 'grey' }}>
-                <p>
-                  Please confirm your email address by clicking the verification link sent to {' '}
-                  <Text
-                    sx={{
-                      background: 'linear-gradient(0deg, #ffe2e1 60%, #fff 40%)',
-                      paddingX: 1,
-                    }}
-                  >
-                    {email}
-                  </Text>
-                </p>
-              </Text>
+              {requireEmailConfirmation ? (
+                <Text sx={{ textAlign: 'center', color: 'grey' }}>
+                  A confirmation email has been sent
+                  {email ? (
+                    <>
+                      {' '}
+                      to{' '}
+                      <Text
+                        as="span"
+                        sx={{
+                          background: 'linear-gradient(0deg, #ffe2e1 60%, #fff 40%)',
+                          paddingX: 1,
+                        }}
+                      >
+                        {email}
+                      </Text>
+                    </>
+                  ) : (
+                    ''
+                  )}
+                  . Please check your inbox (and spam folder) and click the link to activate your account.
+                </Text>
+              ) : (
+                <Text sx={{ textAlign: 'center', color: 'grey' }}>
+                  You&apos;re all set! You can sign in now with your email and password.
+                </Text>
+              )}
+              <Flex sx={{ justifyContent: 'center', mt: 2 }}>
+                <Link to="/sign-in">
+                  <Button variant="primary">Sign in</Button>
+                </Link>
+              </Flex>
             </Flex>
           </Card>
         </Flex>
