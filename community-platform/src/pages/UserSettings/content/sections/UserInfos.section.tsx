@@ -1,4 +1,3 @@
-import { getCountryDataList, getEmojiFlag } from 'countries-list';
 import { observer } from 'mobx-react';
 import { FieldInput, FieldTextarea, Username } from 'oa-components';
 import type { ProfileFormData } from 'oa-shared';
@@ -8,13 +7,70 @@ import { fields, headings } from 'src/pages/UserSettings/labels';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { required, validateUrl } from 'src/utils/validators';
 import { Flex, Heading, Text } from 'theme-ui';
-import { GROUP_PROFILE_DESCRIPTION_MAX_LENGTH, MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH } from '../../constants';
+import {
+  GROUP_PROFILE_DESCRIPTION_MAX_LENGTH,
+  MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH,
+} from '../../constants';
 import { ProfileSection } from '../elements';
-import { ProfileTags } from './ProfileTags.section';
 
-const countryOptions = getCountryDataList().map((country) => ({
-  label: `${getEmojiFlag(country.iso2)} ${country.native}`,
-  value: country.iso2,
+const BC_CITIES = [
+  'Abbotsford',
+  'Armstrong',
+  'Burnaby',
+  'Campbell River',
+  'Castlegar',
+  'Chilliwack',
+  'Colwood',
+  'Coquitlam',
+  'Courtenay',
+  'Cranbrook',
+  'Dawson Creek',
+  'Delta',
+  'Duncan',
+  'Enderby',
+  'Fernie',
+  'Fort St. John',
+  'Grand Forks',
+  'Greenwood',
+  'Kamloops',
+  'Kelowna',
+  'Kimberley',
+  'Langford',
+  'Langley',
+  'Maple Ridge',
+  'Merritt',
+  'Nanaimo',
+  'Nelson',
+  'New Westminster',
+  'North Vancouver',
+  'Parksville',
+  'Penticton',
+  'Pitt Meadows',
+  'Port Alberni',
+  'Port Coquitlam',
+  'Port Moody',
+  'Powell River',
+  'Prince George',
+  'Prince Rupert',
+  'Quesnel',
+  'Revelstoke',
+  'Richmond',
+  'Rossland',
+  'Salmon Arm',
+  'Surrey',
+  'Terrace',
+  'Trail',
+  'Vancouver',
+  'Vernon',
+  'Victoria',
+  'West Kelowna',
+  'White Rock',
+  'Williams Lake',
+];
+
+const cityOptions = BC_CITIES.map((city) => ({
+  label: city,
+  value: city,
 }));
 
 interface IProps {
@@ -31,6 +87,7 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
     <ProfileSection>
       <Flex data-testid="UserInfosSection" sx={{ flexDirection: 'column', gap: [3, 5] }}>
         <Heading as="h2">{headings.infos}</Heading>
+
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
           <Text>
             {userName.title} <Text color="red">*</Text>
@@ -38,7 +95,13 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
           <Text variant="quiet" sx={{ fontSize: 2 }}>
             {userName.description}
           </Text>
-          <Field data-cy="userName" name="userName" component={FieldInput} validate={required} validateFields={[]} disabled />
+          <Field
+            data-cy="userName"
+            name="userName"
+            component={FieldInput}
+            validateFields={[]}
+            disabled
+          />
         </Flex>
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
@@ -52,35 +115,40 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
             data-cy="displayName"
             name="displayName"
             component={FieldInput}
-            placeholder="Pick a name to display on your profile"
             validate={required}
             validateFields={[]}
           />
         </Flex>
 
-        <ProfileTags typeName={formValues.type || ''} />
-
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
-          <Text>
-            {about.title} <Text color="red">*</Text>
-          </Text>
+          <Text>{about.title}</Text>
           <Field
             data-cy="info-about"
             name="about"
             component={FieldTextarea}
             showCharacterCount
-            maxLength={isMemberProfile ? MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH : GROUP_PROFILE_DESCRIPTION_MAX_LENGTH}
+            maxLength={
+              isMemberProfile
+                ? MEMBER_PROFILE_DESCRIPTION_MAX_LENGTH
+                : GROUP_PROFILE_DESCRIPTION_MAX_LENGTH
+            }
             placeholder={about.placeholder}
-            validate={required}
             validateFields={[]}
           />
         </Flex>
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
-          <Text>{country.title}</Text>
+          <Text>{country.title} <Text color="red">*</Text></Text>
           <Field data-cy="country-dropdown" name="country">
-            {(field) => <SelectField options={countryOptions} placeholder="Select your country..." {...field} />}
+            {(field) => (
+              <SelectField
+                options={cityOptions}
+                placeholder="Select your city..."
+                {...field}
+              />
+            )}
           </Field>
+
           <Flex sx={{ gap: 1, alignItems: 'center' }}>
             <Text sx={{ fontSize: 1 }} variant="quiet">
               Preview:

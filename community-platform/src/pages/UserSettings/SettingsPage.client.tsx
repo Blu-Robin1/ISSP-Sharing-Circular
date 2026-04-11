@@ -1,7 +1,7 @@
 import { Tabs } from '@mui/base/Tabs';
 import { observer } from 'mobx-react';
-import type { availableGlyphs } from 'oa-components';
-import { useContext, useMemo } from 'react';
+import { UserRole } from 'oa-shared';
+import { useContext, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { isPreciousPlastic } from 'src/config/config';
 import { isModuleSupported, MODULE } from 'src/modules';
@@ -19,42 +19,52 @@ import type { ISettingsTab } from './types';
 
 import '../../styles/leaflet.css';
 
+/** Tab panel body is unused: the tab links out to `/admin/initiatives`. */
+function AdminSettingsNavPlaceholder() {
+  return null;
+}
+
 export const SettingsPage = observer(() => {
   const env = useContext(EnvironmentContext);
-  const { isComplete, missingFields, profile } = useProfileStore();
+  const { isComplete, missingFields, profile, refresh } = useProfileStore();
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
   const isMember = !profile?.type?.isSpace;
   const showImpactTab = !isMember && isPreciousPlastic();
   const showMapTab = isModuleSupported(env?.VITE_SUPPORTED_MODULES || '', MODULE.MAP);
+  const isAdminUser = profile?.roles?.includes(UserRole.ADMIN) ?? false;
 
   const tabs: ISettingsTab[] = useMemo(
     () => [
       {
         title: 'Profile',
         route: '/settings/profile',
-        header: isComplete === false && (
-          <Flex sx={{ gap: 2, flexDirection: 'column' }} data-cy="CompleteProfileHeader">
-            <Text as="h3">✏️ Complete your profile</Text>
-            <Text>
-              In order to post comments or create content, we'd like you to share something about
-              yourself.
-            </Text>
-            {missingFields && missingFields.length > 0 && (
-              <Text>
-                Missing required fields:
-                <ul style={{ margin: '0.5em 0 0 0', paddingLeft: '1.5em' }}>
-                  {missingFields.map((field) => (
-                    <li key={field}>{field}</li>
-                  ))}
-                </ul>
-              </Text>
-            )}
-          </Flex>
-        ),
+        // header: isComplete === false && (
+        //   <Flex sx={{ gap: 2, flexDirection: 'column' }} data-cy="CompleteProfileHeader">
+        //     <Text as="h3">✏️ Complete your profile</Text>
+        //     <Text>
+        //       In order to post comments or create content, we'd like you to share something about
+        //       yourself.
+        //     </Text>
+        //     {missingFields && missingFields.length > 0 && (
+        //       <Text>
+        //         Missing required fields:
+        //         <ul style={{ margin: '0.5em 0 0 0', paddingLeft: '1.5em' }}>
+        //           {missingFields.map((field) => (
+        //             <li key={field}>{field}</li>
+        //           ))}
+        //         </ul>
+        //       </Text>
+        //     )}
+        //   </Flex>
+        // ),
         body: SettingsPageUserProfile,
-        glyph: 'profile' as availableGlyphs,
+        glyph: 'profile',
       },
       ...(showMapTab
         ? [
@@ -62,7 +72,7 @@ export const SettingsPage = observer(() => {
               title: 'Map',
               route: '/settings/map',
               body: SettingsPageMapPin,
-              glyph: 'map' as availableGlyphs,
+              glyph: 'map',
             },
           ]
         : []),
@@ -72,7 +82,7 @@ export const SettingsPage = observer(() => {
               title: 'Impact',
               route: '/settings/impact',
               body: SettingsPageImpact,
-              glyph: 'impact' as availableGlyphs,
+              glyph: 'impact',
             },
           ]
         : []),
@@ -80,16 +90,26 @@ export const SettingsPage = observer(() => {
         title: 'Notifications',
         route: '/settings/notifications',
         body: SettingsPageNotifications,
-        glyph: 'megaphone' as availableGlyphs,
+        glyph: 'megaphone',
       },
       {
         title: 'Account',
         route: '/settings/account',
         body: SettingsPageAccount,
-        glyph: 'account' as availableGlyphs,
+        glyph: 'account',
       },
+      ...(isAdminUser
+        ? [
+            {
+              title: 'Admin',
+              route: '/admin/initiatives',
+              body: AdminSettingsNavPlaceholder,
+              glyph: 'employee',
+            },
+          ]
+        : []),
     ],
-    [showMapTab, showImpactTab, isComplete, missingFields],
+    [showMapTab, showImpactTab, isComplete, missingFields, isAdminUser],
   );
 
   if (!profile) {

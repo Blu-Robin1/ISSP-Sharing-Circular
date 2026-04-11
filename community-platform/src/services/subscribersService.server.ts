@@ -14,7 +14,7 @@ const combineSubscribers = async (
   const profilesToSubscribe: number[] = ids.map((id) => Number(id));
 
   for (const username of usernames) {
-    const { data } = await client.from('profiles').select('id').eq('username', username).single();
+    const { data } = await client.from('profiles').select('id').eq('username', username).maybeSingle();
     if (data && !!Number(data.id)) {
       profilesToSubscribe.push(Number(data.id));
     }

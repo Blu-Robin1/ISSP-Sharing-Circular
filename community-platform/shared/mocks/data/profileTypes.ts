@@ -6,12 +6,10 @@ export const profileTypes: Partial<DBProfileType>[] = [
     display_name: 'Member',
     is_space: false,
     description: '',
-    image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-member.svg',
+    image_url: '/assets/images/user-avatar.jpg',
     map_pin_name: '',
     order: 1,
-    small_image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/map-member.svg',
+    small_image_url:'/assets/images/user-avatar.jpg',
   },
   {
     name: 'machine-builder',

@@ -13,7 +13,7 @@ export interface IProps {
   viewport: string;
 }
 
-export const EMPTY_LIST = 'Oh nos! Nothing to show!';
+export const EMPTY_LIST = 'No results found.';
 const ITEMS_PER_RENDER = 20;
 
 export const MapCardList = (props: IProps) => {

@@ -105,7 +105,6 @@ export default function Index() {
                 }}
               >
                 <Flex sx={{ flexDirection: 'column', width: '100%' }}>
-                  <HeroBanner type="celebration" />
                   <Card sx={{ borderRadius: 3 }}>
                     <Flex
                       sx={{

@@ -23,7 +23,26 @@ export const loader = async ({ request }) => {
       .update({ last_active: nowUtc })
       .eq('auth_id', claims.data.claims.sub)
       .select(
-        `*,
+        `id,
+        created_at,
+        auth_id,
+        username,
+        display_name,
+        city,
+        about,
+        photo,
+        cover_images,
+        roles,
+        impact,
+        visitor_policy,
+        is_blocked_from_messaging,
+        is_contactable,
+        last_active,
+        website,
+        patreon,
+        total_views,
+        donations_enabled,
+        profile_type,
         tags:profile_tags_relations(
           profile_tags(
             id,
@@ -51,16 +70,21 @@ export const loader = async ({ request }) => {
           is_space
         )`,
       )
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw error;
     }
 
+    if (!data) {
+      return Response.json({}, { headers, status: 404 });
+    }
+
     const profileFactory = new ProfileFactory(client);
     const profile = profileFactory.fromDB(data);
+    const json = { ...profile, roles: data.roles ?? profile.roles ?? null };
 
-    return Response.json(profile, { headers, status: 200 });
+    return Response.json(json, { headers, status: 200 });
   } catch (error) {
     console.error(error);
     return Response.json({ error }, { headers, status: 500 });
@@ -105,7 +129,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return Response.json({}, { headers, status: 401 });
     }
 
-    const profileData = await new ProfileServiceServer(client).getByAuthId(claims.data.claims.sub);
+    const authId = claims.data.claims.sub;
+    const profileService = new ProfileServiceServer(client);
+    let profileData = await profileService.getByAuthId(authId);
+
+    if (!profileData?.id) {
+      const { data: idRow, error: idLookupError } = await client
+        .from('profiles')
+        .select('id')
+        .eq('auth_id', authId)
+        .maybeSingle();
+      if (idLookupError) {
+        console.error('[api.profile action] profile id lookup:', idLookupError);
+      }
+      if (idRow?.id != null) {
+        profileData = await profileService.getById(idRow.id);
+      }
+    }
+
     const profileTypes = await new ProfileTypesServiceServer(client).get();
 
     const memberTypes = profileTypes.filter((x) => x.isSpace === false).map((x) => x.name) || null;
@@ -125,8 +166,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       throw new Error('profile not found');
     }
 
-    const profileService = new ProfileServiceServer(client);
-    const profile = await profileService.updateProfile(profileData?.id, data);
+    const profile = await profileService.updateProfile(profileData.id, data);
 
     updateUserActivity(client, claims.data.claims.sub);
 
@@ -144,35 +184,35 @@ async function validateRequest(
   memberTypes: string[] | null,
 ) {
   if (request.method !== 'POST') {
-    return { status: 405, statusText: 'method not allowed' };
+    return { valid: false, status: 405, statusText: 'method not allowed' };
   }
 
   if (!profile?.id) {
-    return { status: 400, statusText: 'profile not found' };
+    return { valid: false, status: 400, statusText: 'profile not found' };
   }
 
   if (!data.displayName) {
-    return { status: 400, statusText: 'displayName is required' };
+    return { valid: false, status: 400, statusText: 'displayName is required' };
   }
 
   if (!data.type) {
-    return { status: 400, statusText: 'type is required' };
+    return { valid: false, status: 400, statusText: 'type is required' };
   }
 
   if (!memberTypes || !memberTypes?.includes(data.type)) {
     if (!data.existingPhoto && !data.photo) {
-      return { status: 400, statusText: 'photo is required' };
+      return { valid: false, status: 400, statusText: 'photo is required' };
     }
 
     if (
       (!data.existingCoverImageIds || data.existingCoverImageIds.length === 0) &&
       (!data.coverImages || data.coverImages.length === 0)
     ) {
-      return { status: 400, statusText: 'cover images are required' };
+      return { valid: false, status: 400, statusText: 'cover images are required' };
     }
 
     if (data.showVisitorPolicy && !data.visitorPreferencePolicy) {
-      return { status: 400, statusText: 'visitor policy is required' };
+      return { valid: false, status: 400, statusText: 'visitor policy is required' };
     }
   }
 

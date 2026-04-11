@@ -8,7 +8,7 @@ export class ProfileServiceServer {
   constructor(private client: SupabaseClient) {}
 
   async getByAuthId(id: string): Promise<DBProfile | null> {
-    const { data } = await this.client
+    const { data, error } = await this.client
       .from('profiles')
       .select(
         `*,
@@ -34,7 +34,11 @@ export class ProfileServiceServer {
         )`,
       )
       .eq('auth_id', id)
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      console.error('[getByAuthId] Supabase error:', error.message, error);
+    }
 
     if (!data) {
       return null;
@@ -64,7 +68,7 @@ export class ProfileServiceServer {
         )`,
       )
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (!data) {
       return null;
@@ -77,12 +81,12 @@ export class ProfileServiceServer {
     const { data } = await this.client
       .from('profiles')
       .select(
-        `id,
+        `        id,
         username,
         display_name,
         photo,
         cover_images,
-        country,
+        city,
         tags:profile_tags_relations(
           profile_tags(
             id,
@@ -152,7 +156,7 @@ export class ProfileServiceServer {
         )`,
       )
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
     if (!data) {
       return null;
@@ -190,7 +194,7 @@ export class ProfileServiceServer {
 
     const valuesToUpdate = {
       about: values.about,
-      country: values.country,
+      city: values.country,
       display_name: values.displayName,
       website: values.website,
       is_contactable: values.isContactable,

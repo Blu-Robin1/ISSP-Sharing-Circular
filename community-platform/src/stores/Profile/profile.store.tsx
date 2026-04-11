@@ -14,7 +14,6 @@ export class ProfileStore {
   refresh = async () => {
     const profile = await profileService.get();
     runInAction(() => {
-      // runInAction because of async method
       this.profile = profile;
     });
   };
@@ -29,16 +28,13 @@ export class ProfileStore {
 
   initProfileTypes = async () => {
     const profileTypes = await profileTypesService.getProfileTypes();
-
     runInAction(() => {
-      // runInAction because of async method
       this.profileTypes = profileTypes;
     });
   };
 
   initUpgradeBadges = async () => {
     const upgradeBadges = await upgradeBadgeService.getUpgradeBadges();
-
     runInAction(() => {
       this.upgradeBadges = upgradeBadges;
     });
@@ -51,14 +47,12 @@ export class ProfileStore {
   isUserAuthorized = (roleRequired?: UserRole | UserRole[]) => {
     const userRoles = this.profile?.roles || [];
 
-    // If no role required just check if user is logged in
     if (!roleRequired || roleRequired.length === 0) {
       return this.profile ? true : false;
     }
 
     const rolesRequired = Array.isArray(roleRequired) ? roleRequired : [roleRequired];
 
-    // otherwise use logged in user profile values
     if (this.profile && roleRequired) {
       return userRoles.some((role) => rolesRequired.includes(role as UserRole));
     }
@@ -74,6 +68,7 @@ export class ProfileStore {
       upgradeBadgeForCurrentUser: computed,
       isComplete: computed,
       missingFields: computed,
+      showWelcomeBanner: computed,
       refresh: action,
       clear: action,
       update: action,
@@ -112,6 +107,20 @@ export class ProfileStore {
     return this.getMissingFields(this.profile);
   }
 
+  get showWelcomeBanner() {
+    if (!this.profile) {
+      return false;
+    }
+
+    const isMember = this.profile.type?.name === 'member';
+
+    if (isMember) {
+      return !this.profile.country;
+    }
+
+    return !this.profile.coverImages || !this.profile.coverImages[0]?.publicUrl;
+  }
+
   getMissingFields(profile: Partial<Profile>) {
     const { about, coverImages, displayName, photo } = profile;
     const missing: string[] = [];
@@ -126,9 +135,11 @@ export class ProfileStore {
 
     const isMember = profile.type?.name === 'member';
 
-    if (isMember && !photo?.id) {
+    if (isMember && !photo) {
       missing.push('Profile photo');
-    } else if (!isMember && (!coverImages || !coverImages[0]?.publicUrl)) {
+    }
+
+    if (!isMember && (!coverImages || !coverImages[0]?.publicUrl)) {
       missing.push('Cover image');
     }
 
@@ -138,15 +149,18 @@ export class ProfileStore {
   isProfileComplete(profile: Partial<Profile>) {
     const { about, coverImages, displayName, photo } = profile;
 
-    const isBasicInfoFilled = !!(about && displayName);
-
     const isMember = profile.type?.name === 'member';
     const isSpace = !isMember;
 
-    const isMemberFilled = isMember && !!photo?.id;
-    const isSpaceFilled = isSpace && !!coverImages && !!coverImages[0]?.publicUrl;
+    if (!displayName || !about) {
+      return false;
+    }
 
-    return isBasicInfoFilled && (isMemberFilled || isSpaceFilled);
+    if (isMember) {
+      return !!photo;
+    }
+
+    return !!(coverImages && coverImages[0]?.publicUrl);
   }
 }
 
@@ -172,7 +186,9 @@ export const ProfileStoreProvider = ({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <ProfileStoreContext.Provider value={profileStore}>{children}</ProfileStoreContext.Provider>
+    <ProfileStoreContext.Provider value={profileStore}>
+      {children}
+    </ProfileStoreContext.Provider>
   );
 };
 

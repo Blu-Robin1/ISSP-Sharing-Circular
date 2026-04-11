@@ -46,6 +46,11 @@ export interface ScisStage3Milestones {
   launchDate?: string;
   committeeUpdates?: string[];
   fundraisingLaunched?: boolean;
+  /** Stage 4: optional campaign progress (stored in stage3_milestones jsonb) */
+  campaignGoal?: number;
+  campaignRaised?: number;
+  fundraisingStatus?: 'active' | 'launching' | 'planned';
+  investmentInstructions?: string;
 }
 
 export interface ScisInitiativeLocalState {

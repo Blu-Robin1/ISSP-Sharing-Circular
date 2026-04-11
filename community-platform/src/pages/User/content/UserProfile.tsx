@@ -15,6 +15,8 @@ import { ProfileDetails } from './ProfileDetails';
 import { ProfileHeader } from './ProfileHeader';
 import { ProfileImage } from './ProfileImage';
 import UserCreatedDocuments from './UserCreatedDocuments';
+import bcitAvatar from 'oa-themes/assets/images/user-avatar.jpg';
+import { Image } from 'theme-ui';
 
 interface IProps {
   docs: UserCreatedDocs;
@@ -49,16 +51,30 @@ export const UserProfile = ({ docs, isViewingOwnProfile, user }: IProps) => {
       }}
     >
       {isMember && (
-        <MemberBadge
-          profileType={type || undefined}
-          size={50}
+        <Box
           sx={{
             alignSelf: 'center',
             position: 'absolute',
             transform: 'translateY(-25px)',
+            border: '2px solid #000',
+            borderRadius: '50%',
+            backgroundColor: '#fff',
+            zIndex: 3,
+            padding: 1
           }}
-          useLowDetailVersion
-        />
+        >
+          <Image
+            src={bcitAvatar}
+            alt="Default Avatar"
+            sx={{
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
+              objectFit: 'contain',
+              display: 'block',
+            }}
+          />
+        </Box>
       )}
       <Card variant="responsive" sx={{ borderRadius: [3, 3, 3] }}>
         <ProfileImage user={user} />
@@ -72,7 +88,7 @@ export const UserProfile = ({ docs, isViewingOwnProfile, user }: IProps) => {
         >
           {showEmptyProfileAlert && (
             <Alert variant="info" data-cy="emptyProfileMessage">
-              Oh hey! Your profile is looking SO empty. Fancy filling it in...?
+              Your profile is incomplete. Please update your profile to continue.
             </Alert>
           )}
 

@@ -1,6 +1,6 @@
 import { MemberBadge, Username } from 'oa-components';
 import type { Profile } from 'oa-shared';
-import DefaultMemberImage from 'src/assets/images/default_member.svg';
+import DefaultMemberImage from 'oa-themes/assets/images/user-avatar.jpg';
 import { Avatar, Box, Flex, Heading } from 'theme-ui';
 
 interface IProps {
@@ -34,7 +34,7 @@ export const ProfileHeader = ({ user }: IProps) => {
         </Box>
       )}
       <Flex sx={{ gap: 2, alignItems: 'center', paddingBottom: [2, 4] }}>
-        {profileImageSrc && user.type?.isSpace && (
+        {user.type?.isSpace && (
           <Avatar
             data-cy="userImage"
             src={profileImageSrc}

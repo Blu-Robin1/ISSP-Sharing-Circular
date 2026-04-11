@@ -12,13 +12,14 @@ const Logo = observer(() => {
   const logo = theme.logo;
 
   const nameAndVersion = `${name} logo ${VERSION}`;
-  const logoSize = [50, 50, 100];
+
+  const logoBoxHeight = ['60px', '65px', '70px'];
+  const logoBoxWidth = ['220px', '240px', '260px'];
 
   return (
     <Box
       sx={{
-        py: [2, 2, 0], // padding on y axes ( top & bottom )
-        marginBottom: [0, 0, '-50px'],
+        py: [2, 2, 2],
         position: 'relative',
       }}
     >
@@ -26,26 +27,33 @@ const Logo = observer(() => {
         <Flex
           ml={[0, 4]}
           sx={{
-            zIndex: 1000,
-            display: 'flex',
             alignItems: 'center',
-            width: logoSize,
-            height: logoSize,
+            width: logoBoxWidth,
+            height: logoBoxHeight,
           }}
         >
           <Image
             loading="lazy"
             src={logo}
-            style={{ maxWidth: 100, maxHeight: 100 }}
             sx={{
-              width: logoSize,
-              height: logoSize,
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              display: 'block',
+              transform: 'scale(1.5)',
+              transformOrigin: 'left center',
             }}
             alt={nameAndVersion}
             title={nameAndVersion}
           />
         </Flex>
-        <Text className="sr-only" ml={2} sx={{ display: ['none', 'none', 'block'] }} color="black">
+
+        <Text
+          className="sr-only"
+          ml={2}
+          sx={{ display: ['none', 'none', 'block'] }}
+          color="black"
+        >
           {name}
         </Text>
       </Link>

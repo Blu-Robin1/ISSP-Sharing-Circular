@@ -25,7 +25,7 @@ export const commonStyles = {
     grey: '#61646b',
     green: '#00c3a9',
     error: 'red',
-    background: '#f4f6f7',
+    background: '#F5F1EA',
     silver: '#c0c0c0',
     softgrey: '#c2c2c2',
     lightgrey: '#ababac',
@@ -42,8 +42,8 @@ export const commonStyles = {
     fontWeight: 'normal',
   },
   fontFamily: {
-    title: `"Varela Round", Arial, sans-serif`,
-    body: `'Inter', Arial, sans-serif`,
+    title: `"Times New Roman", Arial, serif`,
+    body: `'Times New Roman', Arial, serif`,
   },
   space: [
     0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110,

@@ -83,19 +83,17 @@ export const SettingsFormTabList = (props: IProps) => {
     <>
       <Flex sx={{ display: ['none', 'flex'] }}>
         <TabsList>
-          {tabs.map(({ glyph, title, route }) => {
-            return (
-              <Tab
-                key={title}
-                to={route}
-                value={route}
-                data-cy={`tab-${title}`}
-                slots={{ root: prepareForSlot(InternalLink) }}
-              >
-                <Icon glyph={glyph} size={20} /> {title}
-              </Tab>
-            );
-          })}
+          {tabs.map(({ glyph, title, route }) => (
+            <Tab
+              key={title}
+              to={route}
+              value={route}
+              data-cy={`tab-${title}`}
+              slots={{ root: prepareForSlot(InternalLink) }}
+            >
+              <Icon glyph={glyph} size={20} /> {title}
+            </Tab>
+          ))}
         </TabsList>
       </Flex>
 

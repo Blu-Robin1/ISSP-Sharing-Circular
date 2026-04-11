@@ -47,10 +47,15 @@ export class ProfileFactory {
       console.error('error parsing visitor policy');
     }
 
+    const cityOrCountry =
+      (dbProfile as { city?: string | null; country?: string | null }).city ??
+      dbProfile.country ??
+      '';
+
     return new Profile({
       id: dbProfile.id,
       createdAt: new Date(dbProfile.created_at),
-      country: dbProfile.country,
+      country: cityOrCountry,
       displayName: dbProfile.display_name,
       username: dbProfile.username,
       photo: photo || null,

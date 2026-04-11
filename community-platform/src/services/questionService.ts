@@ -1,5 +1,6 @@
 import type { QuestionFormData } from 'oa-shared';
 import { DBQuestion, Question } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 import { getCleanFileName } from 'src/utils/storage';
 
 const upsert = async (id: number | null, question: QuestionFormData) => {
@@ -32,11 +33,11 @@ const upsert = async (id: number | null, question: QuestionFormData) => {
 
   const response =
     id === null
-      ? await fetch(`/api/questions`, {
+      ? await apiFetch(`/api/questions`, {
           method: 'POST',
           body,
         })
-      : await fetch(`/api/questions/${id}`, {
+      : await apiFetch(`/api/questions/${id}`, {
           method: 'PUT',
           body,
         });

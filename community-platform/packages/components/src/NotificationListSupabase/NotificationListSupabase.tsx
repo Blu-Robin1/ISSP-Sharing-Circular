@@ -57,10 +57,10 @@ export const NotificationListSupabase = (props: IProps) => {
               onClick={() => setIsUnreadOnly(true)}
               variant="subtle"
               sx={{
-                backgroundColor: isUnreadOnly ? 'activeYellow' : 'white',
+                backgroundColor: isUnreadOnly ? '#3F6B66' : 'white',
                 borderRadius: 0,
                 ':hover': {
-                  backgroundColor: isUnreadOnly ? 'activeYellow' : 'white',
+                  backgroundColor: isUnreadOnly ? '#3F6B66' : 'white',
                   textDecoration: isUnreadOnly ? 'none' : 'underline',
                 },
               }}
@@ -72,10 +72,10 @@ export const NotificationListSupabase = (props: IProps) => {
               onClick={() => setIsUnreadOnly(false)}
               variant="subtle"
               sx={{
-                backgroundColor: !isUnreadOnly ? 'activeYellow' : 'white',
+                backgroundColor: !isUnreadOnly ? '#3F6B66' : 'white',
                 borderRadius: 0,
                 ':hover': {
-                  backgroundColor: !isUnreadOnly ? 'activeYellow' : 'white',
+                  backgroundColor: !isUnreadOnly ? '#3F6B66' : 'white',
                   textDecoration: !isUnreadOnly ? 'none' : 'underline',
                 },
               }}
@@ -129,7 +129,7 @@ export const NotificationListSupabase = (props: IProps) => {
             textAlign: 'center',
           }}
         >
-          Wow... No unread notifications!
+          No unread notifications!
         </Box>
       )}
     </Flex>
