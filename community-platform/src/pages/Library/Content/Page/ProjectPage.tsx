@@ -1,5 +1,11 @@
 import { observer } from 'mobx-react';
-import { ArticleCallToActionSupabase, Button, ConfirmModal, UsefulStatsButton, UserEngagementWrapper } from 'oa-components';
+import {
+  ArticleCallToActionSupabase,
+  Button,
+  ConfirmModal,
+  UsefulStatsButton,
+  UserEngagementWrapper,
+} from 'oa-components';
 import type { ContentType, Project, ProjectStep } from 'oa-shared';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
@@ -15,9 +21,9 @@ import { hasAdminRights } from 'src/utils/helpers';
 import { onUsefulClick } from 'src/utils/onUsefulClick';
 import { Card, Flex } from 'theme-ui';
 import { libraryService } from '../../library.service';
-import { LibraryDescription } from './LibraryDescription';
 import { ProjectStageDisplay } from '../Common/ProjectStageDisplay';
 import { ProjectSupportActions } from '../Common/ProjectSupportActions';
+import { LibraryDescription } from './LibraryDescription';
 import Step from './LibraryStep';
 
 interface ProjectPageProps {
@@ -25,6 +31,7 @@ interface ProjectPageProps {
 }
 
 export const ProjectPage = observer(({ item }: ProjectPageProps) => {
+  const navigate = useNavigate();
   const [voted, setVoted] = useState<boolean>(false);
   const [usefulCount, setUsefulCount] = useState<number>(item.usefulCount);
   const { profile: activeUser } = useProfileStore();
@@ -90,7 +97,9 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
   };
 
   const isEditable = useMemo(() => {
-    return !!activeUser && (hasAdminRights(activeUser) || item.author?.username === activeUser.username);
+    return (
+      !!activeUser && (hasAdminRights(activeUser) || item.author?.username === activeUser.username)
+    );
   }, [activeUser, item.author]);
 
   return (
@@ -130,7 +139,9 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
         <Breadcrumbs
           steps={[
             { text: 'Library', link: '/library' },
-            ...(item.category ? [{ text: item.category.name, link: `/library?category=${item.category.id}` }] : []),
+            ...(item.category
+              ? [{ text: item.category.name, link: `/library?category=${item.category.id}` }]
+              : []),
             { text: item.title },
           ]}
         />
@@ -147,8 +158,8 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
 
       <Card sx={{ p: 3, mb: 3 }}>
         <ProjectStageDisplay
-          stage={item.stage}
-          stageOverride={item.stageOverride}
+          stage={item.stage ?? null}
+          stageOverride={item.stageOverride ?? null}
           supporterCount={item.supporterCount || 0}
           memberCount={item.memberCount || 0}
           championCount={item.championCount || 0}
@@ -183,10 +194,14 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
                 type="button"
                 sx={{ fontSize: 2, justifyContent: 'center' }}
                 onClick={() => {
-                  document.querySelector('[data-target="create-comment-container"]')?.scrollIntoView({
-                    behavior: 'smooth',
-                  });
-                  (document.querySelector('[data-cy="comments-form"]') as HTMLTextAreaElement)?.focus();
+                  document
+                    .querySelector('[data-target="create-comment-container"]')
+                    ?.scrollIntoView({
+                      behavior: 'smooth',
+                    });
+                  (
+                    document.querySelector('[data-cy="comments-form"]') as HTMLTextAreaElement
+                  )?.focus();
 
                   return false;
                 }}
@@ -236,7 +251,11 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
                 mt: 5,
               }}
             >
-              <CommentSectionSupabase authors={item.author?.id ? [item.author?.id] : []} sourceId={item.id} sourceType="projects" />
+              <CommentSectionSupabase
+                authors={item.author?.id ? [item.author?.id] : []}
+                sourceId={item.id}
+                sourceType="projects"
+              />
             </Card>
           </UserEngagementWrapper>
         )}

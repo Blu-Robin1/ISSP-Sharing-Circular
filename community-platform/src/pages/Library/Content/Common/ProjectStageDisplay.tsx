@@ -44,11 +44,7 @@ export const ProjectStageDisplay = ({
       >
         Stage {effectiveStage}: {stageLabel}
       </Badge>
-      {isOverridden && (
-        <Text sx={{ fontSize: 0, color: 'text.secondary' }}>
-          (overridden)
-        </Text>
-      )}
+      {isOverridden && <Text sx={{ fontSize: 0, color: 'text.secondary' }}>(overridden)</Text>}
     </Flex>
   );
 };

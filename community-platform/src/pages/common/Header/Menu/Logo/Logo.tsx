@@ -48,12 +48,7 @@ const Logo = observer(() => {
           />
         </Flex>
 
-        <Text
-          className="sr-only"
-          ml={2}
-          sx={{ display: ['none', 'none', 'block'] }}
-          color="black"
-        >
+        <Text className="sr-only" ml={2} sx={{ display: ['none', 'none', 'block'] }} color="black">
           {name}
         </Text>
       </Link>

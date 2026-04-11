@@ -28,6 +28,8 @@ export class ProfileTypesServiceServer {
       display_name,
       order,
       description,
+      image_url,
+      small_image_url,
       map_pin_name,
       is_space,
       tenant_id

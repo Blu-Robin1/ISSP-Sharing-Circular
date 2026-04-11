@@ -103,7 +103,10 @@ export const MapView = () => {
           gap: 2,
         }}
       >
-        <ButtonZoomIn setCenter={(value) => mapState.setLocation(value)} setZoom={mapState.setZoom} />
+        <ButtonZoomIn
+          setCenter={(value) => mapState.setLocation(value)}
+          setZoom={mapState.setZoom}
+        />
         {mapState.isPlacingProject && (
           <Text sx={{ fontSize: 0, color: 'primary', bg: 'white', p: 2, borderRadius: 2 }}>
             Click on the map to place your project
@@ -166,7 +169,11 @@ export const MapView = () => {
 
       {/* Default User Popup */}
       {mapState.selectedPin && !isInitiative(mapState.selectedPin) && (
-        <Popup activePin={mapState.selectedPin} mapRef={mapRef} onClose={() => mapState.selectPin(null)} />
+        <Popup
+          activePin={mapState.selectedPin}
+          mapRef={mapRef}
+          onClose={() => mapState.selectPin(null)}
+        />
       )}
     </Map>
   );

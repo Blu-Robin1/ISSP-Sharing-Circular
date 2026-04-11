@@ -1,11 +1,24 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import { Box, Flex, Heading, Text, Button, Badge, Progress, Input, Label, Select, Textarea, Checkbox } from 'theme-ui';
 import type { MapPin } from 'oa-shared';
 import { UserRole } from 'oa-shared';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { useProfileStore } from 'src/stores/Profile/profile.store';
+import {
+  Badge,
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Heading,
+  Input,
+  Label,
+  Progress,
+  Select,
+  Text,
+  Textarea,
+} from 'theme-ui';
 import { MapContext } from '../../MapContext';
 import { scisService } from '../../scis.service';
-import { scisStore, type ScisStage3Milestones } from '../../scis.store';
-import { useProfileStore } from 'src/stores/Profile/profile.store';
+import { type ScisStage3Milestones, scisStore } from '../../scis.store';
 
 interface IProps {
   pin: MapPin | any;
@@ -24,7 +37,17 @@ const Stage3Content = (props: {
   championSubmitted: boolean;
   handleChampion: (e: React.FormEvent) => void;
 }) => {
-  const { initiativeId, stage3Milestones: serverMilestones, onRefresh, championOpen, setChampionOpen, championNote, setChampionNote, championSubmitted, handleChampion } = props;
+  const {
+    initiativeId,
+    stage3Milestones: serverMilestones,
+    onRefresh,
+    championOpen,
+    setChampionOpen,
+    championNote,
+    setChampionNote,
+    championSubmitted,
+    handleChampion,
+  } = props;
   const { isUserAuthorized } = useProfileStore();
   const isAdmin = isUserAuthorized?.(UserRole.ADMIN);
   const localMilestones = initiativeId ? scisStore.getStageReadinessState(initiativeId) : undefined;
@@ -36,11 +59,19 @@ const Stage3Content = (props: {
   const [renovationScope, setRenovationScope] = useState(ms?.renovationScope ?? '');
   const [launchDate, setLaunchDate] = useState(ms?.launchDate ?? '');
   const [committeeUpdate, setCommitteeUpdate] = useState('');
-  const [committeeUpdatesList, setCommitteeUpdatesList] = useState<string[]>(ms?.committeeUpdates ?? []);
+  const [committeeUpdatesList, setCommitteeUpdatesList] = useState<string[]>(
+    ms?.committeeUpdates ?? [],
+  );
   const [fundraisingLaunched, setFundraisingLaunched] = useState(ms?.fundraisingLaunched ?? false);
-  const [campaignGoal, setCampaignGoal] = useState(ms?.campaignGoal != null ? String(ms.campaignGoal) : '');
-  const [campaignRaised, setCampaignRaised] = useState(ms?.campaignRaised != null ? String(ms.campaignRaised) : '');
-  const [investmentInstructions, setInvestmentInstructions] = useState(ms?.investmentInstructions ?? '');
+  const [campaignGoal, setCampaignGoal] = useState(
+    ms?.campaignGoal != null ? String(ms.campaignGoal) : '',
+  );
+  const [campaignRaised, setCampaignRaised] = useState(
+    ms?.campaignRaised != null ? String(ms.campaignRaised) : '',
+  );
+  const [investmentInstructions, setInvestmentInstructions] = useState(
+    ms?.investmentInstructions ?? '',
+  );
 
   useEffect(() => {
     setBudget(ms?.budget ?? '');
@@ -124,7 +155,11 @@ const Stage3Content = (props: {
         <Label sx={{ alignItems: 'center', gap: 1 }}>
           <Checkbox
             checked={insurance}
-            onChange={(e) => { const v = e.target.checked; setInsurance(v); saveMilestones({ insurance: v }); }}
+            onChange={(e) => {
+              const v = e.target.checked;
+              setInsurance(v);
+              saveMilestones({ insurance: v });
+            }}
             disabled={!isAdmin}
           />
           Insurance in place
@@ -156,12 +191,20 @@ const Stage3Content = (props: {
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCommitteeUpdate())}
             disabled={!isAdmin}
           />
-          <Button onClick={addCommitteeUpdate} disabled={!isAdmin || savingMilestones} sx={{ px: 2, py: 1, fontSize: 0 }}>Add</Button>
+          <Button
+            onClick={addCommitteeUpdate}
+            disabled={!isAdmin || savingMilestones}
+            sx={{ px: 2, py: 1, fontSize: 0 }}
+          >
+            Add
+          </Button>
         </Flex>
         {committeeUpdatesList.length > 0 && (
           <Box sx={{ mb: 2 }}>
             {committeeUpdatesList.map((u, i) => (
-              <Text key={i} sx={{ fontSize: 0, display: 'block' }}>• {u}</Text>
+              <Text key={i} sx={{ fontSize: 0, display: 'block' }}>
+                • {u}
+              </Text>
             ))}
           </Box>
         )}
@@ -212,14 +255,25 @@ const Stage3Content = (props: {
       {championOpen ? (
         <form onSubmit={handleChampion}>
           <Label>Note / role (optional)</Label>
-          <Textarea value={championNote} onChange={(e) => setChampionNote(e.target.value)} rows={2} sx={{ mb: 2 }} />
+          <Textarea
+            value={championNote}
+            onChange={(e) => setChampionNote(e.target.value)}
+            rows={2}
+            sx={{ mb: 2 }}
+          />
           <Flex sx={{ gap: 2 }}>
             <Button type="submit">Submit</Button>
-            <Button type="button" variant="outline" onClick={() => setChampionOpen(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => setChampionOpen(false)}>
+              Cancel
+            </Button>
           </Flex>
         </form>
       ) : (
-        <Button variant="primary" onClick={() => setChampionOpen(true)} disabled={championSubmitted}>
+        <Button
+          variant="primary"
+          onClick={() => setChampionOpen(true)}
+          disabled={championSubmitted}
+        >
           {championSubmitted ? 'Champion role recorded ✓' : 'Committee / Champion involvement'}
         </Button>
       )}
@@ -260,7 +314,10 @@ const Stage4Content = (props: {
   const fundraisingLaunched = Boolean(ms.fundraisingLaunched);
   const statusLabel = fundraisingLaunched ? 'Campaign launched' : 'Campaign not yet launched';
   const hasProgress = campaignGoal != null && campaignGoal > 0;
-  const progressPct = hasProgress && campaignRaised != null ? Math.min(100, (campaignRaised / campaignGoal) * 100) : 0;
+  const progressPct =
+    hasProgress && campaignRaised != null
+      ? Math.min(100, (campaignRaised / campaignGoal) * 100)
+      : 0;
 
   return (
     <Box sx={{ bg: 'softRed', p: 3, borderRadius: 2, mt: 3 }}>
@@ -284,14 +341,20 @@ const Stage4Content = (props: {
         </Box>
       ) : (
         <Text sx={{ fontSize: 0, color: 'grey', mb: 3 }}>
-          Campaign details will appear here once configured by SCIS staff. To contribute now, use the Donate button below. For community bond or investment options, contact SCIS.
+          Campaign details will appear here once configured by SCIS staff. To contribute now, use
+          the Donate button below. For community bond or investment options, contact SCIS.
         </Text>
       )}
       {donateOpen ? (
         <form onSubmit={handleDonate}>
           <Label>Amount (optional)</Label>
           <Flex sx={{ gap: 2, mb: 2 }}>
-            <Input type="number" value={donateAmount} onChange={(e) => setDonateAmount(e.target.value)} placeholder="0" />
+            <Input
+              type="number"
+              value={donateAmount}
+              onChange={(e) => setDonateAmount(e.target.value)}
+              placeholder="0"
+            />
             <Select value={donateCurrency} onChange={(e) => setDonateCurrency(e.target.value)}>
               <option value="CAD">CAD</option>
               <option value="USD">USD</option>
@@ -299,10 +362,19 @@ const Stage4Content = (props: {
             </Select>
           </Flex>
           <Label>Note (optional)</Label>
-          <Textarea value={donateNote} onChange={(e) => setDonateNote(e.target.value)} rows={2} sx={{ mb: 2 }} />
+          <Textarea
+            value={donateNote}
+            onChange={(e) => setDonateNote(e.target.value)}
+            rows={2}
+            sx={{ mb: 2 }}
+          />
           <Flex sx={{ gap: 2 }}>
-            <Button type="submit" variant="primary">Submit</Button>
-            <Button type="button" variant="outline" onClick={() => setDonateOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="primary">
+              Submit
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setDonateOpen(false)}>
+              Cancel
+            </Button>
           </Flex>
         </form>
       ) : (
@@ -331,7 +403,8 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
   const status = (pin as any)?.status ?? (pin as any)?.moderation ?? 'approved';
   const isPending = status === 'pending';
   const effectiveStage = Number(pin?.effectiveStage ?? pin?.stage ?? 1);
-  const initiativeId = pin?.initiativeId ?? String(pin?.id ?? pin?._id ?? '').replace(/^initiative-/, '');
+  const initiativeId =
+    pin?.initiativeId ?? String(pin?.id ?? pin?._id ?? '').replace(/^initiative-/, '');
   const supportersAtSubmitRef = useRef(0);
 
   const membershipCount = Number((pin as any)?.memberCount ?? 0);
@@ -375,9 +448,7 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
   const [championSubmitted, setChampionSubmitted] = useState(false);
 
   // Support both camelCase (initiative pins) and snake_case (API response)
-  const baseSupporters = Number(
-    (pin as any)?.supporterCount ?? (pin as any)?.supporter_count ?? 0,
-  );
+  const baseSupporters = Number((pin as any)?.supporterCount ?? (pin as any)?.supporter_count ?? 0);
   // Optimistic: show +1 immediately after Add my name; once refetch completes, use real count
   const currentSupporters =
     addNameSubmitted && baseSupporters === supportersAtSubmitRef.current
@@ -412,16 +483,21 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
       setAddNameOpen(false);
       setAddNameErrors({});
       setAddNameApiError(null);
-      mapContext?.refreshInitiatives?.();
+      mapContext?.refreshProjects?.();
     } else {
-      setAddNameApiError('Failed to record your support. Check your connection and try again, or contact support if the problem persists.');
+      setAddNameApiError(
+        'Failed to record your support. Check your connection and try again, or contact support if the problem persists.',
+      );
     }
   };
 
   const handleVolunteer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!initiativeId) return;
-    const skills = volunteerSkills.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+    const skills = volunteerSkills
+      .split(/[,;]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     const ok = await scisService.addContribution(initiativeId, 'volunteer_skills', {
       skills: skills.length ? skills : undefined,
       note: volunteerNote.trim() || undefined,
@@ -429,7 +505,7 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
     if (ok) {
       setVolunteerSubmitted(true);
       setVolunteerOpen(false);
-      mapContext?.refreshInitiatives?.();
+      mapContext?.refreshProjects?.();
     }
   };
 
@@ -443,7 +519,7 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
     if (ok) {
       setMembershipSubmitted(true);
       setMembershipOpen(false);
-      mapContext?.refreshInitiatives?.();
+      mapContext?.refreshProjects?.();
     }
   };
 
@@ -459,7 +535,7 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
     if (ok) {
       setDonateSubmitted(true);
       setDonateOpen(false);
-      mapContext?.refreshInitiatives?.();
+      mapContext?.refreshProjects?.();
     }
   };
 
@@ -472,7 +548,7 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
     if (ok) {
       setChampionSubmitted(true);
       setChampionOpen(false);
-      mapContext?.refreshInitiatives?.();
+      mapContext?.refreshProjects?.();
     }
   };
 
@@ -493,7 +569,8 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
             Pending approval
           </Heading>
           <Text sx={{ fontSize: 1 }}>
-            This initiative is awaiting admin approval. Once approved, it will appear with full community support options.
+            This initiative is awaiting admin approval. Once approved, it will appear with full
+            community support options.
           </Text>
         </Box>
       );
@@ -527,34 +604,62 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
             </Flex>
 
             {addNameSubmitted ? (
-              <Text sx={{ color: 'green', fontSize: 1 }}>Thank you! Your support has been recorded.</Text>
+              <Text sx={{ color: 'green', fontSize: 1 }}>
+                Thank you! Your support has been recorded.
+              </Text>
             ) : addNameOpen ? (
               <form ref={addNameFormRef} onSubmit={handleAddMyName}>
                 {addNameApiError && (
                   <Text sx={{ color: 'red', fontSize: 0, mb: 2 }}>{addNameApiError}</Text>
                 )}
                 <Label htmlFor="add-name">Name *</Label>
-                <Input id="add-name" value={addNameName} onChange={(e) => setAddNameName(e.target.value)} required sx={{ mb: 2 }} />
+                <Input
+                  id="add-name"
+                  value={addNameName}
+                  onChange={(e) => setAddNameName(e.target.value)}
+                  required
+                  sx={{ mb: 2 }}
+                />
                 <Label htmlFor="add-email">Email *</Label>
                 <Input
                   id="add-email"
                   type="email"
                   value={addNameEmail}
-                  onChange={(e) => { setAddNameEmail(e.target.value); setAddNameErrors((prev) => ({ ...prev, email: undefined })); }}
+                  onChange={(e) => {
+                    setAddNameEmail(e.target.value);
+                    setAddNameErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
                   sx={{ mb: 2 }}
                 />
-                {addNameErrors.email && <Text sx={{ color: 'red', fontSize: 0, mb: 1 }}>{addNameErrors.email}</Text>}
+                {addNameErrors.email && (
+                  <Text sx={{ color: 'red', fontSize: 0, mb: 1 }}>{addNameErrors.email}</Text>
+                )}
                 <Label htmlFor="add-postal">Postal code *</Label>
                 <Input
                   id="add-postal"
                   value={addNamePostal}
-                  onChange={(e) => { setAddNamePostal(e.target.value); setAddNameErrors((prev) => ({ ...prev, postalCode: undefined })); }}
+                  onChange={(e) => {
+                    setAddNamePostal(e.target.value);
+                    setAddNameErrors((prev) => ({ ...prev, postalCode: undefined }));
+                  }}
                   sx={{ mb: 2 }}
                 />
-                {addNameErrors.postalCode && <Text sx={{ color: 'red', fontSize: 0, mb: 1 }}>{addNameErrors.postalCode}</Text>}
+                {addNameErrors.postalCode && (
+                  <Text sx={{ color: 'red', fontSize: 0, mb: 1 }}>{addNameErrors.postalCode}</Text>
+                )}
                 <Flex sx={{ gap: 2 }}>
                   <Button type="submit">Submit</Button>
-                  <Button type="button" variant="outline" onClick={() => { setAddNameOpen(false); setAddNameErrors({}); setAddNameApiError(null); }}>Cancel</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setAddNameOpen(false);
+                      setAddNameErrors({});
+                      setAddNameApiError(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </Flex>
               </form>
             ) : (
@@ -582,23 +687,41 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
               Stage 2: Community Formation
             </Heading>
             <Text sx={{ fontSize: 1, mb: 2 }}>
-              {currentSupporters}/{STAGE2_SUPPORTERS} supporters · {membershipCount}/{STAGE2_MEMBERS} members · {championCount}/{STAGE2_CHAMPIONS} champions · {volunteerCount} volunteers · {donateCount} donations
+              {currentSupporters}/{STAGE2_SUPPORTERS} supporters · {membershipCount}/
+              {STAGE2_MEMBERS} members · {championCount}/{STAGE2_CHAMPIONS} champions ·{' '}
+              {volunteerCount} volunteers · {donateCount} donations
             </Text>
 
             <Flex sx={{ flexDirection: 'column', gap: 2 }}>
               {volunteerOpen ? (
                 <form onSubmit={handleVolunteer}>
                   <Label>Skills (comma-separated)</Label>
-                  <Input value={volunteerSkills} onChange={(e) => setVolunteerSkills(e.target.value)} placeholder="e.g. carpentry, painting" sx={{ mb: 2 }} />
+                  <Input
+                    value={volunteerSkills}
+                    onChange={(e) => setVolunteerSkills(e.target.value)}
+                    placeholder="e.g. carpentry, painting"
+                    sx={{ mb: 2 }}
+                  />
                   <Label>Note (optional)</Label>
-                  <Textarea value={volunteerNote} onChange={(e) => setVolunteerNote(e.target.value)} rows={2} sx={{ mb: 2 }} />
+                  <Textarea
+                    value={volunteerNote}
+                    onChange={(e) => setVolunteerNote(e.target.value)}
+                    rows={2}
+                    sx={{ mb: 2 }}
+                  />
                   <Flex sx={{ gap: 2 }}>
                     <Button type="submit">Submit</Button>
-                    <Button type="button" variant="outline" onClick={() => setVolunteerOpen(false)}>Cancel</Button>
+                    <Button type="button" variant="outline" onClick={() => setVolunteerOpen(false)}>
+                      Cancel
+                    </Button>
                   </Flex>
                 </form>
               ) : (
-                <Button variant="outline" onClick={() => setVolunteerOpen(true)} disabled={volunteerSubmitted}>
+                <Button
+                  variant="outline"
+                  onClick={() => setVolunteerOpen(true)}
+                  disabled={volunteerSubmitted}
+                >
                   {volunteerSubmitted ? 'Volunteer skills submitted ✓' : 'Volunteer Skills'}
                 </Button>
               )}
@@ -606,20 +729,41 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
               {membershipOpen ? (
                 <form onSubmit={handleMembership}>
                   <Label>Membership type</Label>
-                  <Select value={membershipType} onChange={(e) => setMembershipType(e.target.value)} sx={{ mb: 2 }}>
+                  <Select
+                    value={membershipType}
+                    onChange={(e) => setMembershipType(e.target.value)}
+                    sx={{ mb: 2 }}
+                  >
                     {MEMBERSHIP_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </Select>
                   <Label>Note (optional)</Label>
-                  <Textarea value={membershipNote} onChange={(e) => setMembershipNote(e.target.value)} rows={2} sx={{ mb: 2 }} />
+                  <Textarea
+                    value={membershipNote}
+                    onChange={(e) => setMembershipNote(e.target.value)}
+                    rows={2}
+                    sx={{ mb: 2 }}
+                  />
                   <Flex sx={{ gap: 2 }}>
                     <Button type="submit">Submit</Button>
-                    <Button type="button" variant="outline" onClick={() => setMembershipOpen(false)}>Cancel</Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setMembershipOpen(false)}
+                    >
+                      Cancel
+                    </Button>
                   </Flex>
                 </form>
               ) : (
-                <Button variant="secondary" onClick={() => setMembershipOpen(true)} disabled={membershipSubmitted}>
+                <Button
+                  variant="secondary"
+                  onClick={() => setMembershipOpen(true)}
+                  disabled={membershipSubmitted}
+                >
                   {membershipSubmitted ? 'Membership pledged ✓' : 'Pledge Membership'}
                 </Button>
               )}
@@ -628,22 +772,41 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
                 <form onSubmit={handleDonate}>
                   <Label>Amount (optional)</Label>
                   <Flex sx={{ gap: 2, mb: 2 }}>
-                    <Input type="number" value={donateAmount} onChange={(e) => setDonateAmount(e.target.value)} placeholder="0" />
-                    <Select value={donateCurrency} onChange={(e) => setDonateCurrency(e.target.value)}>
+                    <Input
+                      type="number"
+                      value={donateAmount}
+                      onChange={(e) => setDonateAmount(e.target.value)}
+                      placeholder="0"
+                    />
+                    <Select
+                      value={donateCurrency}
+                      onChange={(e) => setDonateCurrency(e.target.value)}
+                    >
                       <option value="CAD">CAD</option>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                     </Select>
                   </Flex>
                   <Label>Note (optional)</Label>
-                  <Textarea value={donateNote} onChange={(e) => setDonateNote(e.target.value)} rows={2} sx={{ mb: 2 }} />
+                  <Textarea
+                    value={donateNote}
+                    onChange={(e) => setDonateNote(e.target.value)}
+                    rows={2}
+                    sx={{ mb: 2 }}
+                  />
                   <Flex sx={{ gap: 2 }}>
                     <Button type="submit">Submit</Button>
-                    <Button type="button" variant="outline" onClick={() => setDonateOpen(false)}>Cancel</Button>
+                    <Button type="button" variant="outline" onClick={() => setDonateOpen(false)}>
+                      Cancel
+                    </Button>
                   </Flex>
                 </form>
               ) : (
-                <Button variant="outline" onClick={() => setDonateOpen(true)} disabled={donateSubmitted}>
+                <Button
+                  variant="outline"
+                  onClick={() => setDonateOpen(true)}
+                  disabled={donateSubmitted}
+                >
                   {donateSubmitted ? 'Donation intent recorded ✓' : 'Donate'}
                 </Button>
               )}
@@ -651,14 +814,26 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
               {championOpen ? (
                 <form onSubmit={handleChampion}>
                   <Label>Note / role (optional)</Label>
-                  <Textarea value={championNote} onChange={(e) => setChampionNote(e.target.value)} placeholder="How you can champion this" rows={2} sx={{ mb: 2 }} />
+                  <Textarea
+                    value={championNote}
+                    onChange={(e) => setChampionNote(e.target.value)}
+                    placeholder="How you can champion this"
+                    rows={2}
+                    sx={{ mb: 2 }}
+                  />
                   <Flex sx={{ gap: 2 }}>
                     <Button type="submit">Submit</Button>
-                    <Button type="button" variant="outline" onClick={() => setChampionOpen(false)}>Cancel</Button>
+                    <Button type="button" variant="outline" onClick={() => setChampionOpen(false)}>
+                      Cancel
+                    </Button>
                   </Flex>
                 </form>
               ) : (
-                <Button variant="primary" onClick={() => setChampionOpen(true)} disabled={championSubmitted}>
+                <Button
+                  variant="primary"
+                  onClick={() => setChampionOpen(true)}
+                  disabled={championSubmitted}
+                >
                   {championSubmitted ? 'Champion role recorded ✓' : 'Become a Champion'}
                 </Button>
               )}
@@ -671,7 +846,7 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
           <Stage3Content
             initiativeId={initiativeId}
             stage3Milestones={(pin as any)?.stage3Milestones}
-            onRefresh={() => mapContext?.refreshInitiatives?.()}
+            onRefresh={() => mapContext?.refreshProjects?.()}
             championOpen={championOpen}
             setChampionOpen={setChampionOpen}
             championNote={championNote}
@@ -722,36 +897,36 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
       }}
     >
       <Flex
-  sx={{
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    mb: 3,
-    gap: 2,
-  }}
->
-  {/* Left: badges */}
-  <Flex sx={{ alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-    <Badge
-      variant={isPending ? 'outline' : effectiveStage === 4 ? 'accent' : 'primary'}
-      sx={{
-        px: 2,
-        py: 1,
-        borderRadius: 9999,
-        fontSize: 5,
-        lineHeight: 1,
-        whiteSpace: 'nowrap',
-        borderColor: 'primary',
-      }}
-    >
-      {isPending ? 'Pending approval' : `Stage ${effectiveStage}`}
-    </Badge>
-  </Flex>
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+          gap: 2,
+        }}
+      >
+        {/* Left: badges */}
+        <Flex sx={{ alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Badge
+            variant={isPending ? 'outline' : effectiveStage === 4 ? 'accent' : 'primary'}
+            sx={{
+              px: 2,
+              py: 1,
+              borderRadius: 9999,
+              fontSize: 5,
+              lineHeight: 1,
+              whiteSpace: 'nowrap',
+              borderColor: 'primary',
+            }}
+          >
+            {isPending ? 'Pending approval' : `Stage ${effectiveStage}`}
+          </Badge>
+        </Flex>
 
-    {/* Right: close */}
-    <Button variant="outline" onClick={onClose} sx={{ cursor: 'pointer', px: 2, py: 1 }}>
-      Close
-    </Button>
-  </Flex>
+        {/* Right: close */}
+        <Button variant="outline" onClick={onClose} sx={{ cursor: 'pointer', px: 2, py: 1 }}>
+          Close
+        </Button>
+      </Flex>
 
       <Box
         sx={{
@@ -766,11 +941,11 @@ export const InitiativeDrawer = ({ pin, onClose }: IProps) => {
         }}
       />
 
-      <Heading as="h2" sx={{ mb: 2 , fontSize:6}}>
+      <Heading as="h2" sx={{ mb: 2, fontSize: 6 }}>
         {pin.profile?.name || pin.title || 'Community Project'}
       </Heading>
 
-      <Text sx={{ mb: 4, lineHeight: 1.5, color: 'grey', fontSize:3}}>
+      <Text sx={{ mb: 4, lineHeight: 1.5, color: 'grey', fontSize: 3 }}>
         {pin.description || 'A shared infrastructure project proposed by your neighbors.'}
       </Text>
 

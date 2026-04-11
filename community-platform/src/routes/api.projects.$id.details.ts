@@ -41,14 +41,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     return Response.json({ error: 'Forbidden' }, { headers, status: 403 });
   }
 
-  const [{ data: project, error: projectError }, { data: supportRows, error: supportError }] = await Promise.all([
-    client.from('projects').select('*').eq('id', projectId).single(),
-    client
-      .from('project_supports')
-      .select('id,type,display_name,email,payload,created_at')
-      .eq('project_id', projectId)
-      .order('created_at', { ascending: false }),
-  ]);
+  const [{ data: project, error: projectError }, { data: supportRows, error: supportError }] =
+    await Promise.all([
+      client.from('projects').select('*').eq('id', projectId).single(),
+      client
+        .from('project_supports')
+        .select('id,type,display_name,email,payload,created_at')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false }),
+    ]);
 
   if (projectError) {
     console.error('Failed to load project details', projectError);
@@ -68,7 +69,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       const payload = (row.payload ?? {}) as Record<string, unknown>;
       return {
         id: row.id,
-        name: row.display_name ?? (payload.displayName as string) ?? (payload.name as string) ?? null,
+        name:
+          row.display_name ?? (payload.displayName as string) ?? (payload.name as string) ?? null,
         email: row.email ?? (payload.email as string) ?? null,
         postal_code: (payload.postalCode as string) ?? (payload.postal_code as string) ?? null,
         created_at: row.created_at,

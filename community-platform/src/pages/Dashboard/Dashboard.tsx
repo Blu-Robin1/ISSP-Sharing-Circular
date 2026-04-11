@@ -6,9 +6,7 @@ export const Dashboard = () => {
       <Heading as="h1" sx={{ mb: 3 }}>
         Dashboard
       </Heading>
-      <Text>
-        This is dashboard.
-      </Text>
+      <Text>This is dashboard.</Text>
     </Box>
   );
 };

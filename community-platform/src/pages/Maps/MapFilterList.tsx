@@ -1,6 +1,6 @@
 import { Button, ButtonIcon, MapFilterListItem, MemberBadge, UserBadge } from 'oa-components';
-import { useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { useContext, useMemo } from 'react';
 import { Checkbox, Flex, Heading, Label, Text } from 'theme-ui';
 
 import { MapContext } from './MapContext';
@@ -234,13 +234,7 @@ export const MapFilterList = ({ onClose }: MapFilterListProps) => {
   );
 };
 
-const MapFilterListWrapper = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => {
+const MapFilterListWrapper = ({ title, children }: { title: string; children: ReactNode }) => {
   return (
     <Flex sx={{ gap: 1, flexDirection: 'column' }}>
       <Text>{title}</Text>

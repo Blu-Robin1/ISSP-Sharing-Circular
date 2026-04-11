@@ -38,8 +38,7 @@ export const fields: ILabels = {
   },
   about: {
     title: 'Tell us about yourself',
-    placeholder:
-      "Describe in details what you do and who you are.",
+    placeholder: 'Describe in details what you do and who you are.',
   },
   city: {
     title: 'City',
@@ -109,7 +108,7 @@ export const fields: ILabels = {
   },
   userName: {
     title: 'Username',
-    description: "This username was set when your account was created and cannot be changed.",
+    description: 'This username was set when your account was created and cannot be changed.',
   },
   tags: {
     description: 'What are your main activities? (choose max five)',

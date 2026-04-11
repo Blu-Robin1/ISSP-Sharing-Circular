@@ -95,12 +95,7 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
           <Text variant="quiet" sx={{ fontSize: 2 }}>
             {userName.description}
           </Text>
-          <Field
-            data-cy="userName"
-            name="userName"
-            component={FieldInput}
-            validateFields={[]}
-          />
+          <Field data-cy="userName" name="userName" component={FieldInput} validateFields={[]} />
         </Flex>
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
@@ -137,14 +132,12 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
         </Flex>
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
-          <Text>{city.title} <Text color="red">*</Text></Text>
+          <Text>
+            {city.title} <Text color="red">*</Text>
+          </Text>
           <Field data-cy="city-dropdown" name="city">
             {(field) => (
-              <SelectField
-                options={cityOptions}
-                placeholder="Select your city..."
-                {...field}
-              />
+              <SelectField options={cityOptions} placeholder="Select your city..." {...field} />
             )}
           </Field>
 

@@ -40,75 +40,76 @@ export const SettingsPage = observer(() => {
   const isAdminUser = profile?.roles?.includes(UserRole.ADMIN) ?? false;
 
   const tabs: ISettingsTab[] = useMemo(
-    () => [
-      {
-        title: 'Profile',
-        route: '/settings/profile',
-        // header: isComplete === false && (
-        //   <Flex sx={{ gap: 2, flexDirection: 'column' }} data-cy="CompleteProfileHeader">
-        //     <Text as="h3">✏️ Complete your profile</Text>
-        //     <Text>
-        //       In order to post comments or create content, we'd like you to share something about
-        //       yourself.
-        //     </Text>
-        //     {missingFields && missingFields.length > 0 && (
-        //       <Text>
-        //         Missing required fields:
-        //         <ul style={{ margin: '0.5em 0 0 0', paddingLeft: '1.5em' }}>
-        //           {missingFields.map((field) => (
-        //             <li key={field}>{field}</li>
-        //           ))}
-        //         </ul>
-        //       </Text>
-        //     )}
-        //   </Flex>
-        // ),
-        body: SettingsPageUserProfile,
-        glyph: 'profile',
-      },
-      ...(showMapTab
-        ? [
-            {
-              title: 'Map',
-              route: '/settings/map',
-              body: SettingsPageMapPin,
-              glyph: 'map',
-            },
-          ]
-        : []),
-      ...(showImpactTab
-        ? [
-            {
-              title: 'Impact',
-              route: '/settings/impact',
-              body: SettingsPageImpact,
-              glyph: 'impact',
-            },
-          ]
-        : []),
-      {
-        title: 'Notifications',
-        route: '/settings/notifications',
-        body: SettingsPageNotifications,
-        glyph: 'megaphone',
-      },
-      {
-        title: 'Account',
-        route: '/settings/account',
-        body: SettingsPageAccount,
-        glyph: 'account',
-      },
-      ...(isAdminUser
-        ? [
-            {
-              title: 'Admin',
-              route: '/admin/initiatives',
-              body: AdminSettingsNavPlaceholder,
-              glyph: 'employee',
-            },
-          ]
-        : []),
-    ],
+    () =>
+      [
+        {
+          title: 'Profile',
+          route: '/settings/profile',
+          // header: isComplete === false && (
+          //   <Flex sx={{ gap: 2, flexDirection: 'column' }} data-cy="CompleteProfileHeader">
+          //     <Text as="h3">✏️ Complete your profile</Text>
+          //     <Text>
+          //       In order to post comments or create content, we'd like you to share something about
+          //       yourself.
+          //     </Text>
+          //     {missingFields && missingFields.length > 0 && (
+          //       <Text>
+          //         Missing required fields:
+          //         <ul style={{ margin: '0.5em 0 0 0', paddingLeft: '1.5em' }}>
+          //           {missingFields.map((field) => (
+          //             <li key={field}>{field}</li>
+          //           ))}
+          //         </ul>
+          //       </Text>
+          //     )}
+          //   </Flex>
+          // ),
+          body: SettingsPageUserProfile,
+          glyph: 'profile',
+        },
+        ...(showMapTab
+          ? [
+              {
+                title: 'Map',
+                route: '/settings/map',
+                body: SettingsPageMapPin,
+                glyph: 'map',
+              },
+            ]
+          : []),
+        ...(showImpactTab
+          ? [
+              {
+                title: 'Impact',
+                route: '/settings/impact',
+                body: SettingsPageImpact,
+                glyph: 'impact',
+              },
+            ]
+          : []),
+        {
+          title: 'Notifications',
+          route: '/settings/notifications',
+          body: SettingsPageNotifications,
+          glyph: 'megaphone',
+        },
+        {
+          title: 'Account',
+          route: '/settings/account',
+          body: SettingsPageAccount,
+          glyph: 'account',
+        },
+        ...(isAdminUser
+          ? [
+              {
+                title: 'Admin',
+                route: '/admin/initiatives',
+                body: AdminSettingsNavPlaceholder,
+                glyph: 'employee',
+              },
+            ]
+          : []),
+      ] as ISettingsTab[],
     [showMapTab, showImpactTab, isComplete, missingFields, isAdminUser],
   );
 

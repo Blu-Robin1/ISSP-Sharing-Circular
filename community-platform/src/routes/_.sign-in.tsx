@@ -52,18 +52,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     ) {
       return Response.json(
         {
-          error:
-            'Email rate limit exceeded. Please try again in an hour.',
+          error: 'Email rate limit exceeded. Please try again in an hour.',
         },
         { headers, status: 429 },
       );
     }
 
     if (error.code === 'invalid_credentials') {
-      return Response.json(
-        { error: 'Invalid email or password.' },
-        { headers, status: 400 },
-      );
+      return Response.json({ error: 'Invalid email or password.' }, { headers, status: 400 });
     }
 
     console.error('[sign-in] auth error:', error.code, error.message);

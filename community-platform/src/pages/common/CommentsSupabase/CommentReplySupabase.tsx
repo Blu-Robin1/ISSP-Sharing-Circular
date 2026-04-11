@@ -26,7 +26,10 @@ export const CommentReply = observer(({ comment, onEdit, onDelete }: ICommentIte
   const { profile: activeUser } = useProfileStore();
 
   const isEditable = useMemo(() => {
-    return activeUser?.username === comment.createdBy?.username || activeUser?.roles?.includes(UserRole.ADMIN);
+    return (
+      activeUser?.username === comment.createdBy?.username ||
+      activeUser?.roles?.includes(UserRole.ADMIN)
+    );
   }, [activeUser, comment]);
 
   useEffect(() => {
@@ -72,7 +75,11 @@ export const CommentReply = observer(({ comment, onEdit, onDelete }: ICommentIte
       >
         <Icon glyph="reply-outline" />
       </Box>
-      <Flex id={`comment:${comment.id}`} data-cy={isEditable ? `Own${item}` : item} sx={{ flexDirection: 'column', width: '100%' }}>
+      <Flex
+        id={`comment:${comment.id}`}
+        data-cy={isEditable ? `Own${item}` : item}
+        sx={{ flexDirection: 'column', width: '100%' }}
+      >
         <Flex sx={{ gap: 2 }} ref={commentRef as any}>
           {comment.deleted ? (
             <Box

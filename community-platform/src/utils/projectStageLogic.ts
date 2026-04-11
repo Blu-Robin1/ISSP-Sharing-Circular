@@ -13,13 +13,6 @@ const DEFAULT_THRESHOLDS: ProjectStageThresholds = {
   stage4Supporters: 40,
 };
 
-function uniqueSupporterKey(a: { userId?: string; displayName?: string; email?: string }) {
-  if (a.userId) return `u:${a.userId}`;
-  if (a.email) return `e:${a.email.trim().toLowerCase()}`;
-  if (a.displayName) return `n:${a.displayName.trim().toLowerCase()}`;
-  return "anon";
-}
-
 export function computeEffectiveStage(
   params: {
     stage?: number | null;

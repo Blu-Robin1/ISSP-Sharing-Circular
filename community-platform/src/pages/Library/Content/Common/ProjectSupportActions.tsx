@@ -1,6 +1,6 @@
+import type { ProjectSupportActionType } from 'oa-shared';
 import { useState } from 'react';
 import { Button, Card, Flex, Text, Textarea } from 'theme-ui';
-import type { ProjectSupportActionType } from 'oa-shared';
 
 interface ProjectSupportActionsProps {
   projectId: number;
@@ -25,7 +25,7 @@ export const ProjectSupportActions = ({
 
     switch (selectedAction) {
       case 'volunteer_skills':
-        data.skills = skills.split(',').map(s => s.trim());
+        data.skills = skills.split(',').map((s) => s.trim());
         break;
       case 'pledge_membership':
         data.membershipType = membershipType;
@@ -67,9 +67,7 @@ export const ProjectSupportActions = ({
 
     return (
       <Card sx={{ p: 3, mt: 2 }}>
-        <Text sx={{ fontWeight: 'bold', mb: 2 }}>
-          {getActionTitle(selectedAction)}
-        </Text>
+        <Text sx={{ fontWeight: 'bold', mb: 2 }}>{getActionTitle(selectedAction)}</Text>
 
         {selectedAction === 'volunteer_skills' && (
           <div>
@@ -139,11 +137,7 @@ export const ProjectSupportActions = ({
         )}
 
         <Flex sx={{ gap: 2, justifyContent: 'flex-end' }}>
-          <Button
-            variant="outline"
-            onClick={() => setSelectedAction(null)}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={() => setSelectedAction(null)} disabled={isLoading}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>
@@ -160,7 +154,7 @@ export const ProjectSupportActions = ({
       <Flex sx={{ gap: 2, flexWrap: 'wrap' }}>
         <Button
           variant="outline"
-          size="sm"
+          sx={{ fontSize: 1 }}
           onClick={() => setSelectedAction('add_my_name')}
           disabled={isLoading}
         >
@@ -168,7 +162,7 @@ export const ProjectSupportActions = ({
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          sx={{ fontSize: 1 }}
           onClick={() => setSelectedAction('volunteer_skills')}
           disabled={isLoading}
         >
@@ -176,7 +170,7 @@ export const ProjectSupportActions = ({
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          sx={{ fontSize: 1 }}
           onClick={() => setSelectedAction('pledge_membership')}
           disabled={isLoading}
         >
@@ -184,7 +178,7 @@ export const ProjectSupportActions = ({
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          sx={{ fontSize: 1 }}
           onClick={() => setSelectedAction('donate')}
           disabled={isLoading}
         >
@@ -192,7 +186,7 @@ export const ProjectSupportActions = ({
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          sx={{ fontSize: 1 }}
           onClick={() => setSelectedAction('champion')}
           disabled={isLoading}
         >

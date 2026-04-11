@@ -120,7 +120,7 @@ const getAllUserProjects = async (
       slug: x.slug,
       usefulCount: 0,
     }));
-  } catch (err) {
+  } catch (_err) {
     return [];
   }
 };

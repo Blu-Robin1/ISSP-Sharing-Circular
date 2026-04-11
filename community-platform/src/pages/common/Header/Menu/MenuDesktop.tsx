@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
+import { UserRole } from 'oa-shared';
 import { useContext } from 'react';
 import { NavLink } from 'react-router';
-import { UserRole } from 'oa-shared';
 import MenuCurrent from 'src/assets/images/menu-current.svg';
 import { AuthWrapper } from 'src/common/AuthWrapper';
 import { getSupportedModules } from 'src/modules';
