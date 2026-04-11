@@ -2,12 +2,13 @@ import type {
   DBPreferencesWithProfileContact,
   NotificationsPreferencesViaEmailFormData,
 } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getPreferences = async (
   userCode: string,
 ): Promise<DBPreferencesWithProfileContact | null> => {
   try {
-    const response = await fetch(`/api/notifications-preferences-via-email/${userCode}`);
+    const response = await apiFetch(`/api/notifications-preferences-via-email/${userCode}`);
 
     if (!response.ok) {
       console.error(`HTTP error! status: ${response.status}`);
@@ -31,7 +32,7 @@ const setPreferences = async (
   formData.append('research_updates', data.research_updates.toString());
   formData.append('is_unsubscribed', 'false');
 
-  return fetch(`/api/notifications-preferences-via-email/${data.userCode}`, {
+  return apiFetch(`/api/notifications-preferences-via-email/${data.userCode}`, {
     method: 'POST',
     body: formData,
   });
@@ -47,7 +48,7 @@ const setUnsubscribe = async (userCode: string, id?: number): Promise<Response> 
   formData.append('research_updates', 'false');
   formData.append('is_unsubscribed', 'true');
 
-  return fetch(`/api/notifications-preferences-via-email/${userCode}`, {
+  return apiFetch(`/api/notifications-preferences-via-email/${userCode}`, {
     method: 'POST',
     body: formData,
   });

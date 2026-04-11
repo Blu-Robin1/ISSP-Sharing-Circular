@@ -8,7 +8,7 @@ import { ProfileType } from './profileType';
 export type DBAuthor = {
   readonly id: number;
   readonly username: string;
-  readonly country: string;
+  readonly city: string;
   readonly display_name: string;
   readonly photo: DBMedia | null;
   readonly badges?: DBProfileBadgeJoin[] | DBProfileBadge[];
@@ -18,7 +18,7 @@ export type DBAuthor = {
 
 export class Author {
   id: number;
-  country?: string;
+  city?: string;
   displayName: string;
   badges?: ProfileBadge[];
   photo: Image | null;

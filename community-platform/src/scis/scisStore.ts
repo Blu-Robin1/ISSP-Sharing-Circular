@@ -4,13 +4,13 @@ import type {
   ScisStage,
   ScisSupportAction,
   ScisSupportActionType,
-} from "./scisTypes";
+} from './scisTypes';
 
-const STORAGE_KEY = "scis_initiatives_v1";
+const STORAGE_KEY = 'scis_initiatives_v1';
 
 // SSR-safe guard
 function canUseBrowserStorage() {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 }
 
 function nowIso() {
@@ -39,7 +39,7 @@ function saveAll(items: ScisInitiative[]) {
   if (!canUseBrowserStorage()) return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   // Notify same-tab listeners
-  window.dispatchEvent(new CustomEvent("scis_store_updated"));
+  window.dispatchEvent(new CustomEvent('scis_store_updated'));
 }
 
 export interface CreateInitiativeInput {
@@ -92,7 +92,7 @@ export function createLocalScisStore(): ScisStore {
     create(input) {
       const items = loadAll();
       const initiative: ScisInitiative = {
-        id: uid("scis"),
+        id: uid('scis'),
         title: input.title.trim(),
         description: input.description.trim(),
         lat: input.lat,
@@ -101,7 +101,7 @@ export function createLocalScisStore(): ScisStore {
         createdAt: nowIso(),
         createdByUserId: input.createdByUserId,
         createdByName: input.createdByName,
-        moderation: "pending",
+        moderation: 'pending',
         supportActions: [],
       };
       items.unshift(initiative);
@@ -130,7 +130,7 @@ export function createLocalScisStore(): ScisStore {
       if (idx < 0) return undefined;
 
       const base = {
-        id: uid("support"),
+        id: uid('support'),
         initiativeId: input.initiativeId,
         type: input.type,
         createdAt: nowIso(),
@@ -141,40 +141,38 @@ export function createLocalScisStore(): ScisStore {
       let action: ScisSupportAction;
 
       switch (input.type) {
-        case "add_my_name":
-          action = { ...base, type: "add_my_name" };
+        case 'add_my_name':
+          action = { ...base, type: 'add_my_name' };
           break;
-        case "volunteer_skills":
+        case 'volunteer_skills':
           action = {
             ...base,
-            type: "volunteer_skills",
-            skills: (input.skills ?? [])
-              .map((s) => s.trim())
-              .filter(Boolean),
+            type: 'volunteer_skills',
+            skills: (input.skills ?? []).map((s) => s.trim()).filter(Boolean),
             note: input.note?.trim() || undefined,
           };
           break;
-        case "pledge_membership":
+        case 'pledge_membership':
           action = {
             ...base,
-            type: "pledge_membership",
+            type: 'pledge_membership',
             membershipType: input.membershipType?.trim() || undefined,
             note: input.note?.trim() || undefined,
           };
           break;
-        case "donate":
+        case 'donate':
           action = {
             ...base,
-            type: "donate",
-            amount: typeof input.amount === "number" ? input.amount : undefined,
+            type: 'donate',
+            amount: typeof input.amount === 'number' ? input.amount : undefined,
             currency: input.currency?.trim() || undefined,
             note: input.note?.trim() || undefined,
           };
           break;
-        case "champion":
+        case 'champion':
           action = {
             ...base,
-            type: "champion",
+            type: 'champion',
             note: input.note?.trim() || undefined,
           };
           break;
@@ -193,19 +191,19 @@ export function createLocalScisStore(): ScisStore {
       saveAll(items);
     },
     subscribe(cb) {
-      if (typeof window === "undefined") return () => {};
+      if (typeof window === 'undefined') return () => {};
 
       const onStorage = (e: StorageEvent) => {
         if (e.key === STORAGE_KEY) cb();
       };
       const onCustom = () => cb();
 
-      window.addEventListener("storage", onStorage);
-      window.addEventListener("scis_store_updated", onCustom as EventListener);
+      window.addEventListener('storage', onStorage);
+      window.addEventListener('scis_store_updated', onCustom as EventListener);
 
       return () => {
-        window.removeEventListener("storage", onStorage);
-        window.removeEventListener("scis_store_updated", onCustom as EventListener);
+        window.removeEventListener('storage', onStorage);
+        window.removeEventListener('scis_store_updated', onCustom as EventListener);
       };
     },
   };

@@ -38,7 +38,7 @@ export class MapPinFactory {
       id: profile.id,
       about: profile.about,
       username: profile.username,
-      country: profile.country,
+      city: profile.city,
       coverImages,
       displayName: profile.display_name,
       visitorPolicy: profile.visitor_policy,

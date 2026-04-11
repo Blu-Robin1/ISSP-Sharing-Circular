@@ -1,10 +1,11 @@
-import { Category, IconCountWithTooltip, ModerationStatus, Username } from 'oa-components';
+import { Category, Icon, IconCountWithTooltip, ModerationStatus, Username } from 'oa-components';
 import { type Project, UserRole } from 'oa-shared';
 import { Link as RouterLink } from 'react-router';
 import { AuthWrapper } from 'src/common/AuthWrapper';
 import { Highlighter } from 'src/common/Highlighter';
 import { capitalizeFirstLetter } from 'src/utils/helpers';
 import { Box, Card, Flex, Heading, Image } from 'theme-ui';
+import { ProjectStageDisplay } from '../Common/ProjectStageDisplay';
 
 type ProjectCardProps = {
   item: Project;
@@ -72,6 +73,17 @@ export const ProjectCard = ({ item, query }: ProjectCardProps) => {
                 <Username user={item.author} />
               </Box>
             )}
+
+            <ProjectStageDisplay
+              stage={item.stage ?? null}
+              stageOverride={item.stageOverride ?? null}
+              supporterCount={item.supporterCount || 0}
+              memberCount={item.memberCount || 0}
+              championCount={item.championCount || 0}
+              volunteerCount={item.volunteerCount || 0}
+              donateCount={item.donateCount || 0}
+              moderation={item.moderation}
+            />
           </Flex>
 
           <AuthWrapper roleRequired={UserRole.BETA_TESTER} borderLess>
@@ -98,8 +110,23 @@ export const ProjectCard = ({ item, query }: ProjectCardProps) => {
               sx={{
                 gap: 2,
                 justifyContent: 'flex-end',
+                alignItems: 'center',
               }}
             >
+              {item.lat && item.lng && (
+                <RouterLink
+                  to={`/maps?lat=${item.lat}&lng=${item.lng}&zoom=10`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
+                  <Icon glyph="location-on" size={16} />
+                </RouterLink>
+              )}
               <IconCountWithTooltip count={item.totalViews || 0} icon="show" text="Views" />
               <IconCountWithTooltip
                 count={item.usefulCount || 0}

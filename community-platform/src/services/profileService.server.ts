@@ -8,7 +8,7 @@ export class ProfileServiceServer {
   constructor(private client: SupabaseClient) {}
 
   async getByAuthId(id: string): Promise<DBProfile | null> {
-    const { data } = await this.client
+    const { data, error } = await this.client
       .from('profiles')
       .select(
         `*,
@@ -26,21 +26,37 @@ export class ProfileServiceServer {
           id,
           name,
           display_name,
-          image_url,
-          small_image_url,
           description,
           map_pin_name,
           is_space
         )`,
       )
       .eq('auth_id', id)
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      console.error('[getByAuthId] Supabase error:', error.message, error);
+    }
 
     if (!data) {
       return null;
     }
 
     return data as DBProfile;
+  }
+
+  async getByAuthIdOrCreate(authId: string, user?: User): Promise<DBProfile | null> {
+    // First try to get existing profile
+    let profile = await this.getByAuthId(authId);
+
+    // If no profile exists and we have user data, create one
+    if (!profile && user) {
+      await this.ensureProfile(user);
+      // Try again after creation
+      profile = await this.getByAuthId(authId);
+    }
+
+    return profile;
   }
 
   async getById(id: number): Promise<DBProfile | null> {
@@ -52,8 +68,6 @@ export class ProfileServiceServer {
           id,
           name,
           display_name,
-          image_url,
-          small_image_url,
           description,
           map_pin_name,
           is_space
@@ -64,7 +78,7 @@ export class ProfileServiceServer {
         )`,
       )
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (!data) {
       return null;
@@ -77,12 +91,12 @@ export class ProfileServiceServer {
     const { data } = await this.client
       .from('profiles')
       .select(
-        `id,
+        `        id,
         username,
         display_name,
         photo,
         cover_images,
-        country,
+        city,
         tags:profile_tags_relations(
           profile_tags(
             id,
@@ -103,8 +117,6 @@ export class ProfileServiceServer {
           id,
           name,
           display_name,
-          image_url,
-          small_image_url,
           description,
           map_pin_name,
           is_space
@@ -152,7 +164,7 @@ export class ProfileServiceServer {
         )`,
       )
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
     if (!data) {
       return null;
@@ -190,7 +202,7 @@ export class ProfileServiceServer {
 
     const valuesToUpdate = {
       about: values.about,
-      country: values.country,
+      city: values.city,
       display_name: values.displayName,
       website: values.website,
       is_contactable: values.isContactable,
@@ -343,7 +355,11 @@ export class ProfileServiceServer {
     }
 
     if (!user.user_metadata.username) {
-      console.error('Cannot create profile without username in user metadata');
+      console.error('Cannot create profile without username in user metadata', {
+        userId: user.id,
+        userMetadata: user.user_metadata,
+      });
+      throw new Error('Cannot create profile without username in user metadata');
     }
 
     // Doesn't exist - create it
@@ -362,6 +378,7 @@ export class ProfileServiceServer {
 
     if (error) {
       console.error('Error creating profile for user:', error);
+      throw error;
     }
   }
 

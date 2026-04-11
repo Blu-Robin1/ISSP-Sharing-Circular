@@ -1,5 +1,6 @@
 import type { DBNews, NewsFormData } from 'oa-shared';
 import { News } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 import { getCleanFileName } from 'src/utils/storage';
 
 const upsert = async (id: number | null, form: NewsFormData) => {
@@ -33,11 +34,11 @@ const upsert = async (id: number | null, form: NewsFormData) => {
 
   const response =
     id === null
-      ? await fetch(`/api/news`, {
+      ? await apiFetch(`/api/news`, {
           method: 'POST',
           body,
         })
-      : await fetch(`/api/news/${id}`, {
+      : await apiFetch(`/api/news/${id}`, {
           method: 'PUT',
           body,
         });

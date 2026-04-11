@@ -86,9 +86,7 @@ export const ResearchFilterHeader = (props: IProps) => {
 
     setSearchParams(params);
   };
-  const roleRequired = isPreciousPlastic()
-    ? undefined
-    : [UserRole.ADMIN, UserRole.RESEARCH_CREATOR];
+  const roleRequired = isPreciousPlastic() ? undefined : [UserRole.ADMIN, UserRole.ORGANIZER];
   const actionComponents = (
     <UserAction
       incompleteProfile={

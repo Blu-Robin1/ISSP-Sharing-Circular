@@ -1,6 +1,6 @@
-import { Box, Flex, Heading, Image, Text, Grid } from 'theme-ui'
-import ourStoryImage from 'packages/themes/assets/images/photos/our-story.webp'
-import ourMissionImage from 'packages/themes/assets/images/photos/our-mission.webp'
+import ourMissionImage from 'packages/themes/assets/images/photos/our-mission.webp';
+import ourStoryImage from 'packages/themes/assets/images/photos/our-story.webp';
+import { Box, Flex, Grid, Heading, Image, Text } from 'theme-ui';
 
 export const About = () => {
   return (
@@ -36,22 +36,18 @@ export const About = () => {
             <Heading sx={headingStyle}>OUR MISSION</Heading>
 
             <Text sx={paragraph}>
-              To advance the circular economy by facilitating the development,
-              funding, and implementation of shared infrastructure projects.
-              SCIS works to create accessible, community-driven spaces that
-              reduce material waste, promote sustainability, and foster
+              To advance the circular economy by facilitating the development, funding, and
+              implementation of shared infrastructure projects. SCIS works to create accessible,
+              community-driven spaces that reduce material waste, promote sustainability, and foster
               equitable resource-sharing for all.
             </Text>
 
-            <Heading sx={{ ...headingStyle, mt: 6 }}>
-              OUR VISION
-            </Heading>
+            <Heading sx={{ ...headingStyle, mt: 6 }}>OUR VISION</Heading>
 
             <Text sx={paragraph}>
-              That every community, no matter its size, has access to shared
-              infrastructure that empowers individuals and organizations to
-              reduce waste, share resources, and build a more sustainable
-              and connected society.
+              That every community, no matter its size, has access to shared infrastructure that
+              empowers individuals and organizations to reduce waste, share resources, and build a
+              more sustainable and connected society.
             </Text>
           </Box>
         </Flex>
@@ -112,15 +108,13 @@ export const About = () => {
 
             <Box sx={{ maxWidth: '650px' }}>
               <Text sx={{ fontSize: 3, lineHeight: 1.6 }}>
-                SCIS was created to make shared infrastructure more accessible
-                across communities in Canada. As interest in lending libraries
-                and other sharing-based systems grew, we saw the need for a
-                dedicated nonprofit that could help communities build, fund,
-                and manage these spaces—especially in areas where access and
-                opportunity are limited. We believe that circular innovation shouldn’t be a luxury—it
-                should be a right. Our work focuses on equipping communities
-                with the tools and support they need to reduce material waste
-                and increase social connection.
+                SCIS was created to make shared infrastructure more accessible across communities in
+                Canada. As interest in lending libraries and other sharing-based systems grew, we
+                saw the need for a dedicated nonprofit that could help communities build, fund, and
+                manage these spaces—especially in areas where access and opportunity are limited. We
+                believe that circular innovation shouldn’t be a luxury—it should be a right. Our
+                work focuses on equipping communities with the tools and support they need to reduce
+                material waste and increase social connection.
               </Text>
             </Box>
           </Flex>
@@ -135,8 +129,8 @@ export const About = () => {
         </Box>
       </Box>
     </>
-  )
-}
+  );
+};
 
 const headingStyle = {
   fontSize: [9, 10, 11],
@@ -145,12 +139,12 @@ const headingStyle = {
   color: '#2e5e5d',
   mb: 3,
   lineHeight: 1.1,
-}
+};
 
 const paragraph = {
   fontSize: 3,
   lineHeight: 1.6,
-}
+};
 
 const Value = ({ title, text }) => (
   <Box
@@ -159,12 +153,8 @@ const Value = ({ title, text }) => (
       pt: 4,
     }}
   >
-    <Heading sx={{ fontSize: 5, mb: 2 }}>
-      {title}
-    </Heading>
+    <Heading sx={{ fontSize: 5, mb: 2 }}>{title}</Heading>
 
-    <Text sx={{ fontSize: 2 }}>
-      {text}
-    </Text>
+    <Text sx={{ fontSize: 2 }}>{text}</Text>
   </Box>
-)
+);

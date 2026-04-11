@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react';
 import { MemberBadge } from 'oa-components';
+import { UserRole } from 'oa-shared';
 import { useContext, useEffect, useRef, useState } from 'react';
 import MenuMobileLink from 'src/pages/common/Header/Menu/MenuMobile/MenuMobileLink';
 import { ProfileModal } from 'src/pages/common/Header/Menu/ProfileModal/ProfileModal';
@@ -39,6 +40,8 @@ const Profile = observer((props: IProps) => {
   const { profile: profile, upgradeBadgeForCurrentUser } = useProfileStore();
   const modalRef = useClickOutside(() => setShowProfileModal(false));
   const mobileMenuContext = useContext(MobileMenuContext);
+  const isOrganizer =
+    profile?.roles?.includes(UserRole.ORGANIZER) || profile?.roles?.includes(UserRole.ADMIN);
 
   if (!profile) {
     return <ProfileButtons isMobile={props.isMobile} />;
@@ -55,6 +58,7 @@ const Profile = observer((props: IProps) => {
         }}
       >
         <MenuMobileLink path={'/u/' + profile.username} content="Profile" />
+        {isOrganizer && <MenuMobileLink path="/dashboard" content="Dashboard" />}
         {upgradeBadgeForCurrentUser && (
           <Box data-cy="mobile-menu-item" sx={{ py: 3 }}>
             <UpgradeBadgeLink

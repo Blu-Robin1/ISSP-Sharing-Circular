@@ -37,7 +37,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         error:
           result.error.code === 'email_exists'
             ? FRIENDLY_MESSAGES['auth/email-already-in-use']
-            : FRIENDLY_MESSAGES['generic'],
+            : FRIENDLY_MESSAGES['generic-error'],
       },
       { headers, status: 400 },
     );

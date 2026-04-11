@@ -1,9 +1,10 @@
 import type { UpgradeBadge } from 'oa-shared';
 import { logger } from 'src/logger';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getUpgradeBadges = async () => {
   try {
-    const response = await fetch(`/api/upgrade-badges`, {
+    const response = await apiFetch(`/api/upgrade-badges`, {
       cache: 'force-cache',
       headers: {
         'Cache-Control': 'max-age=1800', // 30 minutes

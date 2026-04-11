@@ -33,6 +33,10 @@ export const filterPins = (
     boundaries?: LatLngBounds;
 
     // SCIS additions
+    projectStages?: number[];
+    onlyProjects?: boolean;
+
+    // Backwards compatibility for older callers
     initiativeStages?: number[];
     onlyInitiatives?: boolean;
   },
@@ -41,17 +45,31 @@ export const filterPins = (
     return [];
   }
 
-  const { tags, types, badges, settings, boundaries, initiativeStages, onlyInitiatives } = filters;
+  const {
+    tags,
+    types,
+    badges,
+    settings,
+    boundaries,
+    projectStages,
+    onlyProjects,
+    initiativeStages,
+    onlyInitiatives,
+  } = filters;
 
-  // Split initiatives away from maker pins (do NOT mutate originals)
-  let initiatives = allPins.filter((p: any) => p?.type === 'initiative') as any[];
-  let makerPins = allPins.filter((p: any) => p?.type !== 'initiative') as any[];
+  const activeProjectStages = projectStages ?? initiativeStages;
+  const projectOnly = onlyProjects ?? onlyInitiatives ?? false;
+  const isProjectPin = (pin: any) => pin?.type === 'project' || pin?.type === 'initiative';
 
-  // Apply SCIS stage filters to initiatives (if selected)
-  if (initiativeStages?.length) {
-    initiatives = initiatives.filter((p: any) => {
+  // Split projects away from maker pins (do NOT mutate originals)
+  let projectPins = allPins.filter((p: any) => isProjectPin(p)) as any[];
+  let makerPins = allPins.filter((p: any) => !isProjectPin(p)) as any[];
+
+  // Apply project stage filters (if selected)
+  if (activeProjectStages?.length) {
+    projectPins = projectPins.filter((p: any) => {
       const s = Number(p?.effectiveStage ?? p?.stage ?? p?.scis?.stage);
-      return Number.isFinite(s) && initiativeStages.includes(s);
+      return Number.isFinite(s) && activeProjectStages.includes(s);
     });
   }
 
@@ -79,10 +97,10 @@ export const filterPins = (
     makerPins = makerPins.filter((x: any) => x.profile?.visitorPolicy?.policy === 'open');
   }
 
-  // Merge results (or show only initiatives)
-  let mergedPins: MapPin[] = onlyInitiatives
-    ? (initiatives as any)
-    : ([...makerPins, ...initiatives] as any);
+  // Merge results (or show only projects)
+  let mergedPins: MapPin[] = projectOnly
+    ? (projectPins as any)
+    : ([...makerPins, ...projectPins] as any);
 
   // Boundaries apply to everything
   if (boundaries) {

@@ -26,7 +26,7 @@ export const LibraryList = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get(LibrarySearchParams.q) || '';
-  const category = searchParams.get(LibrarySearchParams.category) || '';
+  const stage = searchParams.get(LibrarySearchParams.stage) || '';
   const sort = searchParams.get(LibrarySearchParams.sort) as LibrarySortOption;
 
   useEffect(() => {
@@ -44,13 +44,13 @@ export const LibraryList = () => {
       // search only when sort is set (avoids duplicate requests)
       fetchProjects();
     }
-  }, [q, category, sort]);
+  }, [q, stage, sort]);
 
   const fetchProjects = async (skip: number = 0) => {
     setIsFetching(true);
 
     try {
-      const result = await libraryService.search(q?.toLocaleLowerCase(), category, sort, skip);
+      const result = await libraryService.search(q?.toLocaleLowerCase(), stage, sort, skip);
 
       if (result) {
         if (skip) {

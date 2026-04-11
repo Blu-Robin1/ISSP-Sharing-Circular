@@ -1,6 +1,6 @@
 import type { LatLngBounds, Marker } from 'leaflet';
 import type { ILatLng, MapPin, ProfileBadge, ProfileTag, ProfileType } from 'oa-shared';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Map as MapType } from 'react-leaflet';
 import { useLocation, useNavigate } from 'react-router';
 import { Box, Flex } from 'theme-ui';
@@ -8,19 +8,17 @@ import { MapList } from './Content/MapView/MapList';
 import { MapView } from './Content/MapView/MapView';
 import { MapContext } from './MapContext';
 import { mapPinService } from './map.service';
-import { filterPins, sortPinsByBadgeThenLastActive } from './utils/pinUtils';
-
-// SCIS mock service
+// SCIS: fetch from API
 import { scisService } from './scis.service';
-// NEW: local client store (support actions + computed stage)
-import { computeEffectiveStage, scisStore } from './scis.store';
+import { computeEffectiveStage, type ScisStage } from './scis.store';
+import { filterPins, sortPinsByBadgeThenLastActive } from './utils/pinUtils';
 
 import './styles.css';
 
 const MapsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isPlacingInitiative, setIsPlacingInitiative] = useState(false);
+  const [isPlacingProject, setIsPlacingProject] = useState(false);
   const [boundaries, setBoundaries] = useState<LatLngBounds | null>(null);
   const [allPins, setAllPins] = useState<MapPin[] | null>(null);
   const [allProfileTypes, setAllProfileTypes] = useState<ProfileType[]>([]);
@@ -33,8 +31,8 @@ const MapsPage = () => {
   const [activeTagFilters, setActiveTags] = useState<number[]>([]);
 
   // SCIS filter state
-  const [activeInitiativeStages, setActiveInitiativeStages] = useState<number[]>([]);
-  const [onlyInitiatives, setOnlyInitiatives] = useState(false);
+  const [activeProjectStages, setActiveProjectStages] = useState<number[]>([]);
+  const [onlyProjects, setOnlyProjects] = useState(false);
 
   const [pinLocation, setPinLocation] = useState<ILatLng>({ lat: 30.0, lng: 19.0 });
   const [selectedPin, selectPin] = useState<MapPin | null | undefined>(undefined);
@@ -100,8 +98,8 @@ const MapsPage = () => {
       boundaries: boundaries ?? undefined,
 
       // SCIS additions
-      initiativeStages: activeInitiativeStages,
-      onlyInitiatives,
+      projectStages: activeProjectStages,
+      onlyProjects,
     });
   }, [
     allPins,
@@ -110,8 +108,8 @@ const MapsPage = () => {
     activeProfileTypeFilters,
     activeTagFilters,
     boundaries,
-    activeInitiativeStages,
-    onlyInitiatives,
+    activeProjectStages,
+    onlyProjects,
   ]);
 
   // Keep selectedPin in sync with allPins when store updates (e.g. after adding support)
@@ -136,9 +134,65 @@ const MapsPage = () => {
     }
   }, [filteredPins, selectedPin, allPins, boundaries]);
 
-  // Subscribe to SCIS store changes (SSR-safe: subscribe no-ops server-side)
-  useEffect(() => {
-    return scisStore.subscribe(() => setScisVersion((v) => v + 1));
+  const refreshProjects = useCallback(async () => {
+    try {
+      const projects = await scisService.getInitiatives('approved_and_pending', true);
+      const projectPins = projects.map((p) => {
+        const rawId = String(p.id);
+        const baseStage = Number(p.stage ?? 1);
+        const serverCounts = {
+          supporters: p.supporter_count,
+          members: p.member_count,
+          champions: p.champion_count,
+        };
+        const local = {
+          stageOverride: (p.stage_override != null ? p.stage_override : undefined) as
+            | ScisStage
+            | undefined,
+          stage3Milestones: p.stage3_milestones ?? undefined,
+        };
+        const effectiveStage = computeEffectiveStage(baseStage, local, serverCounts);
+        return {
+          id: `project-${rawId}`,
+          _id: `project-${rawId}`,
+          _created: p.created_at ?? new Date().toISOString(),
+          _updated: new Date().toISOString(),
+          type: 'project',
+          stage: baseStage,
+          effectiveStage,
+          lat: p.lat,
+          lng: p.lng,
+          title: p.title,
+          description: p.description,
+          supporterCount: p.supporter_count,
+          memberCount: p.member_count,
+          championCount: p.champion_count,
+          volunteerCount: p.volunteer_count,
+          donateCount: p.donate_count,
+          imageUrl: p.image_url ?? '',
+          stage3Milestones: p.stage3_milestones,
+          projectId: rawId,
+          status: p.status,
+          moderation: p.status === 'approved' ? 'accepted' : 'awaiting-moderation',
+          profile: {
+            name: p.title,
+            username: `project-${rawId}`,
+            photo: p.image_url
+              ? { id: `project-photo-${rawId}`, publicUrl: p.image_url }
+              : undefined,
+            avatar: p.image_url ?? '',
+            type: 'member',
+          },
+        };
+      }) as any[];
+      setAllPins((prev) => {
+        const nonProjects = (prev ?? []).filter((p: any) => p?.type !== 'project');
+        return sortPinsByBadgeThenLastActive([...nonProjects, ...projectPins], 'pro');
+      });
+    } catch {
+      // Fallback to full refresh
+      setScisVersion((v) => v + 1);
+    }
   }, []);
 
   useEffect(() => {
@@ -155,98 +209,66 @@ const MapsPage = () => {
           pinsToSet = pins;
         }
 
-        // SCIS: fetch initiatives (placeholder service for now)
-        const initiatives = await scisService.getInitiatives();
+        // SCIS: fetch approved + pending (pending show on map as "Pending approval")
+        // noCache when refreshing (e.g. after Add my name) so supporter count updates immediately
+        const projects = await scisService.getInitiatives('approved_and_pending', scisVersion > 0);
 
-        const initiativePins = initiatives.map((i: any) => {
-          const rawId = String(i.id);
-          const local = scisStore.getLocalState(rawId);
-
-          const baseStage = Number(i.stage ?? 1);
+        const projectPins = projects.map((p) => {
+          const rawId = String(p.id);
+          const baseStage = Number(p.stage ?? 1);
           const serverCounts = {
-            supporters: Number(i.supporter_count ?? 0),
-            members: Number(i.member_count ?? 0),
-            champions: Number(i.champion_count ?? 0),
+            supporters: p.supporter_count,
+            members: p.member_count,
+            champions: p.champion_count,
+          };
+          const local = {
+            stageOverride: (p.stage_override != null ? p.stage_override : undefined) as
+              | ScisStage
+              | undefined,
+            stage3Milestones: p.stage3_milestones ?? undefined,
           };
           const effectiveStage = computeEffectiveStage(baseStage, local, serverCounts);
 
-          const mergedSupporters = scisStore.getSupporterCountStrict(rawId, Number(i.supporter_count ?? 0));
-
           return {
-            id: `initiative-${rawId}`,
-            _id: `initiative-${rawId}`,
-            _created: new Date().toISOString(),
+            id: `project-${rawId}`,
+            _id: `project-${rawId}`,
+            _created: p.created_at ?? new Date().toISOString(),
             _updated: new Date().toISOString(),
 
-            type: 'initiative',
+            type: 'project',
             stage: baseStage,
             effectiveStage,
 
-            // clustering/panning
-            lat: Number(i.lat),
-            lng: Number(i.lng),
+            lat: p.lat,
+            lng: p.lng,
 
-            title: i.title,
-            description: i.description,
-            supporterCount: mergedSupporters,
-            imageUrl: i.image_url ?? '',
+            title: p.title,
+            description: p.description,
+            supporterCount: p.supporter_count,
+            memberCount: p.member_count,
+            championCount: p.champion_count,
+            volunteerCount: p.volunteer_count,
+            donateCount: p.donate_count,
+            imageUrl: p.image_url ?? '',
+            stage3Milestones: p.stage3_milestones,
 
-            // store raw initiative id so drawer actions can reference it
-            initiativeId: rawId,
+            projectId: rawId,
+            status: p.status,
+            moderation: p.status === 'approved' ? 'accepted' : 'awaiting-moderation',
 
             profile: {
-              name: i.title,
-              username: `initiative-${rawId}`,
-              avatar: i.image_url ?? '',
+              name: p.title,
+              username: `project-${rawId}`,
+              photo: p.image_url
+                ? { id: `project-photo-${rawId}`, publicUrl: p.image_url }
+                : undefined,
+              avatar: p.image_url ?? '',
               type: 'member',
             },
           };
         }) as any[];
 
-        pinsToSet = [...pinsToSet, ...(initiativePins as any)];
-
-        // SCIS: merge local initiatives (client-first submissions)
-        const localInitiatives = scisStore.listLocalInitiatives();
-        const localPins = localInitiatives
-          .filter((li) => li.moderation !== 'rejected')
-          .map((li) => {
-            const local = scisStore.getLocalState(li.id);
-            const baseStage = 1;
-            const effectiveStage = computeEffectiveStage(baseStage, local, undefined);
-            const mergedSupporters = scisStore.getSupporterCountStrict(li.id, 0);
-
-            return {
-              id: `initiative-${li.id}`,
-              _id: `initiative-${li.id}`,
-              _created: li.createdAt,
-              _updated: li.createdAt,
-
-              type: 'initiative',
-              stage: baseStage,
-              effectiveStage,
-
-              lat: li.lat,
-              lng: li.lng,
-
-              title: li.title,
-              description: li.description,
-              projectType: li.projectType,
-              supporterCount: mergedSupporters,
-              imageUrl: '',
-
-              initiativeId: li.id,
-              isLocalSubmission: true,
-              moderation: li.moderation,
-
-              profile: {
-                name: li.title,
-                username: `initiative-${li.id}`,
-                avatar: '',
-                type: 'member',
-              },
-            };
-          });
-        pinsToSet = [...pinsToSet, ...(localPins as any)];
+        pinsToSet = [...pinsToSet, ...projectPins];
 
         // might be missing because it's not approved
         const existingPinIndex = pinsToSet.findIndex((x) => x.id === userPin?.id);
@@ -262,7 +284,9 @@ const MapsPage = () => {
         setAllPins(sortPinsByBadgeThenLastActive(pinsToSet, 'pro'));
 
         if (filters?.filters) {
-          const sortedTypes = (filters.filters.types || []).slice().sort((a, b) => a.order - b.order);
+          const sortedTypes = (filters.filters.types || [])
+            .slice()
+            .sort((a, b) => a.order - b.order);
 
           setAllProfileTypes(sortedTypes);
           setAllBadges(filters.filters.badges || []);
@@ -281,7 +305,7 @@ const MapsPage = () => {
     };
 
     init();
-    // Re-run when local SCIS store changes so pins update supporterCount + effectiveStage
+    // Re-run when initiatives change (create, support, contribution)
   }, [scisVersion]);
 
   const toggleActiveBadgeFilter = (value: string) => {
@@ -385,14 +409,15 @@ const MapsPage = () => {
         toggleActiveTagFilter,
 
         // SCIS filters
-        activeInitiativeStages,
-        setActiveInitiativeStages,
-        onlyInitiatives,
-        setOnlyInitiatives,
+        activeProjectStages: activeProjectStages,
+        setActiveProjectStages: setActiveProjectStages,
+        onlyProjects: onlyProjects,
+        setOnlyProjects: setOnlyProjects,
 
         // SCIS submission mode
-        isPlacingInitiative,
-        setIsPlacingInitiative,
+        isPlacingProject,
+        setIsPlacingProject,
+        refreshProjects: refreshProjects,
 
         isMobile,
         setIsMobile,

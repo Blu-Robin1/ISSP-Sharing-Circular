@@ -24,7 +24,12 @@ export interface ScisSupportAction {
   currency?: string;
 }
 
-export type ScisProjectType = 'tool_library' | 'repair_cafe' | 'skill_share' | 'workspace' | 'other';
+export type ScisProjectType =
+  | 'tool_library'
+  | 'repair_cafe'
+  | 'skill_share'
+  | 'workspace'
+  | 'other';
 
 export interface ScisLocalInitiative {
   id: string; // raw id (no "initiative-" prefix)
@@ -46,6 +51,11 @@ export interface ScisStage3Milestones {
   launchDate?: string;
   committeeUpdates?: string[];
   fundraisingLaunched?: boolean;
+  /** Stage 4: optional campaign progress (stored in stage3_milestones jsonb) */
+  campaignGoal?: number;
+  campaignRaised?: number;
+  fundraisingStatus?: 'active' | 'launching' | 'planned';
+  investmentInstructions?: string;
 }
 
 export interface ScisInitiativeLocalState {
@@ -78,7 +88,8 @@ function loadAll(): ScisStorageShape {
     if (!parsed || typeof parsed !== 'object') return { initiatives: {}, state: {} };
 
     return {
-      initiatives: parsed.initiatives && typeof parsed.initiatives === 'object' ? parsed.initiatives : {},
+      initiatives:
+        parsed.initiatives && typeof parsed.initiatives === 'object' ? parsed.initiatives : {},
       state: parsed.state && typeof parsed.state === 'object' ? parsed.state : {},
     };
   } catch {
@@ -162,7 +173,12 @@ export function computeEffectiveStage(
   }
 
   // Stage 2 -> 3: requires 300 supporters, 100 members, 5 champions
-  if (floor >= 2 && supporters >= STAGE2_TO_3_SUPPORTERS && members >= STAGE2_TO_3_MEMBERS && champions >= STAGE2_TO_3_CHAMPIONS) {
+  if (
+    floor >= 2 &&
+    supporters >= STAGE2_TO_3_SUPPORTERS &&
+    members >= STAGE2_TO_3_MEMBERS &&
+    champions >= STAGE2_TO_3_CHAMPIONS
+  ) {
     return 3;
   }
 
@@ -291,7 +307,8 @@ export const scisStore = {
     const initiative = all.initiatives[initiativeId];
     if (!initiative) return;
     if (updates.title !== undefined) initiative.title = updates.title.trim() || initiative.title;
-    if (updates.description !== undefined) initiative.description = updates.description ?? initiative.description;
+    if (updates.description !== undefined)
+      initiative.description = updates.description ?? initiative.description;
     if (updates.projectType !== undefined) initiative.projectType = updates.projectType;
     all.initiatives[initiativeId] = { ...initiative };
     saveAll(all);

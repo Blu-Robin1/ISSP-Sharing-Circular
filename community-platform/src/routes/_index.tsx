@@ -1,7 +1,7 @@
 import { redirect } from 'react-router';
 
 export async function loader() {
-  return redirect('/academy');
+  return redirect('/library');
 }
 
 export default function Index() {

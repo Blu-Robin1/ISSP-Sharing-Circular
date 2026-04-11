@@ -1,8 +1,9 @@
 import type { Tag } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getAllTags = async () => {
   try {
-    const response = await fetch('/api/tags');
+    const response = await apiFetch('/api/tags');
     return (await response.json()) as Tag[];
   } catch (error) {
     console.error({ error });

@@ -1,0 +1,8 @@
+# Team member emails for provisioning
+# One email per line. Lines starting with # are ignored.
+# Replace these with your actual team charter emails.
+#
+# Example:
+# alice@example.com
+# bob@example.com
+# charlie@example.com
