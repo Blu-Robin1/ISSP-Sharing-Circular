@@ -220,8 +220,14 @@ export const scisService = {
         }),
         credentials: 'include',
       });
+
+      if (!res.ok) {
+        console.error('Failed to update project admin fields', await res.text());
+      }
+
       return res.ok;
-    } catch {
+    } catch (error) {
+      console.error('Failed to update project admin fields', error);
       return false;
     }
   },

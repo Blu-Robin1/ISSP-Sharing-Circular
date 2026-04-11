@@ -15,6 +15,8 @@ import { computeEffectiveStage } from 'src/utils/projectStageLogic';
 import { convertToSlug } from 'src/utils/slug';
 import { validateImage } from 'src/utils/storage';
 
+type ProjectStatusFilter = 'approved' | 'pending' | 'approved_and_pending' | 'all';
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
@@ -22,11 +24,121 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const stage = Number(searchParams.get('stage')) || undefined;
   const sort = searchParams.get('sort') as LibrarySortOption;
   const skip = Number(searchParams.get('skip')) || 0;
+  const status = (searchParams.get('status') as ProjectStatusFilter | null) ?? 'approved';
 
   const { client, headers } = createSupabaseServerClient(request);
   const claims = await client.auth.getClaims();
 
   const username = claims.data?.claims?.user_metadata?.username || null;
+  let isAdmin = false;
+  let profileId: number | null = null;
+
+  if (claims.data?.claims?.sub) {
+    const { data: profile } = await client
+      .from('profiles')
+      .select('id,roles')
+      .eq('auth_id', claims.data.claims.sub)
+      .limit(1)
+      .maybeSingle();
+
+    isAdmin = profile?.roles?.includes(UserRole.ADMIN) ?? false;
+    profileId = profile?.id ?? null;
+  }
+
+  if (status !== 'approved') {
+    let query = client.from('projects').select('*', { count: 'exact' });
+
+    query = query.or('deleted.is.null,deleted.eq.false');
+    query = query.or('is_draft.is.null,is_draft.eq.false');
+
+    if (q) {
+      query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+    }
+
+    switch (status) {
+      case 'pending':
+        query = query.eq('moderation', 'awaiting-moderation');
+        if (!isAdmin) {
+          if (!profileId) {
+            return Response.json({ items: [], total: 0 }, { headers });
+          }
+          query = query.eq('created_by', profileId);
+        }
+        break;
+      case 'approved_and_pending':
+        if (isAdmin) {
+          query = query.in('moderation', ['accepted', 'awaiting-moderation']);
+        } else if (profileId) {
+          query = query.or(`moderation.eq.accepted,and(created_by.eq.${profileId},moderation.eq.awaiting-moderation)`);
+        } else {
+          query = query.eq('moderation', 'accepted');
+        }
+        break;
+      case 'all':
+        if (!isAdmin) {
+          if (!profileId) {
+            return Response.json({ items: [], total: 0 }, { headers });
+          }
+          query = query.eq('created_by', profileId);
+        }
+        break;
+      default:
+        query = query.eq('moderation', 'accepted');
+        break;
+    }
+
+    switch (sort) {
+      case 'LatestUpdated':
+        query = query.order('modified_at', { ascending: false, nullsFirst: false });
+        break;
+      case 'MostComments':
+        query = query.order('comment_count', { ascending: false, nullsFirst: false });
+        break;
+      case 'MostDownloads':
+        query = query.order('file_download_count', { ascending: false, nullsFirst: false });
+        break;
+      case 'MostViews':
+        query = query.order('total_views', { ascending: false, nullsFirst: false });
+        break;
+      case 'Newest':
+      default:
+        query = query.order('created_at', { ascending: false });
+        break;
+    }
+
+    const rangeEnd = stage ? 999 : skip + ITEMS_PER_PAGE - 1;
+    const { data, error, count } = await query.range(stage ? 0 : skip, rangeEnd);
+
+    if (error) {
+      console.error(error);
+      return Response.json({}, { status: 500, headers });
+    }
+
+    const allDbItems = (data as DBProject[]) ?? [];
+    const stageFilteredItems =
+      stage === undefined
+        ? allDbItems
+        : allDbItems.filter((item) => {
+            const effectiveStage = computeEffectiveStage({
+              stage: item.stage,
+              stageOverride: item.stage_override,
+              supporterCount: item.supporter_count || 0,
+              memberCount: item.member_count || 0,
+              championCount: item.champion_count || 0,
+              volunteerCount: item.volunteer_count || 0,
+              donateCount: item.donate_count || 0,
+              moderation: item.moderation,
+            });
+
+            return effectiveStage === stage;
+          });
+
+    const items =
+      stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+    const total = stage === undefined ? (count ?? items.length) : stageFilteredItems.length;
+
+    return Response.json({ items, total }, { headers });
+  }
 
   const { data, error } = await client.rpc('get_projects', {
     search_query: q || null,
