@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { Box, Button, Flex, Heading, Text, Badge, Select, Input, Textarea, Label } from 'theme-ui';
-import { scisService, type NormalizedInitiative } from '../scis.service';
-import { computeEffectiveStage, type ScisModerationStatus, type ScisStage, type ScisProjectType } from '../scis.store';
+import { Badge, Box, Button, Flex, Heading, Input, Label, Select, Text, Textarea } from 'theme-ui';
+import { type NormalizedInitiative, scisService } from '../scis.service';
+import {
+  computeEffectiveStage,
+  type ScisModerationStatus,
+  type ScisProjectType,
+  type ScisStage,
+} from '../scis.store';
 
 const STAGE_OPTIONS: ScisStage[] = [1, 2, 3, 4];
 const PROJECT_TYPE_OPTIONS: { value: ScisProjectType; label: string }[] = [
@@ -41,7 +46,10 @@ const InitiativeCard = (props: {
   onModeration: (id: string, s: ScisModerationStatus) => Promise<void>;
   onStageOverride: (id: string, s: ScisStage | '') => Promise<boolean>;
   onDelete: (id: string) => Promise<void>;
-  onUpdate: (id: string, u: { title?: string; description?: string; projectType?: ScisProjectType }) => Promise<void>;
+  onUpdate: (
+    id: string,
+    u: { title?: string; description?: string; projectType?: ScisProjectType },
+  ) => Promise<void>;
   onRefresh: () => Promise<void>;
 }) => {
   const { initiative: i, onModeration, onStageOverride, onDelete, onUpdate, onRefresh } = props;
@@ -89,7 +97,9 @@ const InitiativeCard = (props: {
     champions: i.champion_count,
   };
   const local = {
-    stageOverride: (i.stage_override != null ? i.stage_override : undefined) as ScisStage | undefined,
+    stageOverride: (i.stage_override != null ? i.stage_override : undefined) as
+      | ScisStage
+      | undefined,
     stage3Milestones: i.stage3_milestones ?? undefined,
   };
   const effStage = computeEffectiveStage(baseStage, local, serverCounts);
@@ -115,10 +125,19 @@ const InitiativeCard = (props: {
           {editing ? (
             <>
               <Label>Title</Label>
-              <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} sx={{ mb: 2 }} />
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                sx={{ mb: 2 }}
+              />
 
               <Label>Description</Label>
-              <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={2} sx={{ mb: 2 }} />
+              <Textarea
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+                rows={2}
+                sx={{ mb: 2 }}
+              />
 
               <Label>Project type</Label>
               <Select
@@ -166,14 +185,14 @@ const InitiativeCard = (props: {
               <Text sx={{ fontSize: 1, color: 'grey', mb: 1 }}>{i.description || '—'}</Text>
 
               <Text sx={{ fontSize: 0, color: 'grey' }}>
-                {i.lat.toFixed(4)}, {i.lng.toFixed(4)} · {i.supporter_count} supporters · {i.member_count} members ·{' '}
-                {i.champion_count} champions · {i.volunteer_count} volunteers · {i.donate_count} donations
+                {i.lat.toFixed(4)}, {i.lng.toFixed(4)} · {i.supporter_count} supporters ·{' '}
+                {i.member_count} members · {i.champion_count} champions · {i.volunteer_count}{' '}
+                volunteers · {i.donate_count} donations
               </Text>
 
               {effStage >= 3 && milestones && (
                 <Text sx={{ fontSize: 0, color: 'grey', mt: 1 }}>
-                  Milestones:{' '}
-                  {milestones.budget ? 'budget✓ ' : ''}
+                  Milestones: {milestones.budget ? 'budget✓ ' : ''}
                   {milestones.projectPlanUrl ? 'plan✓ ' : ''}
                   {milestones.insurance ? 'insurance✓ ' : ''}
                   {milestones.renovationScope ? 'scope✓ ' : ''}
@@ -195,7 +214,9 @@ const InitiativeCard = (props: {
             }}
           >
             <Badge
-              variant={status === 'approved' ? 'primary' : status === 'rejected' ? 'secondary' : 'outline'}
+              variant={
+                status === 'approved' ? 'primary' : status === 'rejected' ? 'secondary' : 'outline'
+              }
               sx={{
                 alignSelf: 'flex-end',
                 px: 2,
@@ -276,7 +297,9 @@ const InitiativeCard = (props: {
 
                 const success = await onStageOverride(i.id, val);
                 if (!success) {
-                  setSelectedStageOverride(i.stage_override != null ? String(i.stage_override) : '');
+                  setSelectedStageOverride(
+                    i.stage_override != null ? String(i.stage_override) : '',
+                  );
                 }
 
                 await onRefresh();
@@ -296,6 +319,7 @@ const InitiativeCard = (props: {
             <Button
               variant="outline"
               onClick={async () => {
+                // biome-ignore lint/suspicious/noAlert: synchronous confirmation before irreversible delete
                 if (!confirm('Delete this project? This cannot be undone.')) return;
                 setBusy(true);
                 await onDelete(i.id);
@@ -312,7 +336,11 @@ const InitiativeCard = (props: {
       )}
 
       <Box sx={{ mt: 3, borderTop: '1px solid', borderColor: 'muted', pt: 2 }}>
-        <Button variant="outline" sx={{ fontSize: 0 }} onClick={() => setDetailsExpanded(!detailsExpanded)}>
+        <Button
+          variant="outline"
+          sx={{ fontSize: 0 }}
+          onClick={() => setDetailsExpanded(!detailsExpanded)}
+        >
           {detailsExpanded ? 'Hide' : 'View'} supporters & contributors
         </Button>
 
@@ -400,7 +428,15 @@ const AdminProjectsPage = () => {
 
   return (
     <Box sx={{ maxWidth: 960, mx: 'auto', p: [3, 4] }}>
-      <Flex sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+      <Flex
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Heading as="h1" sx={{ fontSize: [3, 4] }}>
           Admin: SCIS Projects
         </Heading>

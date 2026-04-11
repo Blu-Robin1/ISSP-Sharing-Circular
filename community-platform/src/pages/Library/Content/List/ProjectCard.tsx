@@ -75,8 +75,8 @@ export const ProjectCard = ({ item, query }: ProjectCardProps) => {
             )}
 
             <ProjectStageDisplay
-              stage={item.stage}
-              stageOverride={item.stageOverride}
+              stage={item.stage ?? null}
+              stageOverride={item.stageOverride ?? null}
               supporterCount={item.supporterCount || 0}
               memberCount={item.memberCount || 0}
               championCount={item.championCount || 0}
@@ -117,7 +117,7 @@ export const ProjectCard = ({ item, query }: ProjectCardProps) => {
                 <RouterLink
                   to={`/maps?lat=${item.lat}&lng=${item.lng}&zoom=10`}
                   onClick={(e) => e.stopPropagation()}
-                  sx={{
+                  style={{
                     display: 'flex',
                     alignItems: 'center',
                     textDecoration: 'none',

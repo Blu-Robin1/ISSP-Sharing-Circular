@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
 import { UserRole } from 'oa-shared';
+import React, { useContext } from 'react';
 import { AuthWrapper } from 'src/common/AuthWrapper';
 import { getSupportedModules } from 'src/modules';
 import { EnvironmentContext } from 'src/pages/common/EnvironmentContext';

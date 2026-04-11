@@ -1,9 +1,9 @@
-import { Field } from 'react-final-form';
 import { MapWithPin } from 'oa-components';
-import { FormFieldWrapper } from 'src/pages/common/FormFields';
-import { useRef, useState } from 'react';
 import type { ILatLng } from 'oa-shared';
+import { useRef, useState } from 'react';
+import { Field } from 'react-final-form';
 import type { Map as MapType } from 'react-leaflet';
+import { FormFieldWrapper } from 'src/pages/common/FormFields';
 
 import { intro } from '../../labels';
 
@@ -14,15 +14,9 @@ export const LibraryLocationField = () => {
 
   return (
     <FormFieldWrapper htmlFor="location" text={title}>
-      <Field
-        name="lat"
-        validateFields={[]}
-      >
+      <Field name="lat" validateFields={[]}>
         {({ input: latInput }) => (
-          <Field
-            name="lng"
-            validateFields={[]}
-          >
+          <Field name="lng" validateFields={[]}>
             {({ input: lngInput }) => {
               const currentPosition = {
                 lat: latInput.value || position.lat,

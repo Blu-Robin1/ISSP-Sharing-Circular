@@ -3,8 +3,8 @@ import { Button, ExternalLink } from 'oa-components';
 import { UserRole } from 'oa-shared';
 import { Link } from 'react-router';
 import { DISCORD_INVITE_URL } from 'src/constants';
-import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { fields, headings } from 'src/pages/UserSettings/labels';
+import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { Flex, Heading, Text } from 'theme-ui';
 
 import { PatreonIntegration } from './content/fields/PatreonIntegration';
@@ -33,7 +33,7 @@ export const SettingsPageAccount = observer(() => {
       <ChangePasswordForm />
       <ChangeEmailForm />
 
-      {isAdmin && (
+      {isAdmin || (
         <Link to="/admin/initiatives">
           <Button variant="secondary">Admin panel</Button>
         </Link>

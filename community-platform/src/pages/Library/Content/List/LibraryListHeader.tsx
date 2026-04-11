@@ -1,24 +1,18 @@
-import debounce from "debounce";
-import {
-  CategoryHorizonalList,
-  ReturnPathLink,
-  SearchField,
-  Select,
-  Tooltip,
-} from "oa-components";
-import type { Category } from "oa-shared";
-import { useCallback, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router";
-import { FieldContainer } from "src/common/Form/FieldContainer";
-import { UserAction } from "src/common/UserAction";
-import DraftButton from "src/pages/common/Drafts/DraftButton";
-import { ListHeader } from "src/pages/common/Layout/ListHeader";
-import { getStageLabel } from "src/utils/projectStageLogic";
-import { Button, Flex } from "theme-ui";
-import { listing } from "../../labels";
-import { LibrarySearchParams } from "../../library.service";
-import type { LibrarySortOption } from "./LibrarySortOptions";
-import { LibrarySortOptions } from "./LibrarySortOptions";
+import debounce from 'debounce';
+import { CategoryHorizonalList, ReturnPathLink, SearchField, Select, Tooltip } from 'oa-components';
+import type { Category } from 'oa-shared';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router';
+import { FieldContainer } from 'src/common/Form/FieldContainer';
+import { UserAction } from 'src/common/UserAction';
+import DraftButton from 'src/pages/common/Drafts/DraftButton';
+import { ListHeader } from 'src/pages/common/Layout/ListHeader';
+import { getStageLabel } from 'src/utils/projectStageLogic';
+import { Button, Flex } from 'theme-ui';
+import { listing } from '../../labels';
+import { LibrarySearchParams } from '../../library.service';
+import type { LibrarySortOption } from './LibrarySortOptions';
+import { LibrarySortOptions } from './LibrarySortOptions';
 
 interface IProps {
   itemCount?: number;
@@ -32,7 +26,7 @@ export const LibraryListHeader = (props: IProps) => {
   const [stages, setStages] = useState<Category[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get(LibrarySearchParams.q);
-  const [searchString, setSearchString] = useState<string>(q ?? "");
+  const [searchString, setSearchString] = useState<string>(q ?? '');
 
   useEffect(() => {
     setStages(
@@ -41,7 +35,7 @@ export const LibraryListHeader = (props: IProps) => {
         name: `Stage ${stage}: ${getStageLabel(stage as 1 | 2 | 3 | 4)}`,
         createdAt: new Date(stage),
         modifiedAt: null,
-        type: "projects",
+        type: 'projects',
       })),
     );
   }, []);
@@ -76,12 +70,12 @@ export const LibraryListHeader = (props: IProps) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(LibrarySearchParams.q, value);
 
-    if (value.length > 0 && sort !== "MostRelevant") {
-      params.set(LibrarySearchParams.sort, "MostRelevant");
+    if (value.length > 0 && sort !== 'MostRelevant') {
+      params.set(LibrarySearchParams.sort, 'MostRelevant');
     }
 
     if (value.length === 0 || !value) {
-      params.set(LibrarySearchParams.sort, "MostUsefulLastWeek");
+      params.set(LibrarySearchParams.sort, 'MostUsefulLastWeek');
     }
 
     setSearchParams(params);
@@ -92,14 +86,14 @@ export const LibraryListHeader = (props: IProps) => {
       allCategories={stages}
       activeCategory={activeStage}
       setActiveCategory={(updatedStage) =>
-        updateFilter(LibrarySearchParams.stage, (updatedStage?.id || "").toString())
+        updateFilter(LibrarySearchParams.stage, (updatedStage?.id || '').toString())
       }
     />
   );
 
   const filteringComponents = (
-    <Flex sx={{ gap: 2, flexDirection: ["column", "row", "row"] }}>
-      <Flex sx={{ width: ["100%", "100%", "220px"] }}>
+    <Flex sx={{ gap: 2, flexDirection: ['column', 'row', 'row'] }}>
+      <Flex sx={{ width: ['100%', '100%', '220px'] }}>
         <FieldContainer>
           <Select
             options={LibrarySortOptions.toArray(!!q)}
@@ -108,13 +102,11 @@ export const LibraryListHeader = (props: IProps) => {
               label: LibrarySortOptions.get(sort),
               value: sort,
             }}
-            onChange={(sortBy) =>
-              updateFilter(LibrarySearchParams.sort, sortBy.value)
-            }
+            onChange={(sortBy) => updateFilter(LibrarySearchParams.sort, sortBy.value)}
           />
         </FieldContainer>
       </Flex>
-      <Flex sx={{ width: ["100%", "100%", "270px"] }}>
+      <Flex sx={{ width: ['100%', '100%', '270px'] }}>
         <SearchField
           dataCy="library-search-box"
           placeHolder={listing.search}
@@ -124,8 +116,8 @@ export const LibraryListHeader = (props: IProps) => {
             onSearchInputChange(value);
           }}
           onClickDelete={() => {
-            setSearchString("");
-            searchValue("");
+            setSearchString('');
+            searchValue('');
           }}
           onClickSearch={() => searchValue(searchString)}
         />
@@ -142,11 +134,7 @@ export const LibraryListHeader = (props: IProps) => {
             data-tooltip-id="tooltip"
             data-tooltip-content={listing.incompleteProfile}
           >
-            <Button
-              type="button"
-              data-cy="complete-profile-project"
-              variant="disabled"
-            >
+            <Button type="button" data-cy="complete-profile-project" variant="disabled">
               {listing.create}
             </Button>
           </Link>
@@ -161,12 +149,7 @@ export const LibraryListHeader = (props: IProps) => {
             handleShowDrafts={handleShowDrafts}
           />
           <Link to="/library/create">
-            <Button
-              type="button"
-              sx={{ width: "100%" }}
-              variant="primary"
-              data-cy="create-project"
-            >
+            <Button type="button" sx={{ width: '100%' }} variant="primary" data-cy="create-project">
               {listing.create}
             </Button>
           </Link>
@@ -174,12 +157,7 @@ export const LibraryListHeader = (props: IProps) => {
       }
       loggedOut={
         <ReturnPathLink to="/sign-up">
-          <Button
-            type="button"
-            sx={{ width: "100%" }}
-            variant="primary"
-            data-cy="sign-up"
-          >
+          <Button type="button" sx={{ width: '100%' }} variant="primary" data-cy="sign-up">
             {listing.join}
           </Button>
         </ReturnPathLink>

@@ -62,8 +62,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (error.code === 'weak_password') {
       return Response.json({ error: FRIENDLY_MESSAGES['sign-up/password-weak'] }, { headers });
     }
-    if (error.code === 'user_already_exists' || error.message?.toLowerCase().includes('already registered')) {
-      return Response.json({ error: 'This email is already registered. Try signing in or use a different email.' }, { headers });
+    if (
+      error.code === 'user_already_exists' ||
+      error.message?.toLowerCase().includes('already registered')
+    ) {
+      return Response.json(
+        { error: 'This email is already registered. Try signing in or use a different email.' },
+        { headers },
+      );
     }
     if (
       error.message?.toLowerCase().includes('rate limit') ||
@@ -239,8 +245,7 @@ export default function Index() {
                         }}
                       >
                         <Label htmlFor="email">Email</Label>
-                        <Text color={'grey'} sx={{ fontSize: 1 }}>
-                        </Text>
+                        <Text color={'grey'} sx={{ fontSize: 1 }}></Text>
                         <Field
                           data-cy="email"
                           name="email"
@@ -321,8 +326,8 @@ export default function Index() {
                             fontFamily: '"Times New Roman", Times, serif',
                             justifyContent: 'center',
                             '&: hover': {
-                              backgroundColor: '#355c58'
-                            }
+                              backgroundColor: '#355c58',
+                            },
                           }}
                           data-cy="submit"
                           variant="primary"

@@ -9,7 +9,7 @@ const cache = new Keyv<UpgradeBadge[]>({ ttl: 1800000 }); // ttl: 30 minutes
 
 export async function loader({ request }: LoaderFunctionArgs) {
   let headers = {};
-  
+
   try {
     const response = createSupabaseServerClient(request);
     headers = response.headers;
@@ -37,20 +37,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
       return Response.json([], { headers, status: 200 });
     }
 
-    const upgradeBadges = data?.map((badge) => {
-      try {
-        return UpgradeBadge.fromDB(badge as DBUpgradeBadge);
-      } catch (err) {
-        return null;
-      }
-    }).filter((badge) => badge !== null) || [];
+    const upgradeBadges =
+      data
+        ?.map((badge) => {
+          try {
+            return UpgradeBadge.fromDB(badge as DBUpgradeBadge);
+          } catch (_err) {
+            return null;
+          }
+        })
+        .filter((badge) => badge !== null) || [];
 
     if (upgradeBadges && upgradeBadges.length > 0) {
       cache.set('upgradeBadges', upgradeBadges, 1800000);
     }
 
     return Response.json(upgradeBadges, { headers, status: 200 });
-  } catch (error) {
+  } catch (_error) {
     return Response.json([], { headers, status: 200 });
   }
 }

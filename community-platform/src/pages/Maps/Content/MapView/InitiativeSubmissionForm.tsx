@@ -1,8 +1,8 @@
 import { useContext, useState } from 'react';
 import { Box, Button, Flex, Heading, Input, Label, Select, Text, Textarea } from 'theme-ui';
-import type { ScisProjectType } from '../../scis.store';
 import { MapContext } from '../../MapContext';
 import { scisService } from '../../scis.service';
+import type { ScisProjectType } from '../../scis.store';
 
 const PROJECT_TYPE_OPTIONS: { value: ScisProjectType; label: string }[] = [
   { value: 'tool_library', label: 'Tool Library' },
@@ -38,18 +38,18 @@ export const InitiativeSubmissionForm = ({
     setSubmitting(true);
     setError(null);
     try {
-      const created = await scisService.createInitiative({
+      const result = await scisService.createInitiative({
         title: title.trim(),
         description: description.trim(),
         projectType,
         lat,
         lng,
       });
-      if (created) {
-        mapContext?.refreshInitiatives?.();
+      if (result.ok) {
+        mapContext?.refreshProjects?.();
         onSave();
       } else {
-        setError('Failed to save. Please try again.');
+        setError(result.error);
       }
     } finally {
       setSubmitting(false);
@@ -125,21 +125,20 @@ export const InitiativeSubmissionForm = ({
           ))}
         </Select>
 
-        <Label htmlFor="initiative-description">Description</Label>
+        <Label htmlFor="initiative-description">Description *</Label>
         <Textarea
           id="initiative-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Brief description of your initiative..."
           rows={4}
+          required
           sx={{ mb: 3 }}
         />
 
-        {error && (
-          <Text sx={{ color: 'red', fontSize: 0, mb: 2 }}>{error}</Text>
-        )}
+        {error && <Text sx={{ color: 'red', fontSize: 0, mb: 2 }}>{error}</Text>}
         <Flex sx={{ gap: 2 }}>
-          <Button type="submit" disabled={submitting || !title.trim()}>
+          <Button type="submit" disabled={submitting || !title.trim() || !description.trim()}>
             {submitting ? 'Saving...' : 'Save Initiative'}
           </Button>
           <Button type="button" variant="outline" onClick={onCancel}>

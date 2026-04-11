@@ -1,6 +1,19 @@
+import type { ProjectSupportActionType } from 'oa-shared';
 import type { ActionFunctionArgs } from 'react-router';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
 import { projectSupportService } from 'src/services/projectSupportService.server';
+
+const SUPPORT_ACTION_TYPES: ProjectSupportActionType[] = [
+  'add_my_name',
+  'volunteer_skills',
+  'pledge_membership',
+  'donate',
+  'champion',
+];
+
+function isProjectSupportActionType(value: string): value is ProjectSupportActionType {
+  return SUPPORT_ACTION_TYPES.includes(value as ProjectSupportActionType);
+}
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const { client, headers } = createSupabaseServerClient(request);
@@ -13,17 +26,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const formData = await request.formData();
     const projectId = parseInt(params.id as string);
     const actionType = formData.get('actionType') as string;
-    const data = JSON.parse(formData.get('data') as string || '{}');
+    const data = JSON.parse((formData.get('data') as string) || '{}');
 
     if (!projectId || !actionType) {
       return Response.json({ error: 'Missing required fields' }, { status: 400, headers });
     }
 
-    const result = await projectSupportService.addSupport(client, projectId, actionType, data);
-
-    if (result.error) {
-      return Response.json({ error: result.error }, { status: 400, headers });
+    if (!isProjectSupportActionType(actionType)) {
+      return Response.json({ error: 'Invalid action type' }, { status: 400, headers });
     }
+
+    await projectSupportService.addSupport(client, projectId, actionType, data);
 
     return Response.json({ success: true }, { headers });
   } catch (error) {
