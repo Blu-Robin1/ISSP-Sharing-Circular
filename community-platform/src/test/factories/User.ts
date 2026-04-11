@@ -41,7 +41,7 @@ export const FactoryUser = (userOverloads: Partial<Profile> = {}): Partial<Profi
     },
   ],
   website: faker.internet.url(),
-  country: faker.location.countryCode(),
+  city: faker.location.city(),
   coverImages: [] as any[],
   ...userOverloads,
 });

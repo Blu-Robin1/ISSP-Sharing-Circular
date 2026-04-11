@@ -1,13 +1,14 @@
 import { MemberBadge, MemberHistory, Tab, TabPanel, Tabs, TabsList } from 'oa-components';
 import type { Profile, UserCreatedDocs } from 'oa-shared';
 import { PremiumTier } from 'oa-shared';
+import bcitAvatar from 'oa-themes/assets/images/user-avatar.jpg';
 import { useState } from 'react';
 import { useLocation } from 'react-router';
 import { PremiumTierWrapper } from 'src/common/PremiumTierWrapper';
 import { isPreciousPlastic } from 'src/config/config';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { isContactable } from 'src/utils/helpers';
-import { Alert, Box, Card, Flex } from 'theme-ui';
+import { Alert, Box, Card, Flex, Image } from 'theme-ui';
 import { Impact } from '../impact/Impact';
 import { heading } from '../impact/labels';
 import { ProfileContact } from './ProfileContact';
@@ -49,16 +50,30 @@ export const UserProfile = ({ docs, isViewingOwnProfile, user }: IProps) => {
       }}
     >
       {isMember && (
-        <MemberBadge
-          profileType={type || undefined}
-          size={50}
+        <Box
           sx={{
             alignSelf: 'center',
             position: 'absolute',
             transform: 'translateY(-25px)',
+            border: '2px solid #000',
+            borderRadius: '50%',
+            backgroundColor: '#fff',
+            zIndex: 3,
+            padding: 1,
           }}
-          useLowDetailVersion
-        />
+        >
+          <Image
+            src={bcitAvatar}
+            alt="Default Avatar"
+            sx={{
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
+              objectFit: 'contain',
+              display: 'block',
+            }}
+          />
+        </Box>
       )}
       <Card variant="responsive" sx={{ borderRadius: [3, 3, 3] }}>
         <ProfileImage user={user} />
@@ -72,7 +87,7 @@ export const UserProfile = ({ docs, isViewingOwnProfile, user }: IProps) => {
         >
           {showEmptyProfileAlert && (
             <Alert variant="info" data-cy="emptyProfileMessage">
-              Oh hey! Your profile is looking SO empty. Fancy filling it in...?
+              Your profile is incomplete. Please update your profile to continue.
             </Alert>
           )}
 

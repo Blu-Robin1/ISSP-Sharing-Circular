@@ -23,16 +23,29 @@ export interface ICommentItemProps {
 }
 
 export const CommentItemSupabase = observer((props: ICommentItemProps) => {
-  const { comment, onEdit, onDelete, onReply, onEditReply, onDeleteReply, updateUsefulCount, sourceType } = props;
+  const {
+    comment,
+    onEdit,
+    onDelete,
+    onReply,
+    onEditReply,
+    onDeleteReply,
+    updateUsefulCount,
+    sourceType,
+  } = props;
   const commentRef = useRef<HTMLDivElement>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showReplies, setShowReplies] = useState(() => !!comment.replies?.some((x) => x.highlighted));
+  const [showReplies, setShowReplies] = useState(
+    () => !!comment.replies?.some((x) => x.highlighted),
+  );
   const { profile } = useProfileStore();
   const [voted, setVoted] = useState<boolean>(false);
 
   const isEditable = useMemo(() => {
-    return profile?.username === comment.createdBy?.username || profile?.roles?.includes(UserRole.ADMIN);
+    return (
+      profile?.username === comment.createdBy?.username || profile?.roles?.includes(UserRole.ADMIN)
+    );
   }, [profile]);
 
   const item = 'CommentItem';
@@ -59,7 +72,8 @@ export const CommentItemSupabase = observer((props: ICommentItemProps) => {
         slug: `${comment}+${comment.id}`,
         setVoted,
         setUsefulCount: (newCount) => {
-          const count = typeof newCount === 'function' ? newCount(comment.voteCount ?? 0) : newCount;
+          const count =
+            typeof newCount === 'function' ? newCount(comment.voteCount ?? 0) : newCount;
           updateUsefulCount?.(comment.id, count);
         },
         loggedInUser: profile,
@@ -71,8 +85,16 @@ export const CommentItemSupabase = observer((props: ICommentItemProps) => {
   const copyCommentLink = useCopyCommentLink(comment);
 
   return (
-    <Flex id={`comment:${comment.id}`} data-cy={isEditable ? `OwnCommentItem` : 'CommentItem'} sx={{ flexDirection: 'column' }}>
-      <Card sx={{ flexDirection: 'column', padding: 3, overflow: 'inherit' }} ref={commentRef as any} variant="borderless">
+    <Flex
+      id={`comment:${comment.id}`}
+      data-cy={isEditable ? `OwnCommentItem` : 'CommentItem'}
+      sx={{ flexDirection: 'column' }}
+    >
+      <Card
+        sx={{ flexDirection: 'column', padding: 3, overflow: 'inherit' }}
+        ref={commentRef as any}
+        variant="borderless"
+      >
         <CommentDisplay
           isEditable={isEditable}
           itemType={item}
@@ -138,7 +160,11 @@ export const CommentItemSupabase = observer((props: ICommentItemProps) => {
                 />
               ))}
 
-              <CreateCommentSupabase onSubmit={(comment) => onReply(comment)} sourceType={sourceType} isReply />
+              <CreateCommentSupabase
+                onSubmit={(comment) => onReply(comment)}
+                sourceType={sourceType}
+                isReply
+              />
             </>
           )}
           <ButtonShowReplies

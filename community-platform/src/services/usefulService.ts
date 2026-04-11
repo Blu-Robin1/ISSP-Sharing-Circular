@@ -1,21 +1,22 @@
 import type { ProfileListItem, UsefulContentType } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const add = async (contentType: UsefulContentType, id: number) => {
-  return await fetch(`/api/useful/${contentType}/${id}`, {
+  return await apiFetch(`/api/useful/${contentType}/${id}`, {
     method: 'POST',
     body: JSON.stringify({}),
   });
 };
 
 const remove = async (contentType: UsefulContentType, id: number) => {
-  return await fetch(`/api/useful/${contentType}/${id}`, {
+  return await apiFetch(`/api/useful/${contentType}/${id}`, {
     method: 'DELETE',
   });
 };
 
 const hasVoted = async (contentType: UsefulContentType, id: number) => {
   try {
-    const response = await fetch(`/api/useful/${contentType}/${id}/voted`);
+    const response = await apiFetch(`/api/useful/${contentType}/${id}/voted`);
 
     const { voted } = await response.json();
 
@@ -31,7 +32,7 @@ const usefulVoters = async (
   id: number,
 ): Promise<ProfileListItem[]> => {
   try {
-    const response = await fetch(`/api/useful/${contentType}/${id}/users`);
+    const response = await apiFetch(`/api/useful/${contentType}/${id}/users`);
 
     const users = await response.json();
 

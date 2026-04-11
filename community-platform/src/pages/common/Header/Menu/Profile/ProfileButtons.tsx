@@ -15,6 +15,21 @@ const ProfileButtons = (props: IProps) => {
     width: '100%',
   };
 
+  const greenButtonStyle = {
+    backgroundColor: '#3F6B66',
+    color: '#ffffff',
+    borderRadius: '12px',
+    px: 4,
+    py: 2,
+    fontFamily: '"Times New Roman", Times, serif',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    fontWeight: 'bold',
+    '&:hover': {
+      backgroundColor: '#355c58',
+    },
+  };
+
   if (props.isMobile) {
     return (
       <Flex
@@ -37,10 +52,11 @@ const ProfileButtons = (props: IProps) => {
                 <ProfileButtonItem
                   link="/sign-in"
                   text="Login"
-                  variant="secondary"
+                  variant="primary"
                   sx={{
                     ..._commonMobileBtnStyle,
-                    fontWeight: 'bold',
+                    ...greenButtonStyle,
+                    color: '#ffffff',
                     marginRight: 2,
                     marginBottom: 2,
                   }}
@@ -53,6 +69,7 @@ const ProfileButtons = (props: IProps) => {
                   isMobile={true}
                   sx={{
                     ..._commonMobileBtnStyle,
+                    ...greenButtonStyle,
                   }}
                 />
               </>
@@ -70,14 +87,22 @@ const ProfileButtons = (props: IProps) => {
           <ProfileButtonItem
             link="/sign-in"
             text="Login"
-            variant="secondary"
+            variant="primary"
             sx={{
-              fontWeight: 'bold',
+              ...greenButtonStyle,
               marginRight: 2,
               fontSize: 2,
             }}
           />
-          <ProfileButtonItem link="/sign-up" text="Join" variant="outline" sx={{ fontSize: 2 }} />
+          <ProfileButtonItem
+            link="/sign-up"
+            text="Join"
+            variant="outline"
+            sx={{
+              ...greenButtonStyle,
+              fontSize: 2,
+            }}
+          />
         </>
       )}
     </ClientOnly>

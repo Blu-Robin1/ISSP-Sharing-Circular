@@ -1,8 +1,8 @@
-import { Button, ExternalLink, FieldInput, HeroBanner, TextNotification } from 'oa-components';
+import { Button, ExternalLink, FieldInput, TextNotification } from 'oa-components';
 import { FRIENDLY_MESSAGES } from 'oa-shared';
 import { Field, Form } from 'react-final-form';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
-import { Link, redirect, useActionData } from 'react-router';
+import { Link, redirect, useActionData, useSubmit } from 'react-router';
 import { PasswordField } from 'src/common/Form/PasswordField';
 import Main from 'src/pages/common/Layout/Main';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -37,7 +37,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const emailRedirectTo = `${protocol}//${url.host}/email-confirmation`;
 
   const username = formData.get('username') as string;
-  if (!(await authServiceServer.isUsernameAvailable(username, client))) {
+  const usernameFree = await authServiceServer.isUsernameAvailable(username, client);
+  if (usernameFree === null) {
+    return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers, status: 500 });
+  }
+  if (!usernameFree) {
     return Response.json({ error: FRIENDLY_MESSAGES['sign-up/username-taken'] }, { headers });
   }
 
@@ -54,11 +58,44 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 
   if (error) {
+    console.error('[sign-up] auth.signUp error:', error.message, error.code);
     if (error.code === 'weak_password') {
-      return Response.json({ error: FRIENDLY_MESSAGES['password-weak'] }, { headers });
+      return Response.json({ error: FRIENDLY_MESSAGES['sign-up/password-weak'] }, { headers });
     }
+    if (
+      error.code === 'user_already_exists' ||
+      error.message?.toLowerCase().includes('already registered')
+    ) {
+      return Response.json(
+        { error: 'This email is already registered. Try signing in or use a different email.' },
+        { headers },
+      );
+    }
+    if (
+      error.message?.toLowerCase().includes('rate limit') ||
+      error.message?.toLowerCase().includes('rate_limit') ||
+      (error as { status?: number }).status === 429
+    ) {
+      return Response.json(
+        {
+          error:
+            'Email rate limit exceeded. Supabase limits how many sign-up or password-reset emails can be sent per hour. Please try again in an hour, or use an existing account to sign in.',
+        },
+        { headers, status: 429 },
+      );
+    }
+    return Response.json(
+      { error: error.message || FRIENDLY_MESSAGES['generic-error'] },
+      { headers },
+    );
+  }
 
-    return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers });
+  if (!process.env.TENANT_ID) {
+    console.error('[sign-up] TENANT_ID is not set');
+    return Response.json(
+      { error: 'Server configuration error. Please try again later.' },
+      { headers, status: 500 },
+    );
   }
 
   if (data.user) {
@@ -67,19 +104,46 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       client,
     );
 
-    // This will error if there is already a profile with this auth_id + tenant_id
     if (response.error) {
-      return Response.json({ error: FRIENDLY_MESSAGES['generic-error'] }, { headers });
+      console.error('[sign-up] createUserProfile error:', response.error);
+      const err = response.error as { code?: string; message?: string };
+      if (err.code === '23505') {
+        return Response.json(
+          { error: 'An account with this email or username may already exist. Try signing in.' },
+          { headers },
+        );
+      }
+      if (err.code === 'MEMBER_TYPE_MISSING' || err.message?.includes('member type')) {
+        return Response.json(
+          { error: 'Server is missing required setup. Please contact support.' },
+          { headers, status: 500 },
+        );
+      }
+      return Response.json(
+        { error: err.message || FRIENDLY_MESSAGES['generic-error'] },
+        { headers },
+      );
     }
   }
 
-  return redirect(`/sign-up-message?email=${email}`, { headers });
+  return redirect(`/sign-up-message?email=${encodeURIComponent(email ?? '')}`, { headers });
 };
 
 const rowWidth = ['100%', '100%', `100%`];
 
 export default function Index() {
+  const submit = useSubmit();
   const actionResponse: any = useActionData<typeof action>();
+
+  const handleSubmit = (values: Record<string, unknown>) => {
+    const formData = new FormData();
+    formData.append('username', String(values.username ?? ''));
+    formData.append('email', String(values.email ?? ''));
+    formData.append('password', String(values.password ?? ''));
+    formData.append('confirm-password', String(values['confirm-password'] ?? ''));
+    formData.append('consent', values.consent ? 'on' : '');
+    submit(formData, { method: 'post' });
+  };
 
   const validationSchema = object({
     username: string().min(2, FRIENDLY_MESSAGES['sign-up/username-short']).required('Required'),
@@ -89,14 +153,14 @@ export default function Index() {
       .required(FRIENDLY_MESSAGES['sign-up/password-required']),
     'confirm-password': string()
       .oneOf([ref('password'), ''], FRIENDLY_MESSAGES['sign-up/password-mismatch'])
-      .required(FRIENDLY_MESSAGES['sign-up/email-required']),
+      .required(FRIENDLY_MESSAGES['sign-up/confirm-password-required']),
     consent: bool().oneOf([true], FRIENDLY_MESSAGES['sign-up/terms']),
   });
 
   return (
-    <Main style={{ flex: 1 }}>
+    <Main style={{ flex: 1 }} sx={{ fontFamily: 'Times New Roman, Times, serif' }}>
       <Form
-        onSubmit={() => {}}
+        onSubmit={handleSubmit}
         validate={async (values: any) => {
           try {
             await validationSchema.validate(values, { abortEarly: false });
@@ -120,11 +184,10 @@ export default function Index() {
                 sx={{ width: '100%' }}
                 css={{ maxWidth: '620px' }}
                 mx={'auto'}
-                mt={[5, 10]}
+                mt={[15, 20]}
                 mb={3}
               >
                 <Flex sx={{ flexDirection: 'column', width: '100%' }}>
-                  <HeroBanner type="celebration" />
                   <Card sx={{ borderRadius: 3 }}>
                     <Flex
                       sx={{
@@ -166,9 +229,13 @@ export default function Index() {
                           data-cy="username"
                           name="username"
                           type="userName"
-                          placeholder="yourusername"
                           component={FieldInput}
                           validate={composeValidators(required, noSpecialCharacters)}
+                          sx={{
+                            border: '1px solid rgba(0,0,0,0.25)',
+                            borderRadius: '10px',
+                            px: 3,
+                          }}
                         />
                       </Flex>
                       <Flex
@@ -178,16 +245,18 @@ export default function Index() {
                         }}
                       >
                         <Label htmlFor="email">Email</Label>
-                        <Text color={'grey'} sx={{ fontSize: 1 }}>
-                          It can be personal or work email.
-                        </Text>
+                        <Text color={'grey'} sx={{ fontSize: 1 }}></Text>
                         <Field
                           data-cy="email"
                           name="email"
                           type="email"
                           component={FieldInput}
-                          placeholder="yourname@domain.com"
                           validate={required}
+                          sx={{
+                            border: '1px solid rgba(0,0,0,0.25)',
+                            borderRadius: '10px',
+                            px: 3,
+                          }}
                         />
                       </Flex>
                       <Flex
@@ -200,7 +269,6 @@ export default function Index() {
                         <PasswordField
                           data-cy="password"
                           name="password"
-                          placeholder="Password"
                           component={FieldInput}
                           validate={required}
                         />
@@ -215,7 +283,6 @@ export default function Index() {
                         <PasswordField
                           data-cy="confirm-password"
                           name="confirm-password"
-                          placeholder="Confirm your Password"
                           component={FieldInput}
                           validate={required}
                         />
@@ -253,7 +320,14 @@ export default function Index() {
                           sx={{
                             borderRadius: 3,
                             width: '100%',
+                            backgroundColor: '#3F6B66',
+                            color: '#ffffff',
+                            fontWeight: 'bold',
+                            fontFamily: '"Times New Roman", Times, serif',
                             justifyContent: 'center',
+                            '&: hover': {
+                              backgroundColor: '#355c58',
+                            },
                           }}
                           data-cy="submit"
                           variant="primary"

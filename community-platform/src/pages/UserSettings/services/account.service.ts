@@ -1,9 +1,11 @@
+import { apiFetch } from 'src/utils/apiFetch';
+
 const changeEmail = async (email: string, password: string) => {
   const data = new FormData();
   data.append('email', email);
   data.append('password', password);
 
-  return await fetch('/api/account/change-email', {
+  return await apiFetch('/api/account/change-email', {
     method: 'POST',
     body: data,
   });
@@ -14,7 +16,7 @@ const changePassword = async (oldPassword: string, newPassword: string) => {
   data.append('oldPassword', oldPassword);
   data.append('newPassword', newPassword);
 
-  return await fetch('/api/account/change-password', {
+  return await apiFetch('/api/account/change-password', {
     method: 'POST',
     body: data,
   });

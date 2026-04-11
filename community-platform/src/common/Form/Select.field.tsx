@@ -18,14 +18,18 @@ interface ISelectFieldProps extends FieldProps {
   showError?: boolean;
 }
 
-// annoyingly react-final-form saves the full option as values (not just the value field)
-// therefore the following two functions are used for converting to-from string values and field options
+const getValueFromSelect = (
+  v: ISelectOption | ISelectOption[] | string | string[] | null | undefined,
+) => {
+  if (!v) return v;
 
-// depending on select type (e.g. multi) and option selected get value
-const getValueFromSelect = (v: ISelectOption | ISelectOption[] | null | undefined) =>
-  v ? (Array.isArray(v) ? v.map((el) => el.value) : v.value) : v;
+  if (Array.isArray(v)) {
+    return v.map((el) => (typeof el === 'string' ? el : el.value));
+  }
 
-// given current values find the relevant select options
+  return typeof v === 'string' ? v : v.value;
+};
+
 const getValueForSelect = (opts: ISelectOption[] = [], v: string | string[] | null | undefined) => {
   const findVal = (optVal: string) => opts.find((o) => o.value === optVal);
   return v
@@ -48,7 +52,6 @@ export const SelectField = ({
   showError = true,
   ...rest
 }: ISelectFieldProps) => (
-  // note, we first use a div container so that default styles can be applied
   <Flex sx={{ padding: 0, flexDirection: 'column' }}>
     {showError && meta.error && meta.touched && (
       <Text sx={{ fontSize: 1, color: 'error' }}>{meta.error}</Text>
@@ -60,6 +63,7 @@ export const SelectField = ({
       data-cy={rest['data-cy']}
     >
       <Select
+        suppressHydrationWarning
         onChange={(v) => {
           const value = getValueFromSelect(v);
           input.onChange(value);

@@ -1,4 +1,5 @@
 import { Button, ButtonIcon, MapFilterListItem, MemberBadge, UserBadge } from 'oa-components';
+import type { ReactNode } from 'react';
 import { useContext, useMemo } from 'react';
 import { Checkbox, Flex, Heading, Label, Text } from 'theme-ui';
 
@@ -36,6 +37,23 @@ export const MapFilterList = ({ onClose }: MapFilterListProps) => {
       ),
     [mapState.allBadges, mapState.activeBadgeFilters, mapState.filteredPins],
   );
+
+  // --- Project helpers ---
+  const activeProjectStages: number[] = mapState.activeProjectStages || [];
+  const onlyProjects: boolean = mapState.onlyProjects || false;
+
+  const toggleStage = (stage: number) => {
+    if (activeProjectStages.includes(stage)) {
+      mapState.setActiveProjectStages(activeProjectStages.filter((s) => s !== stage));
+    } else {
+      mapState.setActiveProjectStages([...activeProjectStages, stage]);
+    }
+  };
+
+  const clearProjectFilters = () => {
+    mapState.setActiveProjectStages([]);
+    mapState.setOnlyProjects(false);
+  };
 
   const pinCount = mapState?.filteredPins?.length || 0;
   const buttonLabel = `${pinCount} result${pinCount === 1 ? '' : 's'} in current view`;
@@ -84,6 +102,44 @@ export const MapFilterList = ({ onClose }: MapFilterListProps) => {
           padding: 2,
         }}
       >
+        {/* --- SCIS Project Filters --- */}
+        <MapFilterListWrapper title="Projects">
+          <Flex sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
+            {[1, 2, 3, 4].map((s) => (
+              <MapFilterListItem
+                key={s}
+                active={activeProjectStages.includes(s)}
+                onClick={() => toggleStage(s)}
+                filterType="tag"
+                sx={{ maxWidth: 'auto', width: 'auto' }}
+              >
+                <Text variant="quiet" sx={{ fontSize: 1 }}>
+                  Stage {s}
+                </Text>
+              </MapFilterListItem>
+            ))}
+          </Flex>
+
+          <Label sx={{ alignItems: 'center', gap: 0, mt: 2 }}>
+            <Checkbox
+              onChange={(e) => mapState.setOnlyProjects(e.target.checked)}
+              checked={onlyProjects}
+            />
+            Show only projects
+          </Label>
+
+          {(onlyProjects || activeProjectStages.length > 0) && (
+            <Button
+              variant="outline"
+              onClick={clearProjectFilters}
+              sx={{ mt: 2, alignSelf: 'flex-start' }}
+            >
+              Clear project filters
+            </Button>
+          )}
+        </MapFilterListWrapper>
+
+        {/* Existing OneArmy filters */}
         {(mapState.allProfileTypes?.length || 0) > 0 && (
           <MapFilterListWrapper title="Profiles">
             {mapState.allProfileTypes.map((profileType, index) => (
@@ -101,6 +157,7 @@ export const MapFilterList = ({ onClose }: MapFilterListProps) => {
             ))}
           </MapFilterListWrapper>
         )}
+
         {mapState.allTags.length > 0 && (
           <MapFilterListWrapper title="Spaces activities">
             {visibleTags.length > 0 ? (
@@ -155,7 +212,6 @@ export const MapFilterList = ({ onClose }: MapFilterListProps) => {
                     onClick={() => mapState.toggleActiveProfileSettingFilter(setting)}
                     defaultChecked={mapState.activeBadgeFilters?.includes(setting)}
                   />
-                  {/* There is only 1 for now, so it's hardcoded. */}
                   Open to Visitors
                 </Label>
               );
@@ -178,13 +234,7 @@ export const MapFilterList = ({ onClose }: MapFilterListProps) => {
   );
 };
 
-const MapFilterListWrapper = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => {
+const MapFilterListWrapper = ({ title, children }: { title: string; children: ReactNode }) => {
   return (
     <Flex sx={{ gap: 1, flexDirection: 'column' }}>
       <Text>{title}</Text>

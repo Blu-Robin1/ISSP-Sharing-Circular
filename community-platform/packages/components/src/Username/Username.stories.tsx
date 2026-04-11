@@ -13,7 +13,7 @@ export default {
 export const NoBadge = {
   args: {
     user: {
-      country: 'pt',
+      city: 'Lisbon',
       username: 'a-username',
     } as Author,
   },
@@ -23,7 +23,7 @@ export const OneBadge = {
   args: {
     user: {
       username: 'a-username',
-      country: 'pt',
+      city: 'Lisbon',
       badges: [
         {
           id: 1,
@@ -39,7 +39,7 @@ export const OneBadge = {
 export const TwoBadges = {
   args: {
     user: {
-      country: 'pt',
+      city: 'Lisbon',
       username: 'a-username',
       badges: [
         {
@@ -60,7 +60,7 @@ export const TwoBadges = {
   },
 };
 
-export const WithoutFlag = {
+export const WithoutLocation = {
   args: {
     user: {
       username: 'a-username',
@@ -68,11 +68,11 @@ export const WithoutFlag = {
   },
 };
 
-export const InvalidCountryCode = {
+export const WithLocation = {
   args: {
     user: {
       username: 'a-username',
-      country: 'zz',
+      city: 'Tokyo',
     } as Author,
   },
 };

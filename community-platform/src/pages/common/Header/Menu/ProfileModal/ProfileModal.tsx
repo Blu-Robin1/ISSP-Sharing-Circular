@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { observer } from 'mobx-react';
 import { ReturnPathLink } from 'oa-components';
+import { UserRole } from 'oa-shared';
 import { preciousPlasticTheme } from 'oa-themes';
 import { NavLink } from 'react-router';
 import { AuthWrapper } from 'src/common/AuthWrapper';
@@ -46,6 +47,8 @@ export const ProfileModal = observer(() => {
 
   const upgradeBadge = upgradeBadgeForCurrentUser;
   const shouldShowUpgrade = !!upgradeBadge;
+  const isOrganizer =
+    activeUser?.roles?.includes(UserRole.ORGANIZER) || activeUser?.roles?.includes(UserRole.ADMIN);
 
   return (
     <ModalContainer data-cy="user-menu-list">
@@ -67,6 +70,17 @@ export const ProfileModal = observer(() => {
         >
           Profile
         </ModalLink>
+
+        {isOrganizer && (
+          <ModalLink
+            to="/dashboard"
+            data-cy="menu-Dashboard"
+            className={({ isActive }) => (isActive ? 'current' : '')}
+          >
+            Dashboard
+          </ModalLink>
+        )}
+
         {shouldShowUpgrade && (
           <UpgradeBadgeLink
             upgradeBadge={upgradeBadge}
@@ -80,6 +94,7 @@ export const ProfileModal = observer(() => {
             }}
           />
         )}
+
         {COMMUNITY_PAGES_PROFILE.map((page) => (
           <AuthWrapper key={page.path}>
             <ModalLink
@@ -91,6 +106,7 @@ export const ProfileModal = observer(() => {
             </ModalLink>
           </AuthWrapper>
         ))}
+
         <Box
           sx={{
             padding: '10px 30px 10px 30px',
@@ -105,3 +121,111 @@ export const ProfileModal = observer(() => {
     </ModalContainer>
   );
 });
+
+// import styled from '@emotion/styled';
+// import { observer } from 'mobx-react';
+// import { ReturnPathLink } from 'oa-components';
+// import { preciousPlasticTheme } from 'oa-themes';
+// import { NavLink } from 'react-router';
+// import { AuthWrapper } from 'src/common/AuthWrapper';
+// import { UpgradeBadgeLink } from 'src/pages/common/Header/Menu/Profile/UpgradeBadgeLink';
+// import { COMMUNITY_PAGES_PROFILE } from 'src/pages/PageList';
+// import { useProfileStore } from 'src/stores/Profile/profile.store';
+// import { Box, Flex } from 'theme-ui';
+
+// // TODO: Remove direct usage of Theme
+// const theme = preciousPlasticTheme.styles;
+
+// const ModalContainer = styled(Box)`
+//   max-width: 100%;
+//   max-height: 100%;
+//   position: absolute;
+//   right: 10px;
+//   top: 60px;
+//   z-index: ${theme.zIndex.modalProfile};
+//   height: 100%;
+// `;
+
+// const ModalLink = styled(NavLink)`
+//   z-index: ${theme.zIndex.modalProfile};
+//   display: flex;
+//   flex-direction: column;
+//   color: ${theme.colors.black};
+//   padding: 10px 30px 10px 30px;
+//   text-align: left;
+//   width: 100%;
+//   max-width: 100%;
+//   max-height: 100%;
+
+//   &:hover,
+//   &:focus,
+//   &:active,
+//   &.current {
+//     background-color: ${theme.colors.background};
+//   }
+// `;
+
+// export const ProfileModal = observer(() => {
+//   const { profile: activeUser, upgradeBadgeForCurrentUser } = useProfileStore();
+
+//   const upgradeBadge = upgradeBadgeForCurrentUser;
+//   const shouldShowUpgrade = !!upgradeBadge;
+
+//   return (
+//     <ModalContainer data-cy="user-menu-list">
+//       <Flex
+//         sx={{
+//           zIndex: theme.zIndex.modalProfile,
+//           position: 'relative',
+//           background: 'white',
+//           border: '2px solid black',
+//           borderRadius: 1,
+//           overflow: 'hidden',
+//           flexDirection: 'column',
+//         }}
+//       >
+//         <ModalLink
+//           to={'/u/' + activeUser?.username}
+//           data-cy="menu-Profile"
+//           className={({ isActive }) => (isActive ? 'current' : '')}
+//         >
+//           Profile
+//         </ModalLink>
+//         {shouldShowUpgrade && (
+//           <UpgradeBadgeLink
+//             upgradeBadge={upgradeBadge}
+//             data-cy="menu-upgrade-badge"
+//             sx={{
+//               padding: '10px 30px 10px 30px',
+//               textAlign: 'left',
+//               '&:hover': {
+//                 backgroundColor: 'background',
+//               },
+//             }}
+//           />
+//         )}
+//         {COMMUNITY_PAGES_PROFILE.map((page) => (
+//           <AuthWrapper key={page.path}>
+//             <ModalLink
+//               to={page.path}
+//               data-cy={`menu-${page.title}`}
+//               className={({ isActive }) => (isActive ? 'current' : '')}
+//             >
+//               {page.title}
+//             </ModalLink>
+//           </AuthWrapper>
+//         ))}
+//         <Box
+//           sx={{
+//             padding: '10px 30px 10px 30px',
+//             '&:hover': { background: 'background' },
+//           }}
+//         >
+//           <ReturnPathLink data-cy="menu-Logout" to="/logout" style={{ color: 'black' }}>
+//             Log out
+//           </ReturnPathLink>
+//         </Box>
+//       </Flex>
+//     </ModalContainer>
+//   );
+// });

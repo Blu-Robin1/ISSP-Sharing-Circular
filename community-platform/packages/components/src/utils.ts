@@ -14,7 +14,7 @@ import type {
 
 export const fakeAuthorSB = (authorOverloads: Partial<Author> = {}): Author => ({
   id: faker.number.int(),
-  country: faker.location.country(),
+  city: faker.location.city(),
   displayName: faker.person.firstName(),
   username: faker.internet.username(),
   photo: {
@@ -181,7 +181,7 @@ export const fakeProfileType = (profileTypeOverLoads: Partial<ProfileType> = {})
 export const fakePinProfile = (pinProfileOverLoads: Partial<PinProfile> = {}): PinProfile => ({
   id: faker.number.int(),
   about: '',
-  country: faker.location.country(),
+  city: faker.location.city(),
   coverImages: null,
   displayName: faker.person.firstName(),
   username: faker.internet.username(),

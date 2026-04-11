@@ -84,14 +84,14 @@ export const users: Users = {
     },
     profileType: 'member',
   },
-  research_creator: {
-    email: 'research_creator@test.com',
-    password: 'research_creator',
-    username: 'research_creator',
+  organizer: {
+    email: 'organizer@test.com',
+    password: 'organizer',
+    username: 'organizer',
     createdAt: new Date('2020-01-07T15:46:00.297Z'),
-    displayName: 'research_creator',
-    roles: [UserRole.RESEARCH_CREATOR],
-    about: 'research_creator research_creator',
+    displayName: 'organizer',
+    roles: [UserRole.ORGANIZER],
+    about: 'organizer organizer',
     photo: {
       id: 'string',
       publicUrl: 'string',
@@ -122,7 +122,7 @@ export const users: Users = {
     profileType: 'machine-builder',
   },
   settings_member_new: {
-    country: 'Poland',
+    city: 'Poland',
     username: 'settings_member_new',
     email: 'settings_member_new@test.com',
     password: 'test1234',
@@ -263,7 +263,7 @@ export const users: Users = {
     ],
     website: 'http://profile_views.example.com',
     about: 'Hi! I have 99 views',
-    country: 'nl',
+    city: 'nl',
     photo: {
       id: 'string',
       publicUrl: 'string',

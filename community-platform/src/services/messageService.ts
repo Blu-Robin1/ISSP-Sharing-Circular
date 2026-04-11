@@ -1,4 +1,5 @@
 import type { SendMessage } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const sendMessage = async (data: SendMessage) => {
   const formData = new FormData();
@@ -7,7 +8,7 @@ const sendMessage = async (data: SendMessage) => {
   formData.append('message', data.message);
   formData.append('name', data.name);
 
-  return fetch('/api/messages', {
+  return apiFetch('/api/messages', {
     method: 'POST',
     body: formData,
   });

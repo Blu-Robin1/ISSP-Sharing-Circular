@@ -18,7 +18,7 @@ export const Default: StoryFn<typeof UserEngagementWrapper> = () => (
         <ArticleCallToActionSupabase
           author={{
             username: 'library._createdBy',
-            country: 'US',
+            city: 'San Francisco',
             displayName: 'display name',
             badges: [
               {

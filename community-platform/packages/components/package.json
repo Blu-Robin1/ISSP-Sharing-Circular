@@ -5,7 +5,7 @@
   "private": true,
   "main": "dist/index.js",
   "type": "module",
-  "types": "dist/index.d.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "storybook": "yarn start",
     "start": "storybook dev -p 6006 --loglevel verbose",

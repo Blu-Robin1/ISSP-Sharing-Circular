@@ -37,12 +37,11 @@ export const fields: ILabels = {
     title: 'What is your main activity?',
   },
   about: {
-    title: 'Tell us a bit about yourself',
-    placeholder:
-      "Describe in details what you do and who you are. Write in English otherwise your profile won't be approved.",
+    title: 'Tell us about yourself',
+    placeholder: 'Describe in details what you do and who you are.',
   },
-  country: {
-    title: 'Country',
+  city: {
+    title: 'City',
     description:
       "Thought about adding yourself to our map? If you do, we'll automatically set this field.",
   },
@@ -52,7 +51,7 @@ export const fields: ILabels = {
     title: 'Add profile cover image(s)',
   },
   userImage: {
-    description: 'Visible on your profile and comments, best to upload as a square image.',
+    description: 'Displayed on your profile and comments.',
     title: 'Add an avatar',
   },
   deleteAccount: {
@@ -99,17 +98,17 @@ export const fields: ILabels = {
   },
   publicContentPreference: {
     title: 'Contact Preference',
-    description:
-      "Regardless of your email notifications setting, do you want people to be able to contact you? We'll email you their message whenever they do.",
+    // description:
+    //   "Regardless of your email notifications setting, do you want people to be able to contact you? We'll email you their message whenever they do.",
     placeholder: 'I want people to be able to contact me',
   },
   repeatNewPassword: {
-    title: 'Repeat new password',
-    placeholder: 'Repeat new password',
+    title: 'Confirm new password',
+    placeholder: 'Confirm new password',
   },
   userName: {
     title: 'Username',
-    description: "You set this when you signed up and it can't be changed now. Sorry.",
+    description: 'This username was set when your account was created and cannot be changed.',
   },
   tags: {
     description: 'What are your main activities? (choose max five)',
@@ -133,7 +132,7 @@ export const fields: ILabels = {
 export const form = {
   defaultError: 'Make sure this field is filled correctly',
   saveSuccess: 'Yay! Impact data saved.',
-  saveNotificationPreferences: 'Whoop. Preferences updated.',
+  saveNotificationPreferences: 'Your notification preferences have been updated..',
 };
 
 export const headings = {
@@ -144,7 +143,7 @@ export const headings = {
   editProfile: 'Edit profile',
   focus: 'Focus',
   images: 'Images',
-  infos: 'Infos',
+  infos: 'Profile Information',
   map: {
     description:
       'Add yourself to the map as an individual who wants to get started. Find local community members and meetup to join forces and collaborate.',
@@ -172,8 +171,8 @@ export const mapForm = {
   needsChanges:
     'This map pin has been marked as requiring further changes. Specifically the moderator comments are:',
   noLocationLabel: 'No map pin currently saved',
-  successfulSave: 'Map pin saved successfully - whoop',
-  successfulDelete: 'Location data removed',
+  successfulSave: 'Map pin saved successfully.',
+  successfulDelete: 'Map pin removed successfully.',
 };
 
 export const missingData = 'Do you have impact data for this year?';

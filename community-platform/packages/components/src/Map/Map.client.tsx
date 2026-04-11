@@ -32,4 +32,4 @@ export const Map = forwardRef((props: IProps, ref: Ref<LeafletMap>) => {
   );
 });
 
-Map.displayName = 'Map'; // Is this needed?
+Map.displayName = 'Map';

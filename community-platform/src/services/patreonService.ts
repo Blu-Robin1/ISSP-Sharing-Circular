@@ -1,8 +1,9 @@
 import type { IPatreonUser } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getCurrentUserPatreon = async () => {
   try {
-    const patreonData = await fetch('/api/patreon');
+    const patreonData = await apiFetch('/api/patreon');
 
     return (await patreonData.json()) as {
       patreon: IPatreonUser;
@@ -16,7 +17,7 @@ const getCurrentUserPatreon = async () => {
 };
 
 const disconnectUserPatreon = async () => {
-  const result = await fetch('/api/patreon', { method: 'DELETE' });
+  const result = await apiFetch('/api/patreon', { method: 'DELETE' });
 
   return result.ok;
 };

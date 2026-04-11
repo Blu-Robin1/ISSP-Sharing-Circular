@@ -13,6 +13,7 @@ export const NotFoundPage: FC = () => (
         flexDirection: 'column',
         justifyContent: 'center',
         textAlign: 'center',
+        fontFamily: "'Times New Roman', Times, serif",
       }}
     >
       <Image
@@ -24,9 +25,9 @@ export const NotFoundPage: FC = () => (
         }}
       />
       <Text data-test="NotFound: Heading">
-        Nada, page not found 💩
+        404 - Page not fond.
         <br />
-        Go to the <Link to="/">home page</Link>
+        Return to the <Link to="/">home page</Link>
       </Text>
     </Flex>
   </Main>

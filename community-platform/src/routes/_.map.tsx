@@ -3,6 +3,7 @@ import Main from 'src/pages/common/Layout/Main';
 import MapsPage from 'src/pages/Maps/Maps.client';
 import { MapPinServiceContext, mapPinService } from 'src/pages/Maps/map.service';
 import { generateTags, mergeMeta } from 'src/utils/seo.utils';
+import { Box } from 'theme-ui';
 import '../styles/leaflet.css';
 
 export async function loader() {
@@ -16,9 +17,11 @@ export const meta = mergeMeta(() => {
 export default function Index() {
   return (
     <Main ignoreMaxWidth={true}>
-      <MapPinServiceContext.Provider value={mapPinService}>
-        <ClientOnly fallback={<></>}>{() => <MapsPage />}</ClientOnly>
-      </MapPinServiceContext.Provider>
+      <Box sx={{ mt: [10, 12] }}>
+        <MapPinServiceContext.Provider value={mapPinService}>
+          <ClientOnly fallback={<></>}>{() => <MapsPage />}</ClientOnly>
+        </MapPinServiceContext.Provider>
+      </Box>
     </Main>
   );
 }

@@ -114,7 +114,7 @@ export async function action({ params, request }: LoaderFunctionArgs) {
       parent_id,
       source_type,
       created_by,
-      profiles(id, display_name, username, photo, country, badges:profile_badges_relations(
+      profiles(id, display_name, username, photo, city, badges:profile_badges_relations(
         profile_badges(
           id,
           name,
