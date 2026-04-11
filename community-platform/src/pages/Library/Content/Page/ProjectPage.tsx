@@ -16,6 +16,8 @@ import { onUsefulClick } from 'src/utils/onUsefulClick';
 import { Card, Flex } from 'theme-ui';
 import { libraryService } from '../../library.service';
 import { LibraryDescription } from './LibraryDescription';
+import { ProjectStageDisplay } from '../Common/ProjectStageDisplay';
+import { ProjectSupportActions } from '../Common/ProjectSupportActions';
 import Step from './LibraryStep';
 
 interface ProjectPageProps {
@@ -27,6 +29,8 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
   const [usefulCount, setUsefulCount] = useState<number>(item.usefulCount);
   const { profile: activeUser } = useProfileStore();
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isSupportLoading, setIsSupportLoading] = useState(false);
 
   useEffect(() => {
     const getVoted = async () => {
@@ -56,9 +60,19 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
     });
   };
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const navigate = useNavigate();
+  const handleSupportAction = async (type: string, data: any) => {
+    setIsSupportLoading(true);
+    try {
+      // The API call is handled in the ProjectSupportActions component
+      // Here we could refresh the project data or show a success message
+      console.log('Support action submitted:', type, data);
+      // TODO: Refresh project data to show updated counts
+    } catch (error) {
+      console.error('Error handling support action:', error);
+    } finally {
+      setIsSupportLoading(false);
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -130,6 +144,30 @@ export const ProjectPage = observer(({ item }: ProjectPageProps) => {
         hasUserVotedUseful={voted}
         onUsefulClick={() => handleUsefulClick(voted ? 'delete' : 'add')}
       />
+
+      <Card sx={{ p: 3, mb: 3 }}>
+        <ProjectStageDisplay
+          stage={item.stage}
+          stageOverride={item.stageOverride}
+          supporterCount={item.supporterCount || 0}
+          memberCount={item.memberCount || 0}
+          championCount={item.championCount || 0}
+          volunteerCount={item.volunteerCount || 0}
+          donateCount={item.donateCount || 0}
+          moderation={item.moderation}
+        />
+      </Card>
+
+      {activeUser && (
+        <Card sx={{ p: 3, mb: 3 }}>
+          <ProjectSupportActions
+            projectId={item.id}
+            onSupportAction={handleSupportAction}
+            isLoading={isSupportLoading}
+          />
+        </Card>
+      )}
+
       <Flex sx={{ flexDirection: 'column', marginTop: [3, 4], gap: 4 }}>
         {item.steps
           .sort((a, b) => a.order - b.order)

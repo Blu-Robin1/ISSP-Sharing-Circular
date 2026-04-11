@@ -45,7 +45,7 @@ export const ArticleCallToActionSupabaseSingleContributor: StoryFn<
     contributors={[
       {
         id: faker.number.int(),
-        country: faker.location.countryCode(),
+        city: faker.location.city(),
         displayName: faker.person.firstName(),
         badges: [
           {
@@ -76,7 +76,7 @@ export const ArticleCallToActionSupabaseSingleContributor: StoryFn<
 
 const makeFakeUser = (): Author => ({
   id: faker.number.int(),
-  country: faker.location.countryCode(),
+  city: faker.location.city(),
   displayName: faker.person.firstName(),
   badges: [
     {

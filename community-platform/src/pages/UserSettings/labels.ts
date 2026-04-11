@@ -41,7 +41,7 @@ export const fields: ILabels = {
     placeholder:
       "Describe in details what you do and who you are.",
   },
-  country: {
+  city: {
     title: 'City',
     description:
       "Thought about adding yourself to our map? If you do, we'll automatically set this field.",

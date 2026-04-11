@@ -50,10 +50,8 @@ export const loader = async ({ request, params }) => {
             id,
             name,
             display_name,
-            image_url,
-            small_image_url,
-            map_pin_name,
             description,
+            map_pin_name,
             is_space
           )
         )

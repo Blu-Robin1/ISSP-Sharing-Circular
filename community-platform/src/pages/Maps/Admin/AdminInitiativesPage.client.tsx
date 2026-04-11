@@ -39,10 +39,10 @@ type Contribution = {
 const InitiativeCard = (props: {
   initiative: NormalizedInitiative;
   onModeration: (id: string, s: ScisModerationStatus) => Promise<void>;
-  onStageOverride: (id: string, s: ScisStage | '') => Promise<void>;
+  onStageOverride: (id: string, s: ScisStage | '') => Promise<boolean>;
   onDelete: (id: string) => Promise<void>;
   onUpdate: (id: string, u: { title?: string; description?: string; projectType?: ScisProjectType }) => Promise<void>;
-  onRefresh: () => void;
+  onRefresh: () => Promise<void>;
 }) => {
   const { initiative: i, onModeration, onStageOverride, onDelete, onUpdate, onRefresh } = props;
 
@@ -58,6 +58,13 @@ const InitiativeCard = (props: {
     (i.project_type as ScisProjectType) ?? 'other',
   );
   const [busy, setBusy] = useState(false);
+  const [selectedStageOverride, setSelectedStageOverride] = useState<string>(
+    i.stage_override != null ? String(i.stage_override) : '',
+  );
+
+  useEffect(() => {
+    setSelectedStageOverride(i.stage_override != null ? String(i.stage_override) : '');
+  }, [i.stage_override]);
 
   const loadDetails = useCallback(async () => {
     setDetailsLoading(true);
@@ -259,12 +266,20 @@ const InitiativeCard = (props: {
             <Text sx={{ fontSize: 1 }}>Stage override:</Text>
 
             <Select
-              value={i.stage_override ?? ''}
+              value={selectedStageOverride}
               onChange={async (e) => {
-                const val = e.target.value as ScisStage | '';
+                const rawValue = e.target.value;
+                const val = rawValue === '' ? '' : (Number(rawValue) as ScisStage);
+
+                setSelectedStageOverride(rawValue);
                 setBusy(true);
-                await onStageOverride(i.id, val);
-                onRefresh();
+
+                const success = await onStageOverride(i.id, val);
+                if (!success) {
+                  setSelectedStageOverride(i.stage_override != null ? String(i.stage_override) : '');
+                }
+
+                await onRefresh();
                 setBusy(false);
               }}
               disabled={busy}
@@ -281,7 +296,7 @@ const InitiativeCard = (props: {
             <Button
               variant="outline"
               onClick={async () => {
-                if (!confirm('Delete this initiative? This cannot be undone.')) return;
+                if (!confirm('Delete this project? This cannot be undone.')) return;
                 setBusy(true);
                 await onDelete(i.id);
                 onRefresh();
@@ -347,13 +362,13 @@ const InitiativeCard = (props: {
   );
 };
 
-export const AdminInitiativesPage = () => {
+const AdminProjectsPage = () => {
   const [initiatives, setInitiatives] = useState<NormalizedInitiative[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const list = await scisService.getInitiatives('all');
+    const list = await scisService.getInitiatives('all', true);
     setInitiatives(list);
     setLoading(false);
   }, []);
@@ -367,8 +382,8 @@ export const AdminInitiativesPage = () => {
   };
 
   const handleStageOverride = async (initiativeId: string, stage: ScisStage | '') => {
-    await scisService.updateInitiative(initiativeId, {
-      stageOverride: stage ? (stage as number) : null,
+    return await scisService.updateInitiative(initiativeId, {
+      stageOverride: stage === '' ? null : Number(stage),
     });
   };
 
@@ -387,7 +402,7 @@ export const AdminInitiativesPage = () => {
     <Box sx={{ maxWidth: 960, mx: 'auto', p: [3, 4] }}>
       <Flex sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
         <Heading as="h1" sx={{ fontSize: [3, 4] }}>
-          Admin: SCIS Initiatives
+          Admin: SCIS Projects
         </Heading>
 
         <Flex sx={{ gap: 2 }}>
@@ -404,7 +419,7 @@ export const AdminInitiativesPage = () => {
       {loading ? (
         <Text sx={{ color: 'grey' }}>Loading…</Text>
       ) : initiatives.length === 0 ? (
-        <Text sx={{ color: 'grey' }}>No initiatives yet.</Text>
+        <Text sx={{ color: 'grey' }}>No projects yet.</Text>
       ) : (
         <Flex sx={{ flexDirection: 'column', gap: 3 }}>
           {initiatives.map((initiative) => (
@@ -423,3 +438,5 @@ export const AdminInitiativesPage = () => {
     </Box>
   );
 };
+
+export { AdminProjectsPage, AdminProjectsPage as AdminInitiativesPage };

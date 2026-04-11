@@ -14,6 +14,10 @@ export const categories: Partial<DBCategory>[] = [
     type: 'projects',
   },
   {
+    name: 'Shared Inventory',
+    type: 'projects',
+  },
+  {
     name: 'Other',
     type: 'projects',
   },

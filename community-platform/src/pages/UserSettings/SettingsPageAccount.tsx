@@ -33,7 +33,7 @@ export const SettingsPageAccount = observer(() => {
       <ChangePasswordForm />
       <ChangeEmailForm />
 
-      {isAdmin || (
+      {isAdmin && (
         <Link to="/admin/initiatives">
           <Button variant="secondary">Admin panel</Button>
         </Link>

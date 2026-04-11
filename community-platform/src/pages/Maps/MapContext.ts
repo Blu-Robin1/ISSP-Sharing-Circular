@@ -17,10 +17,10 @@ export const MapContext = createContext<{
   activeProfileSettingFilters: string[];
 
   // SCIS filters
-  activeInitiativeStages: number[];
-  setActiveInitiativeStages: (stages: number[]) => void;
-  onlyInitiatives: boolean;
-  setOnlyInitiatives: (value: boolean) => void;
+  activeProjectStages: number[];
+  setActiveProjectStages: (stages: number[]) => void;
+  onlyProjects: boolean;
+  setOnlyProjects: (value: boolean) => void;
 
   location: ILatLng;
   selectedPin: MapPin | null | undefined;
@@ -50,9 +50,9 @@ export const MapContext = createContext<{
   setClusterGroupRef: (ref: any) => void;
 
     // SCIS submission mode
-  isPlacingInitiative: boolean;
-  setIsPlacingInitiative: (value: boolean) => void;
+  isPlacingProject: boolean;
+  setIsPlacingProject: (value: boolean) => void;
 
   // Called when initiatives change (create, support, contribution) to refetch
-  refreshInitiatives: () => void;
+  refreshProjects: () => void;
 } | null>(null);

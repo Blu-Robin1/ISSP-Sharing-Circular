@@ -20,7 +20,7 @@ export async function loader({ request }) {
 
   // Check if user has required permissions
   const isAdmin = roles?.includes(UserRole.ADMIN) ?? false;
-  const isResearchCreator = roles?.includes(UserRole.RESEARCH_CREATOR) ?? false;
+  const isResearchCreator = roles?.includes(UserRole.ORGANIZER) ?? false;
   const canCreate = isAdmin || isResearchCreator;
 
   if (!canCreate) {

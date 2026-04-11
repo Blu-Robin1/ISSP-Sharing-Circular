@@ -15,7 +15,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const { data, error } = await client
     .from('useful_votes')
     .select(
-      `profiles(id, username, display_name, photo, country, type:profile_types(
+      `profiles(id, username, display_name, photo, city, type:profile_types(
             id,
             name,
             display_name,
@@ -57,7 +57,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       username: profile.username,
       displayName: profile.displayName,
       photo: profile.photo,
-      country: profile.country,
+      city: profile.city,
       badges: profile.badges,
       type: profile.type,
     });

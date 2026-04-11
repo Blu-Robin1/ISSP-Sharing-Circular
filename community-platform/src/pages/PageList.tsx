@@ -6,12 +6,6 @@ interface IPageNavigation {
   title: string;
 }
 
-const QuestionModule: IPageNavigation = {
-  module: MODULE.QUESTION,
-  path: '/questions',
-  title: 'Questions',
-};
-
 const ResearchModule: IPageNavigation = {
   module: MODULE.RESEARCH,
   path: '/research',
@@ -60,29 +54,15 @@ const maps: IPageNavigation = {
   title: 'Map',
 };
 
-const initiatives: IPageNavigation = {
-  module: MODULE.MAP,
-  path: '/initiatives',
-  title: 'Initiatives',
-};
-
-const news: IPageNavigation = {
-  module: MODULE.NEWS,
-  path: '/news',
-  title: 'News',
-};
 export const getAvailablePageList = (supportedModules: MODULE[]): IPageNavigation[] => {
   return COMMUNITY_PAGES.filter((pageItem) => supportedModules.includes(pageItem.module));
 };
 
 export const COMMUNITY_PAGES: IPageNavigation[] = [
-  news,
   discover,
   maps,
-  initiatives,
   academy,
   ResearchModule,
-  QuestionModule,
   about,
   howItWorks,
   impact,

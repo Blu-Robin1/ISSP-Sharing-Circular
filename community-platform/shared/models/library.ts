@@ -50,6 +50,15 @@ export class DBProject implements IDBContentDoc, IDBDownloadable, IDBModeration 
   file_download_count?: number;
   moderation: Moderation;
   moderation_feedback: string;
+  lat?: number;
+  lng?: number;
+  stage?: number;
+  stage_override?: number | null;
+  supporter_count?: number;
+  member_count?: number;
+  champion_count?: number;
+  volunteer_count?: number;
+  donate_count?: number;
 
   constructor(obj: Omit<DBProject, 'id'>) {
     Object.assign(this, obj);
@@ -84,6 +93,15 @@ export class Project implements IContentDoc, IDownloadable, IModeration {
   moderation: Moderation;
   moderationFeedback?: string;
   time?: string;
+  lat?: number;
+  lng?: number;
+  stage?: number;
+  stageOverride?: number | null;
+  supporterCount?: number;
+  memberCount?: number;
+  championCount?: number;
+  volunteerCount?: number;
+  donateCount?: number;
 
   constructor(obj: Project) {
     Object.assign(this, obj);
@@ -120,6 +138,15 @@ export class Project implements IContentDoc, IDownloadable, IModeration {
       // no fileLink as it must be shown only for authenticated users
       hasFileLink: !!obj.file_link,
       time: obj.time,
+      lat: obj.lat !== undefined && obj.lat !== null ? Number(obj.lat) : undefined,
+      lng: obj.lng !== undefined && obj.lng !== null ? Number(obj.lng) : undefined,
+      stage: obj.stage,
+      stageOverride: obj.stage_override,
+      supporterCount: obj.supporter_count,
+      memberCount: obj.member_count,
+      championCount: obj.champion_count,
+      volunteerCount: obj.volunteer_count,
+      donateCount: obj.donate_count,
       steps,
     });
   }
@@ -172,6 +199,8 @@ export interface ProjectFormData extends IFilesForm, IImageForm {
   tags?: number[];
   difficultyLevel?: DifficultyLevel;
   time?: string;
+  lat?: number;
+  lng?: number;
   steps: ProjectStepFormData[];
 }
 

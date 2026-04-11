@@ -25,11 +25,13 @@ const getBySlug = (client: SupabaseClient, slug: string) => {
         file_link, 
         file_download_count,
         time,
+        lat,
+        lng,
         difficulty_level,
         comment_count,
         moderation,
         moderation_feedback,
-        author:profiles(id, display_name, username, photo, country, donations_enabled,
+        author:profiles(id, display_name, username, photo, city, donations_enabled,
           profile_type(id, display_name, name, is_space, image_url, small_image_url),
           badges:profile_badges_relations(
             profile_badges(
@@ -66,7 +68,6 @@ const getUserProjects = async (
   });
 
   if (error) {
-    console.error('Error fetching user projects:', error);
     return [];
   }
 
@@ -76,6 +77,52 @@ const getUserProjects = async (
     slug: x.slug,
     usefulCount: x.total_useful,
   }));
+};
+
+const getAllUserProjects = async (
+  client: SupabaseClient,
+  username: string,
+): Promise<Partial<Project>[]> => {
+  try {
+    // First, get the profile ID for the username
+    const { data: profileData, error: profileError } = await client
+      .from('profiles')
+      .select('id')
+      .eq('username', username)
+      .single();
+
+    if (profileError) {
+      return [];
+    }
+
+    if (!profileData) {
+      return [];
+    }
+
+    // Then fetch all projects created by this user (including drafts and non-accepted)
+    const { data: projects, error } = await client
+      .from('projects')
+      .select('id, title, slug, total_views, created_by, deleted, is_draft')
+      .eq('created_by', profileData.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return [];
+    }
+
+    if (!projects || projects.length === 0) {
+      return [];
+    }
+
+    return projects.map((x) => ({
+      id: x.id,
+      title: x.title,
+      slug: x.slug,
+      usefulCount: 0,
+    }));
+  } catch (err) {
+    return [];
+  }
 };
 
 const getProjectPublicMedia = (projectDb: DBProject, client: SupabaseClient) => {
@@ -196,6 +243,7 @@ export const libraryServiceServer = {
   getBySlug,
   getById,
   getUserProjects,
+  getAllUserProjects,
   getProjectPublicMedia,
   isAllowedToEditProject,
   isAllowedToEditProjectById,

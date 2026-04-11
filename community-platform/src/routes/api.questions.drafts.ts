@@ -35,7 +35,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         category:category(id,name),
         is_draft,
         comment_count,
-        author:profiles(id, display_name, username, country, badges:profile_badges_relations(
+        author:profiles(id, display_name, username, city, badges:profile_badges_relations(
           profile_badges(
             id,
             name,

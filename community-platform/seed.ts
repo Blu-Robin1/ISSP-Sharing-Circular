@@ -235,6 +235,7 @@ const seedCategories = (): categoriesChildInputs => [
   { ..._CATEGORIES_BASE, name: 'Guides', type: 'projects' },
   { ..._CATEGORIES_BASE, name: 'Machines', type: 'projects' },
   { ..._CATEGORIES_BASE, name: 'Moulds', type: 'projects' },
+  { ..._CATEGORIES_BASE, name: 'Shared Inventory', type: 'projects' },
   { ..._CATEGORIES_BASE, name: 'Products', type: 'projects' },
   { ..._CATEGORIES_BASE, name: 'Important Updates', type: 'news' },
 ];

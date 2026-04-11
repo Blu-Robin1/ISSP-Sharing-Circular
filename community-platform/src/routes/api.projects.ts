@@ -11,44 +11,198 @@ import { ProfileServiceServer } from 'src/services/profileService.server';
 import { storageServiceServer } from 'src/services/storageService.server';
 import { subscribersServiceServer } from 'src/services/subscribersService.server';
 import { updateUserActivity } from 'src/utils/activity.server';
+import { computeEffectiveStage } from 'src/utils/projectStageLogic';
 import { convertToSlug } from 'src/utils/slug';
 import { validateImage } from 'src/utils/storage';
+
+type ProjectStatusFilter = 'approved' | 'pending' | 'approved_and_pending' | 'all';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
   const q = searchParams.get('q');
-  const category = Number(searchParams.get('category')) || undefined;
+  const stage = Number(searchParams.get('stage')) || undefined;
   const sort = searchParams.get('sort') as LibrarySortOption;
   const skip = Number(searchParams.get('skip')) || 0;
+  const status = (searchParams.get('status') as ProjectStatusFilter | null) ?? 'approved';
 
   const { client, headers } = createSupabaseServerClient(request);
   const claims = await client.auth.getClaims();
 
   const username = claims.data?.claims?.user_metadata?.username || null;
+  let isAdmin = false;
+  let profileId: number | null = null;
+
+  if (claims.data?.claims?.sub) {
+    const { data: profile } = await client
+      .from('profiles')
+      .select('id,roles')
+      .eq('auth_id', claims.data.claims.sub)
+      .limit(1)
+      .maybeSingle();
+
+    isAdmin = profile?.roles?.includes(UserRole.ADMIN) ?? false;
+    profileId = profile?.id ?? null;
+  }
+
+  if (status !== 'approved') {
+    let query = client.from('projects').select('*', { count: 'exact' });
+
+    query = query.or('deleted.is.null,deleted.eq.false');
+    query = query.or('is_draft.is.null,is_draft.eq.false');
+
+    if (q) {
+      query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+    }
+
+    switch (status) {
+      case 'pending':
+        query = query.eq('moderation', 'awaiting-moderation');
+        if (!isAdmin) {
+          if (!profileId) {
+            return Response.json({ items: [], total: 0 }, { headers });
+          }
+          query = query.eq('created_by', profileId);
+        }
+        break;
+      case 'approved_and_pending':
+        if (isAdmin) {
+          query = query.in('moderation', ['accepted', 'awaiting-moderation']);
+        } else if (profileId) {
+          query = query.or(`moderation.eq.accepted,and(created_by.eq.${profileId},moderation.eq.awaiting-moderation)`);
+        } else {
+          query = query.eq('moderation', 'accepted');
+        }
+        break;
+      case 'all':
+        if (!isAdmin) {
+          if (!profileId) {
+            return Response.json({ items: [], total: 0 }, { headers });
+          }
+          query = query.eq('created_by', profileId);
+        }
+        break;
+      default:
+        query = query.eq('moderation', 'accepted');
+        break;
+    }
+
+    switch (sort) {
+      case 'LatestUpdated':
+        query = query.order('modified_at', { ascending: false, nullsFirst: false });
+        break;
+      case 'MostComments':
+        query = query.order('comment_count', { ascending: false, nullsFirst: false });
+        break;
+      case 'MostDownloads':
+        query = query.order('file_download_count', { ascending: false, nullsFirst: false });
+        break;
+      case 'MostViews':
+        query = query.order('total_views', { ascending: false, nullsFirst: false });
+        break;
+      case 'Newest':
+      default:
+        query = query.order('created_at', { ascending: false });
+        break;
+    }
+
+    const rangeEnd = stage ? 999 : skip + ITEMS_PER_PAGE - 1;
+    const { data, error, count } = await query.range(stage ? 0 : skip, rangeEnd);
+
+    if (error) {
+      console.error(error);
+      return Response.json({}, { status: 500, headers });
+    }
+
+    const allDbItems = (data as DBProject[]) ?? [];
+    const stageFilteredItems =
+      stage === undefined
+        ? allDbItems
+        : allDbItems.filter((item) => {
+            const effectiveStage = computeEffectiveStage({
+              stage: item.stage,
+              stageOverride: item.stage_override,
+              supporterCount: item.supporter_count || 0,
+              memberCount: item.member_count || 0,
+              championCount: item.champion_count || 0,
+              volunteerCount: item.volunteer_count || 0,
+              donateCount: item.donate_count || 0,
+              moderation: item.moderation,
+            });
+
+            return effectiveStage === stage;
+          });
+
+    const items =
+      stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+    const total = stage === undefined ? (count ?? items.length) : stageFilteredItems.length;
+
+    return Response.json({ items, total }, { headers });
+  }
 
   const { data, error } = await client.rpc('get_projects', {
     search_query: q || null,
-    category_id: category,
+    category_id: null,
     sort_by: sort,
-    offset_val: skip,
-    limit_val: ITEMS_PER_PAGE,
+    offset_val: stage ? 0 : skip,
+    limit_val: stage ? 1000 : ITEMS_PER_PAGE,
     current_username: username,
   });
-
-  const countResult = await client.rpc('get_projects_count', {
-    search_query: q || null,
-    category_id: category,
-    current_username: username,
-  });
-  const count = countResult.data || 0;
 
   if (error) {
     console.error(error);
     return Response.json({}, { status: 500, headers });
   }
 
-  const dbItems = data as DBProject[];
+  const allDbItems = (data as DBProject[]) ?? [];
+  const stageFilteredItems =
+    stage === undefined
+      ? allDbItems
+      : allDbItems.filter((item) => {
+          const effectiveStage = computeEffectiveStage({
+            stage: item.stage,
+            stageOverride: item.stage_override,
+            supporterCount: item.supporter_count || 0,
+            memberCount: item.member_count || 0,
+            championCount: item.champion_count || 0,
+            volunteerCount: item.volunteer_count || 0,
+            donateCount: item.donate_count || 0,
+            moderation: item.moderation,
+          });
+
+          return effectiveStage === stage;
+        });
+  const dbItems =
+    stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+  const count =
+    stage === undefined
+      ? ((await client.rpc('get_projects_count', {
+          search_query: q || null,
+          category_id: null,
+          current_username: username,
+        })).data ?? 0)
+      : stageFilteredItems.length;
+
+  if (dbItems.length > 0) {
+    const { data: locationRows } = await client
+      .from('projects')
+      .select('id, lat, lng')
+      .in(
+        'id',
+        dbItems.map((item) => item.id),
+      );
+
+    const locationById = new Map((locationRows ?? []).map((row) => [row.id, row]));
+
+    for (const item of dbItems) {
+      const location = locationById.get(item.id);
+      if (location) {
+        item.lat = location.lat;
+        item.lng = location.lng;
+      }
+    }
+  }
+
   const items = dbItems.map((x) => {
     const images = x.cover_image
       ? storageServiceServer.getPublicUrls(client, [x.cover_image], IMAGE_SIZES.LIST)
@@ -99,6 +253,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         : null,
       moderation: isDraft ? undefined : ('awaiting-moderation' as Moderation),
       stepCount: parseInt(formData.get('stepCount') as string),
+      lat: formData.has('lat') && formData.get('lat') !== '' ? Number(formData.get('lat')) : null,
+      lng: formData.has('lng') && formData.get('lng') !== '' ? Number(formData.get('lng')) : null,
       slug: convertToSlug((formData.get('title') as string) || ''),
       uploadedCoverImage: formData.get('coverImage') as File | null,
       uploadedFiles: formData.getAll('files') as File[] | null,
@@ -237,6 +393,8 @@ async function createProject(
     difficultyLevel: string | null;
     time: string | null;
     moderation?: Moderation;
+    lat: number | null;
+    lng: number | null;
     slug: string;
   },
   profile: DBProfile,
@@ -254,6 +412,8 @@ async function createProject(
       file_link: data.fileLink,
       difficulty_level: data.difficultyLevel,
       time: data.time,
+      lat: data.lat,
+      lng: data.lng,
       moderation: data.moderation,
       tenant_id: process.env.TENANT_ID,
     })

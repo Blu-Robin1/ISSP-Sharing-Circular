@@ -32,7 +32,15 @@ export const Clusters = ({ pins, onPinClick, onClusterClick, clusterGroupRef }: 
       onclusterclick={(e: { layer: MarkerCluster }) => onClusterClick(e.layer)}
     >
       {pins
-        .filter(({ lat }) => Boolean(lat))
+        .filter(
+          ({ lat, lng }) =>
+            lat !== undefined &&
+            lat !== null &&
+            lng !== undefined &&
+            lng !== null &&
+            !Number.isNaN(Number(lat)) &&
+            !Number.isNaN(Number(lng)),
+        )
         .map((pin) => (
           <Marker
             key={pin.id}

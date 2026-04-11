@@ -3,21 +3,31 @@ export interface ScisInitiativeFromApi {
   title: string;
   description: string;
   project_type?: string;
+  projectType?: string;
   stage: number;
   stage_override?: number | null;
+  stageOverride?: number | null;
   location_lat?: number;
   location_lng?: number;
   lat?: number;
   lng?: number;
   status: string;
   stage3_milestones?: Record<string, unknown> | null;
+  stage3Milestones?: Record<string, unknown> | null;
   image_url?: string | null;
+  imageUrl?: string | null;
   supporter_count?: number;
+  supporterCount?: number;
   member_count?: number;
+  memberCount?: number;
   champion_count?: number;
+  championCount?: number;
   volunteer_count?: number;
+  volunteerCount?: number;
   donate_count?: number;
+  donateCount?: number;
   created_at?: string;
+  createdAt?: string;
 }
 
 export interface NormalizedInitiative {
@@ -45,21 +55,45 @@ function normalizeInitiative(i: ScisInitiativeFromApi): NormalizedInitiative {
     id: i.id,
     title: i.title,
     description: i.description,
-    project_type: i.project_type,
+    project_type: i.project_type ?? i.projectType,
     stage: Number(i.stage ?? 1),
-    stage_override: i.stage_override ?? null,
+    stage_override: i.stage_override ?? i.stageOverride ?? null,
     lat: Number(i.location_lat ?? i.lat ?? 0),
     lng: Number(i.location_lng ?? i.lng ?? 0),
-    status: i.status ?? 'pending',
-    stage3_milestones: i.stage3_milestones ?? null,
-    image_url: i.image_url ?? null,
-    created_at: (i as { created_at?: string }).created_at,
-    supporter_count: Number(i.supporter_count ?? 0),
-    member_count: Number(i.member_count ?? 0),
-    champion_count: Number(i.champion_count ?? 0),
-    volunteer_count: Number(i.volunteer_count ?? 0),
-    donate_count: Number(i.donate_count ?? 0),
+    status:
+      i.status ??
+      ((i as { moderation?: string }).moderation === 'accepted'
+        ? 'approved'
+        : (i as { moderation?: string }).moderation === 'rejected'
+          ? 'rejected'
+          : 'pending'),
+    stage3_milestones: i.stage3_milestones ?? i.stage3Milestones ?? null,
+    image_url:
+      i.image_url ??
+      i.imageUrl ??
+      ((i as { coverImage?: { publicUrl?: string } | null }).coverImage?.publicUrl ?? null) ??
+      ((i as { cover_image?: { publicUrl?: string } | null }).cover_image?.publicUrl ?? null),
+    created_at: i.created_at ?? i.createdAt,
+    supporter_count: Number(i.supporter_count ?? i.supporterCount ?? 0),
+    member_count: Number(i.member_count ?? i.memberCount ?? 0),
+    champion_count: Number(i.champion_count ?? i.championCount ?? 0),
+    volunteer_count: Number(i.volunteer_count ?? i.volunteerCount ?? 0),
+    donate_count: Number(i.donate_count ?? i.donateCount ?? 0),
   };
+}
+
+function toProjectSupportFormData(actionType: string, data: Record<string, unknown>) {
+  const formData = new FormData();
+  formData.append('actionType', actionType);
+  formData.append('data', JSON.stringify(data));
+  return formData;
+}
+
+function mapStatusToModeration(status?: string) {
+  if (!status) return undefined;
+  if (status === 'approved') return 'accepted';
+  if (status === 'rejected') return 'rejected';
+  return 'awaiting-moderation';
 }
 
 export const scisService = {
@@ -68,13 +102,22 @@ export const scisService = {
     noCache = false,
   ): Promise<NormalizedInitiative[]> {
     try {
-      const url = noCache ? `/api/initiatives?status=${status}&_=${Date.now()}` : `/api/initiatives?status=${status}`;
+      const url = noCache ? `/api/projects?status=${status}&_=${Date.now()}` : `/api/projects?status=${status}`;
       const res = await fetch(url, {
         credentials: 'include',
         ...(noCache ? { cache: 'no-store' as RequestCache } : {}),
       });
-      const { initiatives } = (await res.json()) as { initiatives?: ScisInitiativeFromApi[] };
-      const list = Array.isArray(initiatives) ? initiatives : [];
+      if (!res.ok) return [];
+
+      const payload = (await res.json()) as {
+        projects?: ScisInitiativeFromApi[];
+        items?: ScisInitiativeFromApi[];
+      };
+      const list = Array.isArray(payload.projects)
+        ? payload.projects
+        : Array.isArray(payload.items)
+          ? payload.items
+          : [];
       return list.map(normalizeInitiative);
     } catch {
       return [];
@@ -89,14 +132,28 @@ export const scisService = {
     lng: number;
   }): Promise<NormalizedInitiative | null> {
     try {
-      const res = await fetch('/api/initiatives', {
+      const formData = new FormData();
+      formData.append('title', input.title);
+      formData.append('description', input.description);
+      formData.append('draft', 'true');
+      formData.append('stepCount', '0');
+      formData.append('lat', String(input.lat));
+      formData.append('lng', String(input.lng));
+
+      if (input.projectType) {
+        formData.append('projectType', input.projectType);
+      }
+
+      const res = await fetch('/api/projects', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
+        body: formData,
         credentials: 'include',
       });
-      const { initiative } = (await res.json()) as { initiative?: ScisInitiativeFromApi };
-      return initiative ? normalizeInitiative(initiative) : null;
+
+      if (!res.ok) return null;
+
+      const { project } = (await res.json()) as { project?: ScisInitiativeFromApi };
+      return project ? normalizeInitiative(project) : null;
     } catch {
       return null;
     }
@@ -107,10 +164,15 @@ export const scisService = {
     input: { name?: string; email?: string; postalCode?: string },
   ): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}/support`, {
+      const formData = toProjectSupportFormData('add_my_name', {
+        displayName: input.name?.trim() || undefined,
+        email: input.email?.trim() || undefined,
+        postalCode: input.postalCode?.trim() || undefined,
+      });
+
+      const res = await fetch(`/api/projects/${initiativeId}/support`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
+        body: formData,
         credentials: 'include',
       });
       return res.ok;
@@ -125,10 +187,10 @@ export const scisService = {
     payload?: Record<string, unknown>,
   ): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}/contribution`, {
+      const formData = toProjectSupportFormData(type, payload ?? {});
+      const res = await fetch(`/api/projects/${initiativeId}/support`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, payload: payload ?? {} }),
+        body: formData,
         credentials: 'include',
       });
       return res.ok;
@@ -149,35 +211,44 @@ export const scisService = {
     },
   ): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}`, {
+      const res = await fetch(`/api/projects/${initiativeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
+        body: JSON.stringify({
+          ...updates,
+          moderation: mapStatusToModeration(updates.status),
+        }),
         credentials: 'include',
       });
+
+      if (!res.ok) {
+        console.error('Failed to update project admin fields', await res.text());
+      }
+
       return res.ok;
-    } catch {
+    } catch (error) {
+      console.error('Failed to update project admin fields', error);
       return false;
     }
   },
 
   async deleteInitiative(initiativeId: string): Promise<boolean> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`/api/projects/${initiativeId}`, { method: 'DELETE', credentials: 'include' });
       return res.ok;
     } catch {
       return false;
     }
   },
 
-  /** Admin-only: fetch initiative with supporters and contributions */
+  /** Admin-only: fetch project with supporters and contributions */
   async getInitiativeDetails(initiativeId: string): Promise<{
     initiative: ScisInitiativeFromApi;
     supporters: { id: string; name: string | null; email: string | null; postal_code: string | null; created_at: string }[];
     contributions: { id: string; type: string; payload: Record<string, unknown> | null; created_at: string }[];
   } | null> {
     try {
-      const res = await fetch(`/api/initiatives/${initiativeId}/details`, { credentials: 'include' });
+      const res = await fetch(`/api/projects/${initiativeId}/details`, { credentials: 'include' });
       if (!res.ok) return null;
       return (await res.json()) as {
         initiative: ScisInitiativeFromApi;

@@ -11,7 +11,7 @@ import { Icon } from '../Icon/Icon';
 import { InternalLink } from '../InternalLink/InternalLink';
 
 export interface UserStatisticsProps {
-  profile: Pick<Profile, 'id' | 'username' | 'badges' | 'totalViews' | 'country'>;
+  profile: Pick<Profile, 'id' | 'username' | 'badges' | 'totalViews' | 'city'>;
   pin?: Pick<MapPin, 'country'>;
   libraryCount: number;
   usefulCount: number;
@@ -136,7 +136,7 @@ export const UserStatistics = (props: UserStatisticsProps) => {
 const isEmpty = (props: UserStatisticsProps & { pin?: Pick<MapPin, 'country'> }) =>
   !props.pin &&
   !props.profile.badges?.length &&
-  !props.profile.country &&
+  !props.profile.city &&
   !props.libraryCount &&
   !props.researchCount &&
   !props.profile.totalViews &&
