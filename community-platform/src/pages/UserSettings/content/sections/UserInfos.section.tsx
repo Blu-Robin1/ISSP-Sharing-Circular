@@ -140,7 +140,7 @@ export const UserInfosSection = observer(({ formValues }: IProps) => {
 
         <Flex sx={{ flexDirection: 'column', gap: 1 }}>
           <Text>{country.title} <Text color="red">*</Text></Text>
-          <Field data-cy="country-dropdown" name="country">
+          <Field data-cy="country-dropdown" name="country-dropdown" >
             {(field) => (
               <SelectField
                 options={cityOptions}

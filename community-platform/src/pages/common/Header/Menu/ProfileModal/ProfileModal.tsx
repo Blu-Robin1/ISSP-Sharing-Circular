@@ -9,7 +9,6 @@ import { COMMUNITY_PAGES_PROFILE } from 'src/pages/PageList';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { Box, Flex } from 'theme-ui';
 
-// TODO: Remove direct usage of Theme
 const theme = preciousPlasticTheme.styles;
 
 const ModalContainer = styled(Box)`
