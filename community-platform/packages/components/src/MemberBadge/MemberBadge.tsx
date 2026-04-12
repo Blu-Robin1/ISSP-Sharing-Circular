@@ -1,7 +1,7 @@
 import type { ProfileType } from 'oa-shared';
 import type { ImageProps, ThemeUIStyleObject } from 'theme-ui';
 import { Image } from 'theme-ui';
-import badge from '../../assets/icons/icon-star-active.svg';
+import badge from '../../assets/icons/profile.svg';
 
 export interface Props extends ImageProps {
   size?: number;

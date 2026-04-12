@@ -255,11 +255,44 @@ async function patchProject(request: Request, id: number) {
       return Response.json({ error: 'No valid updates provided' }, { headers, status: 400 });
     }
 
-    const { data, error } = await client.from('projects').update(projectPatch).eq('id', id).select().single();
+    let { data, error } = await client.from('projects').update(projectPatch).eq('id', id).select().single();
+
+    // Remote databases may not yet have stage_override; fallback to stage.
+    if (
+      error &&
+      (error.code === 'PGRST204' || error.code === '42703') &&
+      Object.prototype.hasOwnProperty.call(projectPatch, 'stage_override')
+    ) {
+      const { stage_override, ...basePatch } = projectPatch;
+      const fallbackPatch: Record<string, unknown> = {
+        ...basePatch,
+      };
+
+      if (stage_override !== null && stage_override !== undefined) {
+        fallbackPatch.stage = stage_override;
+      }
+
+      const fallbackResult = await client
+        .from('projects')
+        .update(fallbackPatch)
+        .eq('id', id)
+        .select()
+        .single();
+
+      data = fallbackResult.data;
+      error = fallbackResult.error;
+    }
 
     if (error) {
       console.error(error);
-      return Response.json({ error: 'Failed to update project' }, { headers, status: 500 });
+      return Response.json(
+        {
+          error: 'Failed to update project',
+          details: error.message,
+          code: error.code,
+        },
+        { headers, status: 500 },
+      );
     }
 
     return Response.json({ project: data }, { headers });

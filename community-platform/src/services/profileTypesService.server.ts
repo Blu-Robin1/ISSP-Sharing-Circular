@@ -9,8 +9,11 @@ export class ProfileTypesServiceServer {
   constructor(private client: SupabaseClient) {}
 
   async get(cached = true) {
+    const tenantId = process.env.TENANT_ID || 'default';
+    const cacheKey = `profile-types-${tenantId}`;
+
     if (cached) {
-      const cachedProfileTypes = await cache.get('profile-types');
+      const cachedProfileTypes = await cache.get(cacheKey);
 
       if (
         cachedProfileTypes &&
@@ -36,7 +39,7 @@ export class ProfileTypesServiceServer {
     const dbProfileTypes = profileTypesResult.data || [];
     const profileTypes = dbProfileTypes.map((x) => ProfileType.fromDB(x));
 
-    await cache.set('profile-types', profileTypes);
+    await cache.set(cacheKey, profileTypes);
 
     return profileTypes;
   }

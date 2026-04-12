@@ -4,11 +4,8 @@ import { Project, UserRole } from 'oa-shared';
 import { IMAGE_SIZES } from 'src/config/imageTransforms';
 import { storageServiceServer } from './storageService.server';
 
-const getBySlug = (client: SupabaseClient, slug: string) => {
-  return client
-    .from('projects')
-    .select(
-      `
+const getBySlug = async (client: SupabaseClient, slug: string) => {
+  const selectProject = (stepOrderField: 'stage' | 'order') => `
         id,
         created_at,
         created_by,
@@ -50,13 +47,27 @@ const getBySlug = (client: SupabaseClient, slug: string) => {
           description, 
           images, 
           video_url,
-          order
+          ${stepOrderField}
         )
-     `,
-    )
+     `;
+
+  let result = await client
+    .from('projects')
+    .select(selectProject('stage'))
     .or(`slug.eq.${slug},previous_slugs.cs.{"${slug}"}`)
     .or('deleted.eq.false,deleted.is.null')
     .single();
+
+  if (result.error && (result.error.code === 'PGRST204' || result.error.code === '42703')) {
+    result = await client
+      .from('projects')
+      .select(selectProject('order'))
+      .or(`slug.eq.${slug},previous_slugs.cs.{"${slug}"}`)
+      .or('deleted.eq.false,deleted.is.null')
+      .single();
+  }
+
+  return result;
 };
 
 const getUserProjects = async (
@@ -128,9 +139,7 @@ const getAllUserProjects = async (
 const getProjectPublicMedia = (projectDb: DBProject, client: SupabaseClient) => {
   const allImages: Image[] = [];
   if (projectDb.cover_image) {
-    const coverImage = storageServiceServer
-      .getPublicUrls(client, [projectDb.cover_image], IMAGE_SIZES.LANDSCAPE)
-      ?.at(0);
+    const coverImage = storageServiceServer.getPublicUrls(client, [projectDb.cover_image])?.at(0);
 
     if (coverImage) {
       allImages.push(coverImage);
@@ -140,7 +149,7 @@ const getProjectPublicMedia = (projectDb: DBProject, client: SupabaseClient) => 
   const stepImages = projectDb.steps?.flatMap((x) => x.images)?.filter((x) => !!x) || [];
 
   const publicStepImages = stepImages
-    ? storageServiceServer.getPublicUrls(client, stepImages, IMAGE_SIZES.GALLERY)
+    ? storageServiceServer.getPublicUrls(client, stepImages)
     : [];
 
   return [...allImages, ...publicStepImages.filter((x) => !!x)];
@@ -200,38 +209,58 @@ async function upsertStep(
     order: number;
   },
 ) {
+  const payloadWithStage = {
+    title: values.title,
+    description: values.description,
+    project_id: values.projectId,
+    video_url: values.videoUrl,
+    stage: values.order,
+  };
+
+  const payloadWithOrder = {
+    title: values.title,
+    description: values.description,
+    project_id: values.projectId,
+    video_url: values.videoUrl,
+    order: values.order,
+  };
+
   if (stepId) {
-    const { data, error } = await client
-      .from('project_steps')
-      .update({
-        title: values.title,
-        description: values.description,
-        project_id: values.projectId,
-        video_url: values.videoUrl,
-        order: values.order,
-      })
-      .eq('id', stepId)
-      .select();
-    if (error || !data) {
-      throw error;
+    let result = await client.from('project_steps').update(payloadWithStage).eq('id', stepId).select();
+
+    if (result.error && result.error.code === 'PGRST204') {
+      result = await client.from('project_steps').update(payloadWithOrder).eq('id', stepId).select();
     }
-    return data[0] as unknown as DBProjectStep;
+
+    if (result.error || !result.data) {
+      throw result.error;
+    }
+
+    return result.data[0] as unknown as DBProjectStep;
   } else {
-    const { data, error } = await client
+    let result = await client
       .from('project_steps')
       .insert({
-        title: values.title,
-        description: values.description,
-        project_id: values.projectId,
-        video_url: values.videoUrl,
-        order: values.order,
+        ...payloadWithStage,
         tenant_id: process.env.TENANT_ID,
       })
       .select();
-    if (error || !data) {
-      throw error;
+
+    if (result.error && result.error.code === 'PGRST204') {
+      result = await client
+        .from('project_steps')
+        .insert({
+          ...payloadWithOrder,
+          tenant_id: process.env.TENANT_ID,
+        })
+        .select();
     }
-    return data[0] as unknown as DBProjectStep;
+
+    if (result.error || !result.data) {
+      throw result.error;
+    }
+
+    return result.data[0] as unknown as DBProjectStep;
   }
 }
 
