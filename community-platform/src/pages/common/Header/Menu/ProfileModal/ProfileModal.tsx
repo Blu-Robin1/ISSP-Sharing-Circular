@@ -1,9 +1,8 @@
 import styled from '@emotion/styled';
 import { observer } from 'mobx-react';
 import { ReturnPathLink } from 'oa-components';
-// import { UserRole } from 'oa-shared';
-import { UserRole } from '../../../../../../shared/models/user';
 import { preciousPlasticTheme } from 'oa-themes';
+import { UserRole } from 'oa-shared';
 import { NavLink } from 'react-router';
 import { AuthWrapper } from 'src/common/AuthWrapper';
 import { UpgradeBadgeLink } from 'src/pages/common/Header/Menu/Profile/UpgradeBadgeLink';
@@ -11,6 +10,7 @@ import { COMMUNITY_PAGES_PROFILE } from 'src/pages/PageList';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { Box, Flex } from 'theme-ui';
 
+// TODO: Remove direct usage of Theme
 const theme = preciousPlasticTheme.styles;
 
 const ModalContainer = styled(Box)`
@@ -47,8 +47,7 @@ export const ProfileModal = observer(() => {
 
   const upgradeBadge = upgradeBadgeForCurrentUser;
   const shouldShowUpgrade = !!upgradeBadge;
-  const isOrganizer =
-    activeUser?.roles?.includes(UserRole.ORGANIZER) || activeUser?.roles?.includes(UserRole.ADMIN);
+  const isOrganizer = activeUser?.roles?.includes(UserRole.ORGANIZER) || activeUser?.roles?.includes(UserRole.ADMIN);
 
   return (
     <ModalContainer data-cy="user-menu-list">
