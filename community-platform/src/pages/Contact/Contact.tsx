@@ -1,4 +1,4 @@
-import { Box, Heading, Text, Flex, Link } from 'theme-ui';
+import { Box, Flex, Heading, Link, Text } from 'theme-ui';
 
 const Step = ({ number, title, text }: any) => (
   <Flex
@@ -102,7 +102,7 @@ const ContactUs = () => {
           title="Individual Feedback / Help"
           text="We are currently unable to offer individual feedback on projects,.... As a foundation with limited resources, we do not have the capacity to provide this level of support. Fore these types of inquiries, we encourage you to contact us through email."
         />
-{/* 
+        {/* 
         <Step
           number="2"
           title="Read Our FAQ"
@@ -116,22 +116,22 @@ const ContactUs = () => {
         />
 
         <Step
-            number="3"
-            title="General Inquiries"
-            text="Have a question or want to learn more? We’d love to hear from you."
-            />
+          number="3"
+          title="General Inquiries"
+          text="Have a question or want to learn more? We’d love to hear from you."
+        />
 
-            <Step
-            number="4"
-            title="Host Shared Infrastructure"
-            text="If you're part of a community group, housing co-op, or municipality interested in hosting a lending library or shared project, reach out."
-            />
+        <Step
+          number="4"
+          title="Host Shared Infrastructure"
+          text="If you're part of a community group, housing co-op, or municipality interested in hosting a lending library or shared project, reach out."
+        />
 
-            <Step
-            number="5"
-            title="Fund a Project"
-            text="We welcome partners and funders who want to support circular innovation and community access."
-            />
+        <Step
+          number="5"
+          title="Fund a Project"
+          text="We welcome partners and funders who want to support circular innovation and community access."
+        />
       </Box>
     </Box>
   );

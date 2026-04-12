@@ -1,10 +1,8 @@
-import { countryToAlpha2 } from 'country-to-iso';
 import type { Author } from 'oa-shared';
 import type { HTMLAttributeAnchorTarget } from 'react';
 import type { ThemeUIStyleObject } from 'theme-ui';
 import { Flex, Text } from 'theme-ui';
 import flagUnknownSVG from '../../assets/icons/flag-unknown.svg';
-import { FlagIcon } from '../FlagIcon/FlagIcon';
 import { InternalLink } from '../InternalLink/InternalLink';
 import { UserBadge } from './UserBadge';
 
@@ -15,24 +13,35 @@ export interface IProps {
   target?: HTMLAttributeAnchorTarget;
 }
 
-const getCountryCode = (country: string | undefined) => {
-  if (!country) {
-    return null;
-  }
-  return countryToAlpha2(country);
+const getLocation = (city: string | undefined) => {
+  const trimmed = city?.trim();
+  return trimmed ? trimmed : null;
 };
 
 export const Username = ({ user, sx, target, isLink = true }: IProps) => {
   const { username, badges } = user;
+  const displayLabel = (user as Partial<Author> & { name?: string }).name?.trim() || username;
 
-  const countryCode = user.country ? getCountryCode(user.country) : null;
+  const location = getLocation(user.city);
 
   const UserNameBody = (
     <Flex data-cy="Username" sx={{ fontFamily: 'body', gap: 1, alignItems: 'center' }}>
-      {countryCode ? (
-        <Flex data-testid="Username: known flag">
-          <FlagIcon countryCode={countryCode} />
-        </Flex>
+      {location ? (
+        <Text
+          data-testid="Username: location"
+          sx={{
+            color: 'textMuted',
+            fontSize: 0,
+            textTransform: 'capitalize',
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+          title={location}
+        >
+          {location}
+        </Text>
       ) : (
         <Flex
           data-testid="Username: unknown flag"
@@ -58,9 +67,9 @@ export const Username = ({ user, sx, target, isLink = true }: IProps) => {
           textOverflow: 'ellipsis',
           maxWidth: '100%',
         }}
-        title={username}
+        title={displayLabel}
       >
-        {username}
+        {displayLabel}
       </Text>
 
       {badges &&

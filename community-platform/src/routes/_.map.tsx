@@ -3,7 +3,7 @@ import Main from 'src/pages/common/Layout/Main';
 import MapsPage from 'src/pages/Maps/Maps.client';
 import { MapPinServiceContext, mapPinService } from 'src/pages/Maps/map.service';
 import { generateTags, mergeMeta } from 'src/utils/seo.utils';
-import { Box } from 'theme-ui'
+import { Box } from 'theme-ui';
 import '../styles/leaflet.css';
 
 export async function loader() {

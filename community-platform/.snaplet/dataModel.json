@@ -6098,9 +6098,9 @@
           "maxLength": null
         },
         {
-          "id": "public.profiles.country",
-          "name": "country",
-          "columnName": "country",
+          "id": "public.profiles.city",
+          "name": "city",
+          "columnName": "city",
           "type": "text",
           "isRequired": false,
           "kind": "scalar",
@@ -6388,6 +6388,20 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.profiles.country",
+          "name": "country",
+          "columnName": "country",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
           "isId": false,
           "maxLength": null
         },

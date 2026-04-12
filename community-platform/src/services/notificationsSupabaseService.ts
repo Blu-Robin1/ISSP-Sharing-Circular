@@ -1,8 +1,9 @@
 import type { NotificationDisplay } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getNotifications = async () => {
   try {
-    const response = await fetch('/api/notifications');
+    const response = await apiFetch('/api/notifications');
     const result = (await response.json()) as {
       notifications: NotificationDisplay[];
     };

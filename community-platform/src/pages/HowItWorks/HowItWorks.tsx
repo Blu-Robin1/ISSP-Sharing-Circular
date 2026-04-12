@@ -1,5 +1,5 @@
-import { Box, Flex, Heading, Image, Text } from 'theme-ui'
-import onceFunded from 'packages/themes/assets/images/photos/funded.webp'
+import onceFunded from 'packages/themes/assets/images/photos/funded.webp';
+import { Box, Flex, Heading, Image, Text } from 'theme-ui';
 
 export const HowItWorks = () => {
   return (
@@ -19,21 +19,18 @@ export const HowItWorks = () => {
             sx={{
               width: ['100%', '100%', '48%'],
               borderRadius: '20px',
-              maxHeight: '480px'
+              maxHeight: '480px',
             }}
           />
 
           <Box sx={{ width: ['100%', '100%', '52%'] }}>
-            <Heading sx={headingStyle}>
-              WHAT HAPPENS ONCE WE’RE FUNDED?
-            </Heading>
+            <Heading sx={headingStyle}>WHAT HAPPENS ONCE WE’RE FUNDED?</Heading>
 
             <Text sx={paragraph}>
-              At SCIS, we make it easier for communities to build and operate
-              shared infrastructure—especially equipment lending libraries
-              known as Thingeries. Once we secure funding, we partner with
-              community groups, housing co-ops, or municipalities to bring
-              these projects to life using a proven step-by-step process.
+              At SCIS, we make it easier for communities to build and operate shared
+              infrastructure—especially equipment lending libraries known as Thingeries. Once we
+              secure funding, we partner with community groups, housing co-ops, or municipalities to
+              bring these projects to life using a proven step-by-step process.
             </Text>
           </Box>
         </Flex>
@@ -52,8 +49,8 @@ export const HowItWorks = () => {
             <Heading sx={headingStyle}>FOR HOSTS.</Heading>
 
             <Text sx={{ mb: 4 }}>
-              Are you a community organization or resident group looking to
-              host shared infrastructure? Here’s what to expect:
+              Are you a community organization or resident group looking to host shared
+              infrastructure? Here’s what to expect:
             </Text>
 
             <a href="/sign-up" style={{ textDecoration: 'none' }}>
@@ -107,8 +104,8 @@ export const HowItWorks = () => {
         </Flex>
       </Box>
     </>
-  )
-}
+  );
+};
 
 const Step = ({ number, title, text }) => (
   <Flex
@@ -132,15 +129,11 @@ const Step = ({ number, title, text }) => (
     </Text>
 
     <Box>
-      <Heading sx={{ fontSize: 4, mb: 2 }}>
-        {title}
-      </Heading>
-      <Text sx={{ fontSize: 2 }}>
-        {text}
-      </Text>
+      <Heading sx={{ fontSize: 4, mb: 2 }}>{title}</Heading>
+      <Text sx={{ fontSize: 2 }}>{text}</Text>
     </Box>
   </Flex>
-)
+);
 
 const headingStyle = {
   fontSize: [8, 9, 10],
@@ -149,11 +142,11 @@ const headingStyle = {
   color: '#3F6B66',
   mb: 3,
   lineHeight: 1.1,
-}
+};
 
 const paragraph = {
   fontSize: 3,
   lineHeight: 1.6,
-}
+};
 
-export default HowItWorks
+export default HowItWorks;

@@ -11,7 +11,7 @@ interface IProps {
 }
 
 export const CardDetailsMemberProfile = ({ profile, isLink }: IProps) => {
-  const photoUrl = profile.photo?.publicUrl;
+  const photoUrl = profile.photo?.publicUrl || profile.coverImages?.[0]?.publicUrl;
 
   return (
     <Flex

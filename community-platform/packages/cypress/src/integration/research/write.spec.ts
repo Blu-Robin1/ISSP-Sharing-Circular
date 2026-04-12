@@ -9,7 +9,7 @@ const generateArticle = () => {
   const slug = title.toLowerCase().split(' ').join('-');
 
   return {
-    _createdBy: 'research_creator',
+    _createdBy: 'organizer',
     _deleted: false,
     description: 'After creating, the research will be deleted.',
     title: title,
@@ -20,7 +20,7 @@ const generateArticle = () => {
 };
 
 const admin = MOCK_DATA.users.admin;
-const researcher = MOCK_DATA.users.research_creator;
+const researcher = MOCK_DATA.users.organizer;
 
 describe('[Research]', () => {
   beforeEach(() => {

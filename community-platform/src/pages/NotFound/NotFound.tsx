@@ -13,7 +13,7 @@ export const NotFoundPage: FC = () => (
         flexDirection: 'column',
         justifyContent: 'center',
         textAlign: 'center',
-        fontFamily: "'Times New Roman', Times, serif"
+        fontFamily: "'Times New Roman', Times, serif",
       }}
     >
       <Image

@@ -1,8 +1,9 @@
 import type { DBNotificationsPreferences, NotificationsPreferencesFormData } from 'oa-shared';
+import { apiFetch } from 'src/utils/apiFetch';
 
 const getPreferences = async (): Promise<DBNotificationsPreferences | null> => {
   try {
-    const preferencesData = await fetch('/api/notifications-preferences');
+    const preferencesData = await apiFetch('/api/notifications-preferences');
     const { preferences } = await preferencesData.json();
     return preferences;
   } catch (err) {
@@ -20,7 +21,7 @@ const setPreferences = async (data: NotificationsPreferencesFormData) => {
   body.append('research_updates', data.research_updates.toString());
   body.append('is_unsubscribed', 'false');
 
-  return fetch('/api/notifications-preferences', {
+  return apiFetch('/api/notifications-preferences', {
     method: 'POST',
     body,
   });
@@ -35,7 +36,7 @@ const setUnsubscribe = async (id: number | undefined) => {
   body.append('research_updates', 'false');
   body.append('is_unsubscribed', 'true');
 
-  return fetch('/api/notifications-preferences', {
+  return apiFetch('/api/notifications-preferences', {
     method: 'POST',
     body,
   });

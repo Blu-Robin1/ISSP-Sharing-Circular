@@ -51,7 +51,11 @@ const Document = withEmotionCache(({ children }: DocumentProps, emotionCache) =>
         <Meta />
         <Links />
         {serverStyleData?.map(({ key, ids, css }) => (
-          <style key={key} data-emotion={`${key} ${ids.join(' ')}`} dangerouslySetInnerHTML={{ __html: css }} />
+          <style
+            key={key}
+            data-emotion={`${key} ${ids.join(' ')}`}
+            dangerouslySetInnerHTML={{ __html: css }}
+          />
         ))}
       </head>
       <body>

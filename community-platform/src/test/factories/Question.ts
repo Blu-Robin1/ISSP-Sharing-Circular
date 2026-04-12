@@ -28,7 +28,7 @@ export const FactoryQuestionItem = (questionOverloads: Partial<Question> = {}): 
   ],
   author: {
     id: faker.number.int(),
-    country: faker.location.countryCode(),
+    city: faker.location.city(),
     displayName: faker.internet.username(),
     badges: [
       {

@@ -16,6 +16,7 @@ import { transformLibraryErrors } from '../utils';
 import { LibraryCategoryField } from './LibraryCategory.field';
 import { LibraryDescriptionField } from './LibraryDescription.field';
 import { LibraryDifficultyField } from './LibraryDifficulty.field';
+import { LibraryLocationField } from './LibraryLocation.field';
 import { LibraryPostingGuidelines } from './LibraryPostingGuidelines';
 import { LibraryStepsContainerField } from './LibraryStepsContainer.field';
 import { LibraryTimeField } from './LibraryTime.field';
@@ -47,6 +48,8 @@ export const LibraryForm = ({ project, files, fileLink }: LibraryFormProps) => {
       tags: project?.tagIds || [],
       time: project?.time,
       difficultyLevel: project?.difficultyLevel,
+      lat: project?.lat,
+      lng: project?.lng,
       existingImage: project?.coverImage || null,
       existingFiles: files,
       fileLink: fileLink,
@@ -185,6 +188,7 @@ export const LibraryForm = ({ project, files, fileLink }: LibraryFormProps) => {
                   <LibraryCategoryField />
                   <TagsField title={intro.tags.title} />
                   <LibraryTimeField />
+                  <LibraryLocationField />
                   <LibraryDifficultyField />
                   <FilesFields />
                 </Flex>

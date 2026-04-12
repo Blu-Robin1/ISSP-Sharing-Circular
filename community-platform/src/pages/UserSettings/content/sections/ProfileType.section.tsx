@@ -11,7 +11,8 @@ type ProfileTypeSectionProps = {
   profileTypes: ProfileType[];
 };
 export const ProfileTypeSection = ({ profileTypes }: ProfileTypeSectionProps) => {
-  const profileGuidelinesUrl = import.meta.env.VITE_PROFILE_GUIDELINES_URL || process.env.VITE_PROFILE_GUIDELINES_URL;
+  const profileGuidelinesUrl =
+    import.meta.env.VITE_PROFILE_GUIDELINES_URL || process.env.VITE_PROFILE_GUIDELINES_URL;
   const { description, error } = fields.activities;
   const themeUi = useThemeUI();
   const theme = themeUi.theme as ThemeWithName;
@@ -29,7 +30,11 @@ export const ProfileTypeSection = ({ profileTypes }: ProfileTypeSectionProps) =>
             <Heading as="h2">{headings.focus}</Heading>
             <Paragraph>
               {description}{' '}
-              <ExternalLink href={profileGuidelinesUrl} sx={{ textDecoration: 'underline', color: 'grey' }} type="button">
+              <ExternalLink
+                href={profileGuidelinesUrl}
+                sx={{ textDecoration: 'underline', color: 'grey' }}
+                type="button"
+              >
                 {buttons.guidelines}
               </ExternalLink>
             </Paragraph>

@@ -23,6 +23,7 @@ export const FRIENDLY_MESSAGES = {
   'sign-up/password-short': 'Password must be at least 6 characters',
   'sign-up/password-required': 'A password is required unfortunately',
   'sign-up/password-mismatch': 'Your new password does not match',
+  'sign-up/confirm-password-required': 'Please confirm your password',
   'sign-up/password-weak': "Your password isn't strong enough, try something else?",
   'sign-up/terms': 'Consent is required. Gotta tick that box',
   'sign-up/username-short': 'Username must be at least 2 characters',

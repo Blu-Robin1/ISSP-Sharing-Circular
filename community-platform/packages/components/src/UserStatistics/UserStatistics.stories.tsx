@@ -12,7 +12,7 @@ const Template: StoryFn<typeof UserStatistics> = (args) => <UserStatistics {...a
 export const Default = Template.bind({});
 Default.args = {
   profile: {
-    country: 'Greenland',
+    city: 'Vancouver',
     id: 1,
     badges: [
       {

@@ -1,4 +1,6 @@
+import { UserRole } from 'oa-shared';
 import React, { useContext } from 'react';
+import { AuthWrapper } from 'src/common/AuthWrapper';
 import { getSupportedModules } from 'src/modules';
 import { EnvironmentContext } from 'src/pages/common/EnvironmentContext';
 import MenuMobileLink from 'src/pages/common/Header/Menu/MenuMobile/MenuMobileLink';
@@ -31,6 +33,9 @@ const MenuMobilePanel = () => {
         {getAvailablePageList(getSupportedModules(env.VITE_SUPPORTED_MODULES || '')).map((page) => (
           <MenuMobileLink path={page.path} content={page.title} key={page.path} />
         ))}
+        <AuthWrapper roleRequired={UserRole.ADMIN}>
+          <MenuMobileLink path="/admin/initiatives" content="Admin" />
+        </AuthWrapper>
         <Profile isMobile={true} />
       </Flex>
     </Box>

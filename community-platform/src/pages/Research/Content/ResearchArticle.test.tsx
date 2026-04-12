@@ -16,7 +16,7 @@ import type { Author, ResearchItem } from 'oa-shared';
 
 const Theme = testingThemeStyles;
 
-const mockUser = FactoryUser({ country: 'AF' });
+const mockUser = FactoryUser({ city: 'Vancouver' });
 
 vi.mock('src/stores/Profile/profile.store', () => ({
   useProfileStore: vi.fn(() => ({
@@ -52,8 +52,8 @@ describe('Research Article', () => {
       wrapper = getWrapper(
         FactoryResearchItem({
           collaborators: [
-            { username: 'example-username', country: 'nl' } as Author,
-            { username: 'another-example-username', country: 'nl' } as Author,
+            { username: 'example-username', city: 'Vancouver' } as Author,
+            { username: 'another-example-username', city: 'Toronto' } as Author,
           ],
         }),
       );

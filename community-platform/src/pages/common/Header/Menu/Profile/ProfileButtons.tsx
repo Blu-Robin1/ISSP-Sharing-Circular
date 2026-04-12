@@ -26,7 +26,7 @@ const ProfileButtons = (props: IProps) => {
     letterSpacing: '1px',
     fontWeight: 'bold',
     '&:hover': {
-      backgroundColor: '#355c58'
+      backgroundColor: '#355c58',
     },
   };
 
@@ -95,13 +95,13 @@ const ProfileButtons = (props: IProps) => {
             }}
           />
           <ProfileButtonItem
-            link="/sign-up" 
-            text="Join" 
-            variant="outline" 
-            sx={{ 
+            link="/sign-up"
+            text="Join"
+            variant="outline"
+            sx={{
               ...greenButtonStyle,
-              fontSize: 2 
-            }} 
+              fontSize: 2,
+            }}
           />
         </>
       )}

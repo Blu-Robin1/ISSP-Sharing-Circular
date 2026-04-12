@@ -38,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         tags,
         moderation,
         is_draft,
-        author:profiles(id, display_name, username, country, badges:profile_badges_relations(
+        author:profiles(id, display_name, username, city, badges:profile_badges_relations(
           profile_badges(
             id,
             name,

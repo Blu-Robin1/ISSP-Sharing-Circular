@@ -29,7 +29,7 @@ export const FactoryComment = (commentOverloads: Partial<Comment> = {}): Comment
       id: faker.string.uuid(),
       publicUrl: faker.image.avatar(),
     },
-    country: faker.location.countryCode(),
+    city: faker.location.city(),
   },
   parentId: faker.number.int(),
   comment: faker.lorem.paragraph(),

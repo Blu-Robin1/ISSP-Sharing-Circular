@@ -30,7 +30,7 @@ const getBySlug = (client: SupabaseClient, slug: string) => {
        total_views,
        tenant_id,
        hero_image,
-       author:profiles(id, display_name, username, country, badges:profile_badges_relations(
+       author:profiles(id, display_name, username, city, badges:profile_badges_relations(
           profile_badges(
             id,
             name,

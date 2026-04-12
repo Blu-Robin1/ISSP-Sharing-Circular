@@ -24,6 +24,7 @@ export * from './profile';
 export * from './profileBadge';
 export * from './profileTag';
 export * from './profileType';
+export * from './projectSupport';
 export * from './question';
 export * from './research';
 export * from './storage';

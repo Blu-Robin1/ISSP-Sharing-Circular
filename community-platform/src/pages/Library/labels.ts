@@ -83,6 +83,9 @@ export const intro: ILabels = {
     placeholder: 'How much time?',
     title: 'How long does it take?',
   },
+  location: {
+    title: 'Location (optional)',
+  },
   title: {
     placeholder: 'Add a title of your project',
     title: 'Title of your project',
@@ -130,7 +133,7 @@ export const steps: ILabels = {
 export const listing = {
   create: 'Add your project',
   empty: 'No projects to show!',
-  filterCategory: 'Filter by category',
+  filterCategory: 'Filter by stage',
   incompleteProfile: 'Complete your profile to add your project',
   join: 'Sign up to add your project',
   loadMore: 'Load More',

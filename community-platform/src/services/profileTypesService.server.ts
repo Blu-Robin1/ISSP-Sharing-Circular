@@ -27,11 +27,12 @@ export class ProfileTypesServiceServer {
       name,
       display_name,
       order,
+      description,
       image_url,
       small_image_url,
-      description,
       map_pin_name,
-      is_space
+      is_space,
+      tenant_id
       `);
 
     const dbProfileTypes = profileTypesResult.data || [];

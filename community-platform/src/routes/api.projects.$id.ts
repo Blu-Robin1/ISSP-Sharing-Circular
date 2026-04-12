@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { DBMedia, DBProfile, DBProject, MediaFile } from 'oa-shared';
+import type { DBMedia, DBProfile, DBProject, MediaFile, Moderation } from 'oa-shared';
 import { Project, ProjectStep, UserRole } from 'oa-shared';
 import type { ActionFunctionArgs } from 'react-router';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -20,6 +20,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       return await deleteProject(request, id);
     }
 
+    if (request.method === 'PATCH') {
+      return await patchProject(request, id);
+    }
+
     const formData = await request.formData();
 
     const uploadedCoverImage = formData.get('coverImage') as File | null;
@@ -36,6 +40,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         ? (formData.get('difficultyLevel') as string)
         : null,
       stepCount: parseInt(formData.get('stepCount') as string),
+      lat: formData.has('lat') && formData.get('lat') !== '' ? Number(formData.get('lat')) : null,
+      lng: formData.has('lng') && formData.get('lng') !== '' ? Number(formData.get('lng')) : null,
       slug: convertToSlug(formData.get('title') as string),
     };
     const existingCoverImageId = formData.get('existingCoverImage') as string;
@@ -161,6 +167,116 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   }
 };
 
+async function patchProject(request: Request, id: number) {
+  const { client, headers } = createSupabaseServerClient(request);
+
+  try {
+    const claims = await client.auth.getClaims();
+
+    if (!claims.data?.claims) {
+      return Response.json({ error: 'Unauthorized' }, { headers, status: 401 });
+    }
+
+    const profileService = new ProfileServiceServer(client);
+    const profile = await profileService.getByAuthId(claims.data.claims.sub);
+
+    if (!profile) {
+      return Response.json({ error: 'User not found' }, { headers, status: 404 });
+    }
+
+    const username = claims.data.claims.user_metadata?.username ?? profile.username;
+    const isAdmin = profile.roles?.includes(UserRole.ADMIN) ?? false;
+    const canEdit =
+      isAdmin ||
+      (!!username && (await libraryServiceServer.isAllowedToEditProjectById(client, id, username)));
+
+    if (!canEdit) {
+      return Response.json({ error: 'Forbidden' }, { headers, status: 403 });
+    }
+
+    const updates = (await request.json()) as {
+      title?: string;
+      description?: string | null;
+      projectType?: string | null;
+      project_type?: string | null;
+      status?: 'approved' | 'rejected' | 'pending';
+      moderation?: Moderation;
+      stageOverride?: number | null;
+      stage_override?: number | null;
+      stage3Milestones?: Record<string, unknown> | null;
+      stage3_milestones?: Record<string, unknown> | null;
+    };
+
+    const projectPatch: Record<string, unknown> = {
+      modified_at: new Date().toISOString(),
+    };
+    let hasChanges = false;
+
+    if (typeof updates.title === 'string' && updates.title.trim()) {
+      projectPatch.title = updates.title.trim();
+      hasChanges = true;
+    }
+
+    if ('description' in updates) {
+      projectPatch.description = updates.description ?? null;
+      hasChanges = true;
+    }
+
+    const projectType = updates.projectType ?? updates.project_type;
+    if (projectType !== undefined) {
+      projectPatch.project_type = projectType ?? null;
+      hasChanges = true;
+    }
+
+    const moderation =
+      updates.moderation ??
+      (updates.status === 'approved'
+        ? 'accepted'
+        : updates.status === 'rejected'
+          ? 'rejected'
+          : updates.status === 'pending'
+            ? 'awaiting-moderation'
+            : undefined);
+    if (moderation !== undefined) {
+      projectPatch.moderation = moderation;
+      hasChanges = true;
+    }
+
+    if ('stageOverride' in updates || 'stage_override' in updates) {
+      const stageOverride = updates.stageOverride ?? updates.stage_override ?? null;
+      projectPatch.stage_override = stageOverride === null ? null : Number(stageOverride);
+      hasChanges = true;
+    }
+
+    if ('stage3Milestones' in updates || 'stage3_milestones' in updates) {
+      projectPatch.stage3_milestones =
+        updates.stage3Milestones ?? updates.stage3_milestones ?? null;
+      hasChanges = true;
+    }
+
+    if (!hasChanges) {
+      return Response.json({ error: 'No valid updates provided' }, { headers, status: 400 });
+    }
+
+    const { data, error } = await client
+      .from('projects')
+      .update(projectPatch)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      return Response.json({ error: 'Failed to update project' }, { headers, status: 500 });
+    }
+
+    return Response.json({ project: data }, { headers });
+  } catch (error) {
+    console.error(error);
+    return Response.json({ error: 'Failed to update project' }, { headers, status: 500 });
+  }
+}
+
 async function validateRequest(
   request: Request,
   profile: DBProfile | null,
@@ -218,6 +334,8 @@ async function updateProject(
     fileLink: string | null;
     difficultyLevel: string | null;
     time: string | null;
+    lat: number | null;
+    lng: number | null;
     slug: string;
   },
   files: MediaFile[] | null,
@@ -253,6 +371,8 @@ async function updateProject(
       file_link: data.fileLink,
       difficulty_level: data.difficultyLevel,
       time: data.time,
+      lat: data.lat,
+      lng: data.lng,
       files,
       moderation,
       cover_image,

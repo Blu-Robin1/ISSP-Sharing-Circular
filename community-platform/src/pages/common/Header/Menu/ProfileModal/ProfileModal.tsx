@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import { observer } from 'mobx-react';
 import { ReturnPathLink } from 'oa-components';
+// import { UserRole } from 'oa-shared';
+import { UserRole } from '../../../../../../shared/models/user';
 import { preciousPlasticTheme } from 'oa-themes';
 import { NavLink } from 'react-router';
 import { AuthWrapper } from 'src/common/AuthWrapper';
@@ -45,6 +47,8 @@ export const ProfileModal = observer(() => {
 
   const upgradeBadge = upgradeBadgeForCurrentUser;
   const shouldShowUpgrade = !!upgradeBadge;
+  const isOrganizer =
+    activeUser?.roles?.includes(UserRole.ORGANIZER) || activeUser?.roles?.includes(UserRole.ADMIN);
 
   return (
     <ModalContainer data-cy="user-menu-list">
@@ -67,13 +71,15 @@ export const ProfileModal = observer(() => {
           Profile
         </ModalLink>
 
-        <ModalLink
-          to="/dashboard"
-          data-cy="menu-Dashboard"
-          className={({ isActive }) => (isActive ? 'current' : '')}
-        >
-          Dashboard
-        </ModalLink>
+        {isOrganizer && (
+          <ModalLink
+            to="/dashboard"
+            data-cy="menu-Dashboard"
+            className={({ isActive }) => (isActive ? 'current' : '')}
+          >
+            Dashboard
+          </ModalLink>
+        )}
 
         {shouldShowUpgrade && (
           <UpgradeBadgeLink

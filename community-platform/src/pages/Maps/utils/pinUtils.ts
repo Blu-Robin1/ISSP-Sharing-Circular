@@ -31,47 +31,87 @@ export const filterPins = (
     badges?: string[];
     settings?: string[];
     boundaries?: LatLngBounds;
+
+    // SCIS additions
+    projectStages?: number[];
+    onlyProjects?: boolean;
+
+    // Backwards compatibility for older callers
+    initiativeStages?: number[];
+    onlyInitiatives?: boolean;
   },
 ): MapPin[] => {
   if (!allPins?.length) {
     return [];
   }
-  const { tags, types, badges, settings, boundaries } = filters;
 
-  let filteredPins = structuredClone(allPins);
+  const {
+    tags,
+    types,
+    badges,
+    settings,
+    boundaries,
+    projectStages,
+    onlyProjects,
+    initiativeStages,
+    onlyInitiatives,
+  } = filters;
 
+  const activeProjectStages = projectStages ?? initiativeStages;
+  const projectOnly = onlyProjects ?? onlyInitiatives ?? false;
+  const isProjectPin = (pin: any) => pin?.type === 'project' || pin?.type === 'initiative';
+
+  // Split projects away from maker pins (do NOT mutate originals)
+  let projectPins = allPins.filter((p: any) => isProjectPin(p)) as any[];
+  let makerPins = allPins.filter((p: any) => !isProjectPin(p)) as any[];
+
+  // Apply project stage filters (if selected)
+  if (activeProjectStages?.length) {
+    projectPins = projectPins.filter((p: any) => {
+      const s = Number(p?.effectiveStage ?? p?.stage ?? p?.scis?.stage);
+      return Number.isFinite(s) && activeProjectStages.includes(s);
+    });
+  }
+
+  // Apply existing OneArmy filters only to maker pins
   if (tags?.length) {
-    filteredPins = filteredPins.filter((x) =>
-      tags.every((tag) => x.profile?.tags?.some((profileTag) => profileTag.id === tag)),
+    makerPins = makerPins.filter((x: any) =>
+      tags.every((tag) => x.profile?.tags?.some((profileTag: any) => profileTag.id === tag)),
     );
   }
 
   if (types?.length) {
-    filteredPins = filteredPins.filter(
-      (x) => x.profile?.type?.name && types.includes(x.profile?.type?.name),
+    makerPins = makerPins.filter(
+      (x: any) => x.profile?.type?.name && types.includes(x.profile?.type?.name),
     );
   }
 
   if (badges?.length) {
-    filteredPins = filteredPins.filter((x) =>
-      x.profile?.badges?.some((badge) => badges.includes(badge.name)),
+    makerPins = makerPins.filter((x: any) =>
+      x.profile?.badges?.some((badge: any) => badges.includes(badge.name)),
     );
   }
 
   if (settings?.length) {
     // Right now visitor filter is only setting filter. This should be smarter.
-    filteredPins = filteredPins.filter((x) => x.profile?.visitorPolicy?.policy === 'open');
+    makerPins = makerPins.filter((x: any) => x.profile?.visitorPolicy?.policy === 'open');
   }
 
+  // Merge results (or show only projects)
+  let mergedPins: MapPin[] = projectOnly
+    ? (projectPins as any)
+    : ([...makerPins, ...projectPins] as any);
+
+  // Boundaries apply to everything
   if (boundaries) {
-    filteredPins = filterByLatLong(
+    mergedPins = filterByLatLong(
       {
         _northEast: boundaries.getNorthEast(),
         _southWest: boundaries.getSouthWest(),
       },
-      filteredPins,
+      mergedPins,
     );
   }
 
-  return filteredPins;
+  return mergedPins;
 };

@@ -6,6 +6,12 @@ interface IPageNavigation {
   title: string;
 }
 
+const ResearchModule: IPageNavigation = {
+  module: MODULE.RESEARCH,
+  path: '/research',
+  title: 'Research',
+};
+
 const discover: IPageNavigation = {
   module: MODULE.HOWTO,
   path: '/library',
@@ -36,8 +42,14 @@ const settings: IPageNavigation = {
   title: 'Settings',
 };
 
+const academy: IPageNavigation = {
+  module: MODULE.ACADEMY,
+  path: '/academy',
+  title: 'Academy',
+};
+
 const maps: IPageNavigation = {
-  module: MODULE.CORE,
+  module: MODULE.MAP,
   path: '/map',
   title: 'Map',
 };
@@ -49,6 +61,8 @@ export const getAvailablePageList = (supportedModules: MODULE[]): IPageNavigatio
 export const COMMUNITY_PAGES: IPageNavigation[] = [
   discover,
   maps,
+  academy,
+  ResearchModule,
   about,
   howItWorks,
   impact,
