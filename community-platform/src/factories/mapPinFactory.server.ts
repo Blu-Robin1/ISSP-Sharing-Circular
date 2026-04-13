@@ -11,7 +11,8 @@ export class MapPinFactory {
 
   fromDBWithProfile(pin: DBMapPin): MapPin {
     const profile = this.getProfilePin(pin.profile);
-    const pinCountry = (pin as unknown as { country?: string; city?: string }).country ||
+    const pinCountry =
+      (pin as unknown as { country?: string; city?: string }).country ||
       (pin as unknown as { country?: string; city?: string }).city ||
       '';
     const pinCountryCode = (pin as unknown as { country_code?: string }).country_code || '';

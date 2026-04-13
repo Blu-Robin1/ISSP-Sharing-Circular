@@ -148,9 +148,7 @@ const getProjectPublicMedia = (projectDb: DBProject, client: SupabaseClient) => 
 
   const stepImages = projectDb.steps?.flatMap((x) => x.images)?.filter((x) => !!x) || [];
 
-  const publicStepImages = stepImages
-    ? storageServiceServer.getPublicUrls(client, stepImages)
-    : [];
+  const publicStepImages = stepImages ? storageServiceServer.getPublicUrls(client, stepImages) : [];
 
   return [...allImages, ...publicStepImages.filter((x) => !!x)];
 };
@@ -226,10 +224,18 @@ async function upsertStep(
   };
 
   if (stepId) {
-    let result = await client.from('project_steps').update(payloadWithStage).eq('id', stepId).select();
+    let result = await client
+      .from('project_steps')
+      .update(payloadWithStage)
+      .eq('id', stepId)
+      .select();
 
     if (result.error && result.error.code === 'PGRST204') {
-      result = await client.from('project_steps').update(payloadWithOrder).eq('id', stepId).select();
+      result = await client
+        .from('project_steps')
+        .update(payloadWithOrder)
+        .eq('id', stepId)
+        .select();
     }
 
     if (result.error || !result.data) {

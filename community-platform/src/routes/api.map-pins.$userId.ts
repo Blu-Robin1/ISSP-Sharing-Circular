@@ -99,21 +99,24 @@ export const loader = async ({ request, params }) => {
         )
       `;
 
-    let result = await client
+    const newResult = await client
       .from('map_pins')
       .select(selectNewSchema)
       .eq('profile_id', profileId)
       .eq('moderation', 'accepted');
 
-    if (result.error && (result.error.code === 'PGRST204' || result.error.code === '42703')) {
-      result = await client
+    let data: typeof newResult.data = newResult.data;
+    let error = newResult.error;
+
+    if (error && (error.code === 'PGRST204' || error.code === '42703')) {
+      const legacyResult = await client
         .from('map_pins')
         .select(selectLegacySchema)
         .eq('profile_id', profileId)
         .eq('moderation', 'accepted');
+      data = legacyResult.data as typeof newResult.data;
+      error = legacyResult.error;
     }
-
-    const { data, error } = result;
 
     if (error) {
       console.error(error);

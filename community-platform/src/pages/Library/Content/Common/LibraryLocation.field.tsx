@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Field } from 'react-final-form';
 import type { Map as MapType } from 'react-leaflet';
 import { FormFieldWrapper } from 'src/pages/common/FormFields';
+import { Box } from 'theme-ui';
 
 import { intro } from '../../labels';
 

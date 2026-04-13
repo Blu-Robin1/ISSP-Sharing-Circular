@@ -56,7 +56,6 @@ export const intro: ILabels = {
     title: 'Cover image alt text',
   },
   description: {
-    
     description: `Provide a descripion of your project (max ${LIBRARY_DESCRIPTION_MAX_LENGTH} characters)`,
     title: 'Short description',
   },
@@ -94,7 +93,7 @@ export const intro: ILabels = {
 
 export const guidance = {
   'tools & equipment': {
-    main: '',
+    main: 'Share how others can use or build on your tools and equipment setup.',
   },
   'repair & maintenance': {
     main: '',

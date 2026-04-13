@@ -110,13 +110,23 @@ export const loader = async ({ request }) => {
         )
       `;
 
-    let result = await client.from('map_pins').select(selectNewSchema).eq('profile_id', profile.id);
+    const newResult = await client
+      .from('map_pins')
+      .select(selectNewSchema)
+      .eq('profile_id', profile.id);
 
-    if (result.error && (result.error.code === 'PGRST204' || result.error.code === '42703')) {
-      result = await client.from('map_pins').select(selectLegacySchema).eq('profile_id', profile.id);
+    // New schema uses `city` on map_pins; legacy uses `country` / `country_code` — union typing differs.
+    let data: typeof newResult.data = newResult.data;
+    let error = newResult.error;
+
+    if (error && (error.code === 'PGRST204' || error.code === '42703')) {
+      const legacyResult = await client
+        .from('map_pins')
+        .select(selectLegacySchema)
+        .eq('profile_id', profile.id);
+      data = legacyResult.data as typeof newResult.data;
+      error = legacyResult.error;
     }
-
-    const { data, error } = result;
 
     if (error) {
       console.error(error);

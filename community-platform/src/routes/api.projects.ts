@@ -136,8 +136,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           });
 
     const items =
-<<<<<<< Abner
-      stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+      stage === undefined
+        ? stageFilteredItems
+        : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
 
     // Ensure consumers (e.g. map popups) receive a directly usable cover image URL.
     const itemsWithImageUrls = items.map((item) => {
@@ -157,11 +158,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           : item.cover_image,
       };
     });
-=======
-      stage === undefined
-        ? stageFilteredItems
-        : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
->>>>>>> dev
     const total = stage === undefined ? (count ?? items.length) : stageFilteredItems.length;
 
     return Response.json({ items: itemsWithImageUrls, total }, { headers });
@@ -277,9 +273,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   const items = dbItems.map((x) => {
-    const images = x.cover_image
-      ? storageServiceServer.getPublicUrls(client, [x.cover_image])
-      : [];
+    const images = x.cover_image ? storageServiceServer.getPublicUrls(client, [x.cover_image]) : [];
     return Project.fromDB(x, [], images);
   });
 
@@ -337,7 +331,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const claims = await client.auth.getClaims();
 
     if (!claims.data?.claims) {
-      return Response.json({ error: 'Sign in required to create a project.' }, { headers, status: 401 });
+      return Response.json(
+        { error: 'Sign in required to create a project.' },
+        { headers, status: 401 },
+      );
     }
 
     const { valid, status, statusText } = await validateRequest(request, data, client);
@@ -357,7 +354,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     if (!profile) {
-      return Response.json({ error: 'User profile not found' }, { headers, status: 400, statusText: 'User not found' });
+      return Response.json(
+        { error: 'User profile not found' },
+        { headers, status: 400, statusText: 'User not found' },
+      );
     }
 
     const projectDb = await createProject(client, data, profile);
