@@ -69,7 +69,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         if (isAdmin) {
           query = query.in('moderation', ['accepted', 'awaiting-moderation']);
         } else if (profileId) {
-          query = query.or(`moderation.eq.accepted,and(created_by.eq.${profileId},moderation.eq.awaiting-moderation)`);
+          query = query.or(
+            `moderation.eq.accepted,and(created_by.eq.${profileId},moderation.eq.awaiting-moderation)`,
+          );
         } else {
           query = query.eq('moderation', 'accepted');
         }
@@ -134,6 +136,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           });
 
     const items =
+<<<<<<< Abner
       stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
 
     // Ensure consumers (e.g. map popups) receive a directly usable cover image URL.
@@ -154,6 +157,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           : item.cover_image,
       };
     });
+=======
+      stage === undefined
+        ? stageFilteredItems
+        : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+>>>>>>> dev
     const total = stage === undefined ? (count ?? items.length) : stageFilteredItems.length;
 
     return Response.json({ items: itemsWithImageUrls, total }, { headers });
@@ -224,14 +232,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           return effectiveStage === stage;
         });
   const dbItems =
-    stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+    stage === undefined
+      ? stageFilteredItems
+      : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
   const count =
     stage === undefined
-      ? ((await client.rpc('get_projects_count', {
-          search_query: q || null,
-          category_id: null,
-          current_username: username,
-        })).data ?? 0)
+      ? ((
+          await client.rpc('get_projects_count', {
+            search_query: q || null,
+            category_id: null,
+            current_username: username,
+          })
+        ).data ?? 0)
       : stageFilteredItems.length;
 
   // For the non-stage-filter path, hydrate the page slice with stage/location fields.
@@ -305,6 +317,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       title: formData.get('title') as string,
       description: formData.get('description') as string,
       isDraft,
+      mapInitiative: formData.get('mapInitiative') === 'true',
       time: formData.get('time') as string,
       category: formData.has('category') ? (formData.get('category') as string) : null,
       tags: formData.has('tags') ? formData.getAll('tags').map((x) => Number(x)) : null,
@@ -313,7 +326,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         ? (formData.get('difficultyLevel') as string)
         : null,
       moderation: isDraft ? undefined : ('awaiting-moderation' as Moderation),
-      stepCount: parseInt(formData.get('stepCount') as string),
+      stepCount: parseInt(formData.get('stepCount') as string, 10),
       lat: formData.has('lat') && formData.get('lat') !== '' ? Number(formData.get('lat')) : null,
       lng: formData.has('lng') && formData.get('lng') !== '' ? Number(formData.get('lng')) : null,
       slug: convertToSlug((formData.get('title') as string) || ''),
@@ -324,13 +337,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const claims = await client.auth.getClaims();
 
     if (!claims.data?.claims) {
-      return Response.json({}, { headers, status: 401 });
+      return Response.json({ error: 'Sign in required to create a project.' }, { headers, status: 401 });
     }
 
     const { valid, status, statusText } = await validateRequest(request, data, client);
 
     if (!valid) {
-      return Response.json({}, { headers, status, statusText });
+      return Response.json(
+        { error: statusText ?? 'Invalid request' },
+        { headers, status, statusText },
+      );
     }
 
     const profileService = new ProfileServiceServer(client);
@@ -341,7 +357,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     if (!profile) {
-      return Response.json({}, { headers, status: 400, statusText: 'User not found' });
+      return Response.json({ error: 'User profile not found' }, { headers, status: 400, statusText: 'User not found' });
     }
 
     const projectDb = await createProject(client, data, profile);
@@ -373,7 +389,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return Response.json({ project }, { headers, status: 201 });
   } catch (error) {
     console.error(error);
-    return Response.json({}, { headers, status: 500, statusText: 'Error creating project' });
+    return Response.json(
+      { error: 'Could not save project. Please try again.' },
+      { headers, status: 500, statusText: 'Error creating project' },
+    );
   }
 };
 
@@ -421,7 +440,14 @@ async function validateRequest(request: Request, data: any, client: SupabaseClie
     return { status: 400, statusText: 'description is required' };
   }
 
-  if (!data.isDraft && (!data.stepCount || data.stepCount < 3)) {
+  const mapInitiativeOk =
+    data.mapInitiative === true &&
+    data.lat != null &&
+    !Number.isNaN(Number(data.lat)) &&
+    data.lng != null &&
+    !Number.isNaN(Number(data.lng));
+
+  if (!data.isDraft && !mapInitiativeOk && (!data.stepCount || data.stepCount < 3)) {
     return { status: 400, statusText: '3 steps are required' };
   }
 
@@ -433,7 +459,7 @@ async function validateRequest(request: Request, data: any, client: SupabaseClie
 
   if (!imageValidation.valid) {
     return {
-      value: false,
+      valid: false,
       status: 400,
       statusText: imageValidation.error?.message,
     };

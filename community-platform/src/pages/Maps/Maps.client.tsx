@@ -8,11 +8,10 @@ import { MapList } from './Content/MapView/MapList';
 import { MapView } from './Content/MapView/MapView';
 import { MapContext } from './MapContext';
 import { mapPinService } from './map.service';
-import { filterPins, sortPinsByBadgeThenLastActive } from './utils/pinUtils';
-
 // SCIS: fetch from API
 import { scisService } from './scis.service';
 import { computeEffectiveStage, type ScisStage } from './scis.store';
+import { filterPins, sortPinsByBadgeThenLastActive } from './utils/pinUtils';
 
 import './styles.css';
 
@@ -141,9 +140,15 @@ const MapsPage = () => {
       const projectPins = projects.map((p) => {
         const rawId = String(p.id);
         const baseStage = Number(p.stage ?? 1);
-        const serverCounts = { supporters: p.supporter_count, members: p.member_count, champions: p.champion_count };
+        const serverCounts = {
+          supporters: p.supporter_count,
+          members: p.member_count,
+          champions: p.champion_count,
+        };
         const local = {
-          stageOverride: (p.stage_override != null ? p.stage_override : undefined) as ScisStage | undefined,
+          stageOverride: (p.stage_override != null ? p.stage_override : undefined) as
+            | ScisStage
+            | undefined,
           stage3Milestones: p.stage3_milestones ?? undefined,
         };
         const effectiveStage = computeEffectiveStage(baseStage, local, serverCounts);
@@ -217,7 +222,9 @@ const MapsPage = () => {
             champions: p.champion_count,
           };
           const local = {
-            stageOverride: (p.stage_override != null ? p.stage_override : undefined) as ScisStage | undefined,
+            stageOverride: (p.stage_override != null ? p.stage_override : undefined) as
+              | ScisStage
+              | undefined,
             stage3Milestones: p.stage3_milestones ?? undefined,
           };
           const effectiveStage = computeEffectiveStage(baseStage, local, serverCounts);
@@ -277,7 +284,9 @@ const MapsPage = () => {
         setAllPins(sortPinsByBadgeThenLastActive(pinsToSet, 'pro'));
 
         if (filters?.filters) {
-          const sortedTypes = (filters.filters.types || []).slice().sort((a, b) => a.order - b.order);
+          const sortedTypes = (filters.filters.types || [])
+            .slice()
+            .sort((a, b) => a.order - b.order);
 
           setAllProfileTypes(sortedTypes);
           setAllBadges(filters.filters.badges || []);
@@ -400,15 +409,15 @@ const MapsPage = () => {
         toggleActiveTagFilter,
 
         // SCIS filters
-activeProjectStages: activeProjectStages,
-      setActiveProjectStages: setActiveProjectStages,
-      onlyProjects: onlyProjects,
-      setOnlyProjects: setOnlyProjects,
+        activeProjectStages: activeProjectStages,
+        setActiveProjectStages: setActiveProjectStages,
+        onlyProjects: onlyProjects,
+        setOnlyProjects: setOnlyProjects,
 
         // SCIS submission mode
-isPlacingProject,
-      setIsPlacingProject,
-      refreshProjects: refreshProjects,
+        isPlacingProject,
+        setIsPlacingProject,
+        refreshProjects: refreshProjects,
 
         isMobile,
         setIsMobile,

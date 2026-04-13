@@ -1,4 +1,4 @@
-import type { Image, ProfileFormData } from 'oa-shared';
+import type { DBProfile, Image, ProfileFormData } from 'oa-shared';
 import type { ActionFunctionArgs } from 'react-router';
 import { ProfileFactory } from 'src/factories/profileFactory.server';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -77,7 +77,9 @@ export const loader = async ({ request }) => {
         tags:profile_tags_relations(
           profile_tags(
             id,
-            name
+            name,
+            created_at,
+            profile_type
           )
         ),
         badges:profile_badges_relations(
@@ -94,6 +96,8 @@ export const loader = async ({ request }) => {
           id,
           name,
           display_name,
+          image_url,
+          small_image_url,
           description,
           map_pin_name,
           is_space
@@ -110,7 +114,7 @@ export const loader = async ({ request }) => {
     }
 
     const profileFactory = new ProfileFactory(client);
-    const profile = profileFactory.fromDB(data);
+    const profile = profileFactory.fromDB(data as unknown as DBProfile);
     const json = { ...profile, roles: data.roles ?? profile.roles ?? null };
 
     return Response.json(json, { headers, status: 200 });

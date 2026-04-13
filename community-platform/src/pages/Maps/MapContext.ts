@@ -49,7 +49,7 @@ export const MapContext = createContext<{
   setMapRef: (ref: MapType | null) => void;
   setClusterGroupRef: (ref: any) => void;
 
-    // SCIS submission mode
+  // SCIS submission mode
   isPlacingProject: boolean;
   setIsPlacingProject: (value: boolean) => void;
 

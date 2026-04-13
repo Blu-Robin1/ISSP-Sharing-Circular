@@ -1,4 +1,4 @@
-import type { ScisInitiative, ScisStage } from "./scisTypes";
+import type { ScisInitiative, ScisStage } from './scisTypes';
 
 export interface StageThresholds {
   stage2Supporters: number;
@@ -17,7 +17,7 @@ function uniqueSupporterKey(a: { userId?: string; displayName?: string }) {
   // Fall back to a stable placeholder to avoid NaN logic.
   if (a.userId) return `u:${a.userId}`;
   if (a.displayName) return `n:${a.displayName.trim().toLowerCase()}`;
-  return "anon";
+  return 'anon';
 }
 
 export function computeEffectiveStage(
@@ -29,11 +29,9 @@ export function computeEffectiveStage(
 
   // If moderation is pending/rejected, you can decide to freeze stage.
   // Recommendation: pending stays at stage 1; rejected stays at stage 1 (but hidden from main map).
-  if (initiative.moderation !== "approved") return 1;
+  if (initiative.moderation !== 'approved') return 1;
 
-  const uniqueSupporters = new Set(
-    initiative.supportActions.map((a) => uniqueSupporterKey(a)),
-  );
+  const uniqueSupporters = new Set(initiative.supportActions.map((a) => uniqueSupporterKey(a)));
 
   const count = uniqueSupporters.size;
 

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import type { ScisInitiative } from "./scisTypes";
-import { createLocalScisStore } from "./scisStore";
-import { computeEffectiveStage } from "./scisStatelogic";
+import { useEffect, useMemo, useState } from 'react';
+import { computeEffectiveStage } from './scisStatelogic';
+import { createLocalScisStore } from './scisStore';
+import type { ScisInitiative } from './scisTypes';
 
 // Singleton store instance (client-only safe because it no-ops SSR)
 const store = createLocalScisStore();

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { DBMedia, DBProfile, DBProject, MediaFile } from 'oa-shared';
+import type { DBMedia, DBProfile, DBProject, MediaFile, Moderation } from 'oa-shared';
 import { Project, ProjectStep, UserRole } from 'oa-shared';
 import type { ActionFunctionArgs } from 'react-router';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
@@ -186,7 +186,9 @@ async function patchProject(request: Request, id: number) {
 
     const username = claims.data.claims.user_metadata?.username ?? profile.username;
     const isAdmin = profile.roles?.includes(UserRole.ADMIN) ?? false;
-    const canEdit = isAdmin || (!!username && (await libraryServiceServer.isAllowedToEditProjectById(client, id, username)));
+    const canEdit =
+      isAdmin ||
+      (!!username && (await libraryServiceServer.isAllowedToEditProjectById(client, id, username)));
 
     if (!canEdit) {
       return Response.json({ error: 'Forbidden' }, { headers, status: 403 });
@@ -247,7 +249,8 @@ async function patchProject(request: Request, id: number) {
     }
 
     if ('stage3Milestones' in updates || 'stage3_milestones' in updates) {
-      projectPatch.stage3_milestones = updates.stage3Milestones ?? updates.stage3_milestones ?? null;
+      projectPatch.stage3_milestones =
+        updates.stage3Milestones ?? updates.stage3_milestones ?? null;
       hasChanges = true;
     }
 
@@ -255,6 +258,7 @@ async function patchProject(request: Request, id: number) {
       return Response.json({ error: 'No valid updates provided' }, { headers, status: 400 });
     }
 
+<<<<<<< Abner
     let { data, error } = await client.from('projects').update(projectPatch).eq('id', id).select().single();
 
     // Remote databases may not yet have stage_override; fallback to stage.
@@ -282,6 +286,14 @@ async function patchProject(request: Request, id: number) {
       data = fallbackResult.data;
       error = fallbackResult.error;
     }
+=======
+    const { data, error } = await client
+      .from('projects')
+      .update(projectPatch)
+      .eq('id', id)
+      .select()
+      .single();
+>>>>>>> dev
 
     if (error) {
       console.error(error);

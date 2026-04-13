@@ -1,17 +1,16 @@
 import type { UserCreatedDocs } from 'oa-shared';
 import { UserRole } from 'oa-shared';
 import type { LoaderFunctionArgs } from 'react-router';
-import { useLoaderData } from 'react-router';
-import { redirect } from 'react-router';
+import { redirect, useLoaderData } from 'react-router';
+import { ProfileFactory } from 'src/factories/profileFactory.server';
 import Main from 'src/pages/common/Layout/Main';
 import { OrganizerDashboard } from 'src/pages/OrganizerDashboard/OrganizerDashboard';
 import { createSupabaseServerClient } from 'src/repository/supabase.server';
 import { libraryServiceServer } from 'src/services/libraryService.server';
-import { ProfileFactory } from 'src/factories/profileFactory.server';
 import { ProfileServiceServer } from 'src/services/profileService.server';
 import { questionServiceServer } from 'src/services/questionService.server';
-import { researchServiceServer } from 'src/services/researchService.server';
 import { redirectServiceServer } from 'src/services/redirectService.server';
+import { researchServiceServer } from 'src/services/researchService.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { client, headers } = createSupabaseServerClient(request);
@@ -38,7 +37,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   // Check if user has organizer role
-  const hasOrganizerRole = profile.roles?.includes(UserRole.ORGANIZER) || profile.roles?.includes(UserRole.ADMIN);
+  const hasOrganizerRole =
+    profile.roles?.includes(UserRole.ORGANIZER) || profile.roles?.includes(UserRole.ADMIN);
   if (!hasOrganizerRole) {
     return redirect('/dashboard', { headers });
   }

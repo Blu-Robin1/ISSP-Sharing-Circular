@@ -1,13 +1,14 @@
 import { MemberBadge, MemberHistory, Tab, TabPanel, Tabs, TabsList } from 'oa-components';
 import type { Profile, UserCreatedDocs } from 'oa-shared';
 import { PremiumTier } from 'oa-shared';
+import bcitAvatar from 'oa-themes/assets/images/user-avatar.jpg';
 import { useState } from 'react';
 import { useLocation } from 'react-router';
 import { PremiumTierWrapper } from 'src/common/PremiumTierWrapper';
 import { isPreciousPlastic } from 'src/config/config';
 import { useProfileStore } from 'src/stores/Profile/profile.store';
 import { isContactable } from 'src/utils/helpers';
-import { Alert, Box, Card, Flex } from 'theme-ui';
+import { Alert, Box, Card, Flex, Image } from 'theme-ui';
 import { Impact } from '../impact/Impact';
 import { heading } from '../impact/labels';
 import { ProfileContact } from './ProfileContact';
@@ -15,8 +16,6 @@ import { ProfileDetails } from './ProfileDetails';
 import { ProfileHeader } from './ProfileHeader';
 import { ProfileImage } from './ProfileImage';
 import UserCreatedDocuments from './UserCreatedDocuments';
-import bcitAvatar from 'oa-themes/assets/images/user-avatar.jpg';
-import { Image } from 'theme-ui';
 
 interface IProps {
   docs: UserCreatedDocs;
@@ -60,7 +59,7 @@ export const UserProfile = ({ docs, isViewingOwnProfile, user }: IProps) => {
             borderRadius: '50%',
             backgroundColor: '#fff',
             zIndex: 3,
-            padding: 1
+            padding: 1,
           }}
         >
           <Image

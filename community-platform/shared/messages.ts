@@ -12,7 +12,7 @@ export const FRIENDLY_MESSAGES = {
   'auth/email-changed':
     "Roger that. We've sent you an email, please click the confirmation link to make the change happen",
   'auth/invalid-email': `That email address doesn't quite look right`,
-  'auth/password-changed': 'All done. Password changed',
+  'auth/password-changed': 'Password has changed',
   'auth/user-not-found': 'No account found, typo maybe?',
   'auth/wrong-password': 'Password does not match the user account',
   'generic-error': 'Oops, something went wrong!',

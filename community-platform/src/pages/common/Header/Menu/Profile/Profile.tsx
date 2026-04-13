@@ -40,7 +40,8 @@ const Profile = observer((props: IProps) => {
   const { profile: profile, upgradeBadgeForCurrentUser } = useProfileStore();
   const modalRef = useClickOutside(() => setShowProfileModal(false));
   const mobileMenuContext = useContext(MobileMenuContext);
-  const isOrganizer = profile?.roles?.includes(UserRole.ORGANIZER) || profile?.roles?.includes(UserRole.ADMIN);
+  const isOrganizer =
+    profile?.roles?.includes(UserRole.ORGANIZER) || profile?.roles?.includes(UserRole.ADMIN);
 
   if (!profile) {
     return <ProfileButtons isMobile={props.isMobile} />;
@@ -57,9 +58,7 @@ const Profile = observer((props: IProps) => {
         }}
       >
         <MenuMobileLink path={'/u/' + profile.username} content="Profile" />
-        {isOrganizer && (
-          <MenuMobileLink path="/dashboard" content="Dashboard" />
-        )}
+        {isOrganizer && <MenuMobileLink path="/dashboard" content="Dashboard" />}
         {upgradeBadgeForCurrentUser && (
           <Box data-cy="mobile-menu-item" sx={{ py: 3 }}>
             <UpgradeBadgeLink

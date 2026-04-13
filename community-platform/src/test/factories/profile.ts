@@ -16,7 +16,7 @@ export const FactoryDBProfile = (dbProfileOverloads: Partial<DBProfile> = {}): D
   about: '',
   auth_id: '',
   cover_images: null,
-  city: '',
+  impact: null,
   created_at: faker.date.past(),
   type: {
     id: faker.number.int(),

@@ -1,11 +1,10 @@
 import { HeroBanner } from 'oa-components';
-import { Link } from 'react-router';
-import { Box, Button, Card, Flex, Heading, Text, Image } from 'theme-ui';
 import bcitLogo from 'oa-themes/assets/images/bcit-footer.png';
+import { Link } from 'react-router';
+import { Box, Button, Card, Flex, Heading, Image, Text } from 'theme-ui';
 
 /** When true, Supabase sends confirmation emails. Match auth.email.enable_confirmations in Supabase. */
-const requireEmailConfirmation =
-  import.meta.env.VITE_REQUIRE_EMAIL_CONFIRMATION === 'true';
+const requireEmailConfirmation = import.meta.env.VITE_REQUIRE_EMAIL_CONFIRMATION === 'true';
 
 const SignUpMessagePage = ({ email }: { email: string | null }) => {
   return (
@@ -48,7 +47,7 @@ const SignUpMessagePage = ({ email }: { email: string | null }) => {
                 padding: 0,
                 objectFit: 'contain',
                 display: 'block',
-                margin: '0 auto'
+                margin: '0 auto',
               }}
             />
           </Box>
@@ -91,7 +90,8 @@ const SignUpMessagePage = ({ email }: { email: string | null }) => {
                   ) : (
                     ''
                   )}
-                  . Please check your inbox (and spam folder) and click the link to activate your account.
+                  . Please check your inbox (and spam folder) and click the link to activate your
+                  account.
                 </Text>
               ) : (
                 <Text sx={{ textAlign: 'center', color: 'grey' }}>

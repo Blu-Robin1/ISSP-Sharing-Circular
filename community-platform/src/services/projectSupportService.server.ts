@@ -105,7 +105,12 @@ export const projectSupportService = {
   getByProjectId: (client: SupabaseClient, projectId: number) =>
     new ProjectSupportService(client).getByProjectId(projectId),
 
-  addSupport: (client: SupabaseClient, projectId: number, type: ProjectSupportActionType, data: any) => {
+  addSupport: (
+    client: SupabaseClient,
+    projectId: number,
+    type: ProjectSupportActionType,
+    data: any,
+  ) => {
     // Extract user info from data or use anonymous
     const { userId, displayName, email, ...payload } = data;
 

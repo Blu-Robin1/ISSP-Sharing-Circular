@@ -1,3 +1,3 @@
 export const headings = {
-  errors: "Please correct the following errors!",
+  errors: 'Please correct the following errors!',
 };

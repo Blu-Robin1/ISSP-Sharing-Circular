@@ -4,11 +4,9 @@ export const Dashboard = () => {
   return (
     <Box sx={{ p: 4 }}>
       <Heading as="h1" sx={{ mb: 3 }}>
-        Dashboard
+        Organnizer's Dashboard
       </Heading>
-      <Text>
-        This is dashboard.
-      </Text>
+      <Text>This is dashboard.</Text>
     </Box>
   );
 };
