@@ -150,7 +150,6 @@ export class ProfileStore {
     const { about, coverImages, displayName, photo } = profile;
 
     const isMember = profile.type?.name === 'member';
-    const isSpace = !isMember;
 
     if (!displayName || !about) {
       return false;
@@ -186,9 +185,7 @@ export const ProfileStoreProvider = ({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <ProfileStoreContext.Provider value={profileStore}>
-      {children}
-    </ProfileStoreContext.Provider>
+    <ProfileStoreContext.Provider value={profileStore}>{children}</ProfileStoreContext.Provider>
   );
 };
 
@@ -201,8 +198,6 @@ export const useProfileStore = () => {
 
   return store;
 };
-
-
 
 // import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 // import type { Profile, ProfileType, UpgradeBadge, UserRole } from 'oa-shared';

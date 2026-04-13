@@ -252,11 +252,12 @@ export class ProfileServiceServer {
     let imagesToKeep: DBMedia[] = [];
 
     if (values.existingCoverImageIds?.length) {
-      imagesToRemove = imagesToRemove?.filter((x) => !values.existingCoverImageIds?.includes(x.id));
+      imagesToRemove =
+        imagesToRemove?.filter((x) => !values.existingCoverImageIds?.includes(x.id)) ?? null;
       imagesToKeep =
         existingProfile?.cover_images?.filter((x) =>
           values.existingCoverImageIds?.includes(x.id),
-        ) || [];
+        ) ?? [];
     }
 
     if (imagesToRemove?.length) {

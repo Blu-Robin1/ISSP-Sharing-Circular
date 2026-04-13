@@ -114,19 +114,22 @@ export class MapPinsServiceServer {
         )
       `;
 
-    let result = await this.client
+    const newResult = await this.client
       .from('map_pins')
       .select(selectNewSchema)
       .eq('moderation', 'accepted');
 
-    if (result.error && (result.error.code === 'PGRST204' || result.error.code === '42703')) {
-      result = await this.client
+    let data: typeof newResult.data = newResult.data;
+    let error = newResult.error;
+
+    if (error && (error.code === 'PGRST204' || error.code === '42703')) {
+      const legacyResult = await this.client
         .from('map_pins')
         .select(selectLegacySchema)
         .eq('moderation', 'accepted');
+      data = legacyResult.data as typeof newResult.data;
+      error = legacyResult.error;
     }
-
-    const { data, error } = result;
 
     if (!data || error) {
       throw error;
