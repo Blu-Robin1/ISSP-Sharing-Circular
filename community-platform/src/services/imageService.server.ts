@@ -12,7 +12,8 @@ export class ImageServiceServer {
     }
 
     try {
-      const { data } = this.client.storage.from(process.env.TENANT_ID as string).getPublicUrl(
+      const readBucketId = process.env.TENANT_ID || process.env.STORAGE_BUCKET || 'precious-plastic';
+      const { data } = this.client.storage.from(readBucketId).getPublicUrl(
         image.path,
         size
           ? {

@@ -6,10 +6,10 @@ export const profileTypes: Partial<DBProfileType>[] = [
     display_name: 'Member',
     is_space: false,
     description: '',
-    image_url: '/assets/images/user-avatar.jpg',
+    image_url: '',
     map_pin_name: '',
     order: 1,
-    small_image_url:'/assets/images/user-avatar.jpg',
+    small_image_url: '',
   },
   {
     name: 'machine-builder',
@@ -18,10 +18,8 @@ export const profileTypes: Partial<DBProfileType>[] = [
     description: '',
     map_pin_name: 'Machine Builder',
     is_space: true,
-    image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-machine.svg',
-    small_image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-machine-small.svg',
+    image_url: '',
+    small_image_url: '',
   },
   {
     name: 'workspace',
@@ -30,10 +28,8 @@ export const profileTypes: Partial<DBProfileType>[] = [
     description: '',
     map_pin_name: 'Workspace',
     is_space: true,
-    image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-workspace.svg',
-    small_image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-workspace-small.svg',
+    image_url: '',
+    small_image_url: '',
   },
   {
     name: 'community-point',
@@ -42,10 +38,8 @@ export const profileTypes: Partial<DBProfileType>[] = [
     description: '',
     map_pin_name: 'Community Point',
     is_space: true,
-    image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-community.svg',
-    small_image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-community-small.svg',
+    image_url: '',
+    small_image_url: '',
   },
   {
     name: 'collection-point',
@@ -54,9 +48,7 @@ export const profileTypes: Partial<DBProfileType>[] = [
     description: '',
     map_pin_name: 'Collection Point',
     is_space: true,
-    image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-collection.svg',
-    small_image_url:
-      'https://wbskztclbriekwpehznv.supabase.co/storage/v1/object/public/one-army/profile-types/pp-collection-small.svg',
+    image_url: '',
+    small_image_url: '',
   },
 ];

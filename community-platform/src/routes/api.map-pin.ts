@@ -19,14 +19,10 @@ export const loader = async ({ request }) => {
       return Response.json({}, { headers, status: 400, statusText: 'user not found' });
     }
 
-    const { data, error } = await client
-      .from('map_pins')
-      .select(
-        `
+    const selectNewSchema = `
         id,
         profile_id,
-        country,
-        country_code,
+        city,
         name,
         administrative,
         post_code,
@@ -36,7 +32,7 @@ export const loader = async ({ request }) => {
         moderation_feedback,
         profile:profiles(
           id,
-          country,
+          city,
           display_name,
           photo,
           type,
@@ -66,9 +62,61 @@ export const loader = async ({ request }) => {
             is_space
           )
         )
-      `,
-      )
-      .eq('profile_id', profile.id);
+      `;
+
+    const selectLegacySchema = `
+        id,
+        profile_id,
+        country,
+        country_code,
+        name,
+        administrative,
+        post_code,
+        lat,
+        lng,
+        moderation,
+        moderation_feedback,
+        profile:profiles(
+          id,
+          city,
+          display_name,
+          photo,
+          type,
+          about,
+          username,
+          badges:profile_badges_relations(
+            profile_badges(
+              id,
+              name,
+              display_name,
+              image_url,
+              action_url
+            )
+          ),
+          tags:profile_tags_relations(
+            profile_tags(
+              id,
+              name
+            )
+          ),
+          type:profile_types(
+            id,
+            name,
+            display_name,
+            description,
+            map_pin_name,
+            is_space
+          )
+        )
+      `;
+
+    let result = await client.from('map_pins').select(selectNewSchema).eq('profile_id', profile.id);
+
+    if (result.error && (result.error.code === 'PGRST204' || result.error.code === '42703')) {
+      result = await client.from('map_pins').select(selectLegacySchema).eq('profile_id', profile.id);
+    }
+
+    const { data, error } = result;
 
     if (error) {
       console.error(error);

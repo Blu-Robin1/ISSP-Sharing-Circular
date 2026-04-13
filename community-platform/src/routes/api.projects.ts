@@ -136,12 +136,35 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           });
 
     const items =
+<<<<<<< Abner
+      stage === undefined ? stageFilteredItems : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+
+    // Ensure consumers (e.g. map popups) receive a directly usable cover image URL.
+    const itemsWithImageUrls = items.map((item) => {
+      const images = item.cover_image
+        ? storageServiceServer.getPublicUrls(client, [item.cover_image])
+        : [];
+      const coverImage = images[0];
+
+      return {
+        ...item,
+        image_url: coverImage?.publicUrl ?? null,
+        cover_image: coverImage
+          ? {
+              ...item.cover_image,
+              publicUrl: coverImage.publicUrl,
+            }
+          : item.cover_image,
+      };
+    });
+=======
       stage === undefined
         ? stageFilteredItems
         : stageFilteredItems.slice(skip, skip + ITEMS_PER_PAGE);
+>>>>>>> dev
     const total = stage === undefined ? (count ?? items.length) : stageFilteredItems.length;
 
-    return Response.json({ items, total }, { headers });
+    return Response.json({ items: itemsWithImageUrls, total }, { headers });
   }
 
   const { data, error } = await client.rpc('get_projects', {
@@ -159,6 +182,38 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   const allDbItems = (data as DBProject[]) ?? [];
+
+  // When stage filtering is active, hydrate stage fields from the projects table
+  // BEFORE filtering so computeEffectiveStage sees the real stageOverride values.
+  if (stage !== undefined && allDbItems.length > 0) {
+    const { data: projectRows } = await client
+      .from('projects')
+      .select(
+        'id, lat, lng, stage, stage_override, supporter_count, member_count, champion_count, volunteer_count, donate_count',
+      )
+      .in(
+        'id',
+        allDbItems.map((item) => item.id),
+      );
+
+    const projectById = new Map((projectRows ?? []).map((row) => [row.id, row]));
+
+    for (const item of allDbItems) {
+      const project = projectById.get(item.id);
+      if (project) {
+        item.lat = project.lat;
+        item.lng = project.lng;
+        item.stage = project.stage;
+        item.stage_override = project.stage_override;
+        item.supporter_count = project.supporter_count;
+        item.member_count = project.member_count;
+        item.champion_count = project.champion_count;
+        item.volunteer_count = project.volunteer_count;
+        item.donate_count = project.donate_count;
+      }
+    }
+  }
+
   const stageFilteredItems =
     stage === undefined
       ? allDbItems
@@ -191,29 +246,39 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         ).data ?? 0)
       : stageFilteredItems.length;
 
-  if (dbItems.length > 0) {
-    const { data: locationRows } = await client
+  // For the non-stage-filter path, hydrate the page slice with stage/location fields.
+  if (stage === undefined && dbItems.length > 0) {
+    const { data: projectRows } = await client
       .from('projects')
-      .select('id, lat, lng')
+      .select(
+        'id, lat, lng, stage, stage_override, supporter_count, member_count, champion_count, volunteer_count, donate_count',
+      )
       .in(
         'id',
         dbItems.map((item) => item.id),
       );
 
-    const locationById = new Map((locationRows ?? []).map((row) => [row.id, row]));
+    const projectById = new Map((projectRows ?? []).map((row) => [row.id, row]));
 
     for (const item of dbItems) {
-      const location = locationById.get(item.id);
-      if (location) {
-        item.lat = location.lat;
-        item.lng = location.lng;
+      const project = projectById.get(item.id);
+      if (project) {
+        item.lat = project.lat;
+        item.lng = project.lng;
+        item.stage = project.stage;
+        item.stage_override = project.stage_override;
+        item.supporter_count = project.supporter_count;
+        item.member_count = project.member_count;
+        item.champion_count = project.champion_count;
+        item.volunteer_count = project.volunteer_count;
+        item.donate_count = project.donate_count;
       }
     }
   }
 
   const items = dbItems.map((x) => {
     const images = x.cover_image
-      ? storageServiceServer.getPublicUrls(client, [x.cover_image], IMAGE_SIZES.LIST)
+      ? storageServiceServer.getPublicUrls(client, [x.cover_image])
       : [];
     return Project.fromDB(x, [], images);
   });
@@ -458,23 +523,35 @@ async function createStep(
     order: number;
   },
 ) {
-  const { data, error } = await client
-    .from('project_steps')
-    .insert({
-      title: values.title,
-      description: values.description,
-      project_id: values.projectId,
-      video_url: values.videoUrl,
-      order: values.order,
-      tenant_id: process.env.TENANT_ID,
-    })
-    .select();
+  const payloadWithStage = {
+    title: values.title,
+    description: values.description,
+    project_id: values.projectId,
+    video_url: values.videoUrl,
+    stage: values.order,
+    tenant_id: process.env.TENANT_ID,
+  };
 
-  if (error || !data) {
-    throw error;
+  const payloadWithOrder = {
+    title: values.title,
+    description: values.description,
+    project_id: values.projectId,
+    video_url: values.videoUrl,
+    order: values.order,
+    tenant_id: process.env.TENANT_ID,
+  };
+
+  let result = await client.from('project_steps').insert(payloadWithStage).select();
+
+  if (result.error && result.error.code === 'PGRST204') {
+    result = await client.from('project_steps').insert(payloadWithOrder).select();
   }
 
-  return data[0] as unknown as DBProjectStep;
+  if (result.error || !result.data) {
+    throw result.error;
+  }
+
+  return result.data[0] as unknown as DBProjectStep;
 }
 
 async function uploadAndUpdateImage(
