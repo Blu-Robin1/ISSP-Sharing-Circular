@@ -15,7 +15,7 @@ describe('LibraryCategoryGuidance', () => {
             id: 1,
             createdAt: faker.date.past(),
             modifiedAt: faker.date.past(),
-            name: 'Moulds',
+            name: 'Tools & Equipment',
             type: 'projects',
           }}
           type="main"
@@ -23,7 +23,7 @@ describe('LibraryCategoryGuidance', () => {
       </LibraryFormProvider>,
     );
 
-    const guidanceFirstLine = guidance.moulds.main.slice(0, 40);
+    const guidanceFirstLine = guidance['tools & equipment'].main.slice(0, 40);
 
     await screen.findByText(guidanceFirstLine, { exact: false });
   });

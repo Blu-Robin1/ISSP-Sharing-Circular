@@ -111,10 +111,10 @@ const seedProfileTypes = (): Partial<profile_typesScalars>[] => [
     display_name: 'Member',
     is_space: false,
     description: 'test',
-    image_url: '/assets/images/user-avatar.jpg',
+    image_url: '',
     map_pin_name: '',
     order: 1,
-    small_image_url: '/assets/images/user-avatar.jpg'
+    small_image_url: '',
   },
   {
     ..._TYPES_BASE,

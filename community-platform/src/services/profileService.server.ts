@@ -196,9 +196,22 @@ export class ProfileServiceServer {
   async updateProfile(id: number, values: ProfileFormData) {
     const imageService = new ImageServiceServer(this.client);
     const types = await new ProfileTypesServiceServer(this.client).get();
-    const typeId = types.find((x) => x.name === values.type)!.id;
+    const selectedType = types.find((x) => x.name === values.type);
+
+    if (!selectedType) {
+      throw new Error(
+        `Invalid profile type '${values.type}'. Ensure profile_types exist for tenant '${process.env.TENANT_ID}'.`,
+      );
+    }
+
+    const typeId = selectedType.id;
     const existingProfile = await this.getById(id);
-    const pinModeration = this.determinePinModeration(types, existingProfile!, values.type);
+
+    if (!existingProfile) {
+      throw new Error(`Profile not found for id '${id}'`);
+    }
+
+    const pinModeration = this.determinePinModeration(types, existingProfile, values.type);
 
     const valuesToUpdate = {
       about: values.about,
@@ -216,7 +229,7 @@ export class ProfileServiceServer {
     } as Partial<DBProfile>;
 
     if (values.photo) {
-      const currentImagePath = existingProfile!.photo?.path;
+      const currentImagePath = existingProfile.photo?.path;
 
       // remove current photo first
       if (currentImagePath) {
@@ -239,11 +252,12 @@ export class ProfileServiceServer {
     let imagesToKeep: DBMedia[] = [];
 
     if (values.existingCoverImageIds?.length) {
-      imagesToRemove = imagesToRemove?.filter((x) => !values.existingCoverImageIds?.includes(x.id));
+      imagesToRemove =
+        imagesToRemove?.filter((x) => !values.existingCoverImageIds?.includes(x.id)) ?? null;
       imagesToKeep =
         existingProfile?.cover_images?.filter((x) =>
           values.existingCoverImageIds?.includes(x.id),
-        ) || [];
+        ) ?? [];
     }
 
     if (imagesToRemove?.length) {

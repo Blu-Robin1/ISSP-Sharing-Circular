@@ -160,6 +160,7 @@ export class DBProjectStep {
   images: DBMedia[] | null;
   video_url: string | null;
   order: number;
+  stage?: number;
 
   constructor(obj: Omit<DBProjectStep, 'id'>) {
     Object.assign(this, obj);
@@ -187,7 +188,7 @@ export class ProjectStep {
       description: obj.description,
       images: images?.filter((x) => obj.images?.map((x) => x.id)?.includes(x.id)) || [],
       videoUrl: obj.video_url,
-      order: obj.order,
+      order: obj.order ?? obj.stage ?? 0,
     });
   }
 }

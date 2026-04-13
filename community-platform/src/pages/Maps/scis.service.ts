@@ -155,7 +155,10 @@ export const scisService = {
         credentials: 'include',
       });
 
-      const body = (await res.json().catch(() => ({}))) as { project?: ScisInitiativeFromApi; error?: string };
+      const body = (await res.json().catch(() => ({}))) as {
+        project?: ScisInitiativeFromApi;
+        error?: string;
+      };
 
       if (!res.ok) {
         const message =

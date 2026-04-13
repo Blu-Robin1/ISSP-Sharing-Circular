@@ -4,6 +4,7 @@ import type { DBMedia } from 'oa-shared';
 import { Image, MediaFile } from 'oa-shared';
 
 const bucketId = process.env.TENANT_ID || 'precious-plastic';
+const readBucketId = process.env.TENANT_ID || process.env.STORAGE_BUCKET || 'precious-plastic';
 
 if (!bucketId) {
   throw new Error('TENANT_ID environment variable is required for storage operations');
@@ -18,7 +19,7 @@ const getPublicUrls = (
 
   for (const x of images || []) {
     try {
-      const { data } = client.storage.from(bucketId).getPublicUrl(
+      const { data } = client.storage.from(readBucketId).getPublicUrl(
         x.path,
         size
           ? {

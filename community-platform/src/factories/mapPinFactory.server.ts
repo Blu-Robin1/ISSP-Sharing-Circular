@@ -11,13 +11,18 @@ export class MapPinFactory {
 
   fromDBWithProfile(pin: DBMapPin): MapPin {
     const profile = this.getProfilePin(pin.profile);
+    const pinCountry =
+      (pin as unknown as { country?: string; city?: string }).country ||
+      (pin as unknown as { country?: string; city?: string }).city ||
+      '';
+    const pinCountryCode = (pin as unknown as { country_code?: string }).country_code || '';
 
     return new MapPin({
       id: pin.id,
       administrative: pin.administrative,
       name: pin.name,
-      country: pin.country,
-      countryCode: pin.country_code,
+      country: pinCountry,
+      countryCode: pinCountryCode,
       lat: pin.lat,
       lng: pin.lng,
       moderation: pin.moderation,
