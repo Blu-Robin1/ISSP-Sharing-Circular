@@ -174,6 +174,38 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   const allDbItems = (data as DBProject[]) ?? [];
+
+  // When stage filtering is active, hydrate stage fields from the projects table
+  // BEFORE filtering so computeEffectiveStage sees the real stageOverride values.
+  if (stage !== undefined && allDbItems.length > 0) {
+    const { data: projectRows } = await client
+      .from('projects')
+      .select(
+        'id, lat, lng, stage, stage_override, supporter_count, member_count, champion_count, volunteer_count, donate_count',
+      )
+      .in(
+        'id',
+        allDbItems.map((item) => item.id),
+      );
+
+    const projectById = new Map((projectRows ?? []).map((row) => [row.id, row]));
+
+    for (const item of allDbItems) {
+      const project = projectById.get(item.id);
+      if (project) {
+        item.lat = project.lat;
+        item.lng = project.lng;
+        item.stage = project.stage;
+        item.stage_override = project.stage_override;
+        item.supporter_count = project.supporter_count;
+        item.member_count = project.member_count;
+        item.champion_count = project.champion_count;
+        item.volunteer_count = project.volunteer_count;
+        item.donate_count = project.donate_count;
+      }
+    }
+  }
+
   const stageFilteredItems =
     stage === undefined
       ? allDbItems
@@ -202,7 +234,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         })).data ?? 0)
       : stageFilteredItems.length;
 
-  if (dbItems.length > 0) {
+  // For the non-stage-filter path, hydrate the page slice with stage/location fields.
+  if (stage === undefined && dbItems.length > 0) {
     const { data: projectRows } = await client
       .from('projects')
       .select(

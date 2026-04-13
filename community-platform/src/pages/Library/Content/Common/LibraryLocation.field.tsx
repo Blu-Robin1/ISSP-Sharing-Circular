@@ -4,6 +4,7 @@ import { FormFieldWrapper } from 'src/pages/common/FormFields';
 import { useRef, useState } from 'react';
 import type { ILatLng } from 'oa-shared';
 import type { Map as MapType } from 'react-leaflet';
+import { Box } from 'theme-ui';
 
 import { intro } from '../../labels';
 
@@ -30,17 +31,19 @@ export const LibraryLocationField = () => {
               };
 
               return (
-                <MapWithPin
-                  mapRef={mapRef}
-                  position={currentPosition}
-                  updatePosition={(newPosition) => {
-                    latInput.onChange(newPosition.lat);
-                    lngInput.onChange(newPosition.lng);
-                    setPosition(newPosition);
-                  }}
-                  center={currentPosition}
-                  zoom={2}
-                />
+                <Box sx={{ position: 'relative', zIndex: 0 }}>
+                  <MapWithPin
+                    mapRef={mapRef}
+                    position={currentPosition}
+                    updatePosition={(newPosition) => {
+                      latInput.onChange(newPosition.lat);
+                      lngInput.onChange(newPosition.lng);
+                      setPosition(newPosition);
+                    }}
+                    center={currentPosition}
+                    zoom={2}
+                  />
+                </Box>
               );
             }}
           </Field>
