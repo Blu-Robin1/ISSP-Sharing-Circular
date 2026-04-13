@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { observer } from 'mobx-react';
 import { ReturnPathLink } from 'oa-components';
-import { UserRole } from 'oa-shared';
 import { preciousPlasticTheme } from 'oa-themes';
+import { UserRole } from 'oa-shared';
 import { NavLink } from 'react-router';
 import { AuthWrapper } from 'src/common/AuthWrapper';
 import { UpgradeBadgeLink } from 'src/pages/common/Header/Menu/Profile/UpgradeBadgeLink';
@@ -47,8 +47,7 @@ export const ProfileModal = observer(() => {
 
   const upgradeBadge = upgradeBadgeForCurrentUser;
   const shouldShowUpgrade = !!upgradeBadge;
-  const isOrganizer =
-    activeUser?.roles?.includes(UserRole.ORGANIZER) || activeUser?.roles?.includes(UserRole.ADMIN);
+  const isOrganizer = activeUser?.roles?.includes(UserRole.ORGANIZER) || activeUser?.roles?.includes(UserRole.ADMIN);
 
   return (
     <ModalContainer data-cy="user-menu-list">
